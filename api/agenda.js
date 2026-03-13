@@ -4,7 +4,11 @@ const token = process.env.FEEGOW_TOKEN;
 
 try {
 
-const response = await fetch("https://api.feegow.com/v1/api/appoints",{
+const hoje = new Date().toISOString().split("T")[0];
+
+const url = `https://api.feegow.com/v1/api/appoints?start=${hoje}&end=${hoje}`;
+
+const response = await fetch(url,{
 method:"GET",
 headers:{
 "x-access-token": token,
