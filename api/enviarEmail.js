@@ -1,5 +1,3 @@
-import fs from "fs"
-import path from "path"
 import nodemailer from "nodemailer"
 
 export default async function handler(req,res){
@@ -29,7 +27,11 @@ const paciente = pacienteData.content
 const emailPaciente = paciente.email?.[0]
 
 if(!emailPaciente){
-return res.status(400).json({erro:"Paciente sem email cadastrado"})
+
+return res.status(400).json({
+erro:"Paciente sem email cadastrado"
+})
+
 }
 
 /* MONTAR ANEXOS */
@@ -40,22 +42,10 @@ const anexos = []
 
 if(tipo === "receita" || tipo === "ambos"){
 
-const receitaPath = path.join(process.cwd(),"uploads","receitas",`${paciente_id}.pdf`)
-
-if(fs.existsSync(receitaPath)){
-
-console.log("Receita encontrada")
-
 anexos.push({
 filename:"receita.pdf",
-path:receitaPath
+path:`https://blob.vercel-storage.com/${paciente_id}_receita.pdf`
 })
-
-}else{
-
-console.log("Receita NÃO encontrada")
-
-}
 
 }
 
@@ -63,31 +53,19 @@ console.log("Receita NÃO encontrada")
 
 if(tipo === "nota" || tipo === "ambos"){
 
-const notaPath = path.join(process.cwd(),"uploads","notas",`${paciente_id}.pdf`)
-
-if(fs.existsSync(notaPath)){
-
-console.log("Nota encontrada")
-
 anexos.push({
 filename:"nota_fiscal.pdf",
-path:notaPath
+path:`https://blob.vercel-storage.com/${paciente_id}_nota.pdf`
 })
 
-}else{
-
-console.log("Nota NÃO encontrada")
-
 }
 
-}
-
-/* SE NÃO EXISTIR DOCUMENTO */
+/* SE NÃO HOUVER ANEXO */
 
 if(anexos.length === 0){
 
 return res.status(400).json({
-erro:"Nenhum documento encontrado para envio"
+erro:"Nenhum documento encontrado"
 })
 
 }
@@ -105,7 +83,7 @@ pass:process.env.EMAIL_PASS
 
 })
 
-/* ENVIAR EMAIL */
+/* ENVIA EMAIL */
 
 await transporter.sendMail({
 
@@ -128,7 +106,9 @@ attachments: anexos
 
 })
 
-res.status(200).json({success:true})
+res.status(200).json({
+success:true
+})
 
 }catch(error){
 
