@@ -2,39 +2,59 @@
 
 async function carregarAgenda(){
 
+try{
+
 const response = await fetch('/api/agenda');
 const data = await response.json();
 
+if(!data || !data.content){
+console.log("API retornou vazio");
+return;
+}
+
 const lista = document.getElementById("agenda");
 
-let total = 0;
-let cancelados = 0;
-let faturamento = 0;
+if(!lista){
+console.log("Elemento agenda não encontrado");
+return;
+}
 
-lista.innerHTML = "";
+lista.innerHTML="";
 
-data.content.forEach(item =>{
+let total=0;
+let cancelados=0;
+let faturamento=0;
 
-const li = document.createElement("li");
+data.content.forEach(item=>{
 
-li.innerText = item.horario + " - Paciente " + item.paciente_id;
+const li=document.createElement("li");
+
+li.innerText=item.horario+" - Paciente "+item.paciente_id;
 
 lista.appendChild(li);
 
 total++;
 
-if(item.status_id != 1){
+if(item.status_id!=1){
 cancelados++;
 }
 
-const valor = item.valor.replace("R$","").replace(",",".");
-faturamento += parseFloat(valor);
+if(item.valor){
+let valor=item.valor.replace("R$","").replace(",",".");
+faturamento+=parseFloat(valor);
+}
 
 });
 
-document.getElementById("consultas").innerText = total;
-document.getElementById("cancelamentos").innerText = cancelados;
-document.getElementById("faturamento").innerText = faturamento;
+document.getElementById("consultas").innerText=total;
+document.getElementById("cancelamentos").innerText=cancelados;
+document.getElementById("faturamento").innerText=faturamento;
+
+}catch(err){
+
+console.log("Erro no painel:",err);
+
+}
 
 }
 
