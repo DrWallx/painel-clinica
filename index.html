@@ -111,8 +111,6 @@ flex:1;
 
 <script>
 
-/* CONVERTER VALOR */
-
 function converterValor(valor){
 
 if(!valor) return 0
@@ -127,8 +125,6 @@ valor
 
 }
 
-/* FORMATAR DATA */
-
 function formatarData(data){
 
 const partes = data.split("-");
@@ -136,7 +132,9 @@ return `${partes[2]}-${partes[1]}-${partes[0]}`;
 
 }
 
+/* ===================== */
 /* AGENDA DO DIA */
+/* ===================== */
 
 async function carregarAgenda(data){
 
@@ -184,11 +182,13 @@ return;
 
 }
 
-/* STATUS VISÍVEIS NA AGENDA */
+/* STATUS VISÍVEIS */
 
 if(item.status_id != 1 && item.status_id != 7 && item.status_id != 2 && item.status_id != 3){
 return;
 }
+
+/* TIPO */
 
 let tipo = "Consulta";
 
@@ -198,6 +198,8 @@ retornos++;
 }else{
 consultas++;
 }
+
+/* STATUS */
 
 let statusIcon = "";
 
@@ -217,7 +219,7 @@ bloco.innerHTML = `
 
 lista.appendChild(bloco);
 
-/* FATURAMENTO PREVISTO */
+/* RECEITA PREVISTA */
 
 if(item.procedimento_id != 22){
 
@@ -234,7 +236,9 @@ document.getElementById("faturamentoPrevisto").innerText = faturamentoPrevisto.t
 
 }
 
+/* ===================== */
 /* PRODUÇÃO DO MÊS */
+/* ===================== */
 
 async function carregarMes(){
 
@@ -255,19 +259,23 @@ let retornos = 0;
 let cancelados = 0;
 let faturamento = 0;
 
-agenda.content.forEach(item=>{
+agenda.content.forEach(item => {
 
-/* CANCELADOS */
+/* CANCELADO */
 
 if(item.status_id == 11){
 cancelados++;
 return;
 }
 
-/* SOMENTE REALIZADOS */
+/* CONSULTA */
 
-if(item.status_id != 3){
+if(item.procedimento_id == 23){
+
+consultas++;
+faturamento += converterValor(item.valor_total_agendamento);
 return;
+
 }
 
 /* RETORNO */
@@ -275,12 +283,7 @@ return;
 if(item.procedimento_id == 22){
 
 retornos++;
-
-}else{
-
-consultas++;
-
-faturamento += converterValor(item.valor_total_agendamento);
+return;
 
 }
 
@@ -293,7 +296,9 @@ document.getElementById("faturamentoMes").innerText = faturamento.toFixed(2);
 
 }
 
+/* ===================== */
 /* BOTÕES */
+/* ===================== */
 
 function buscarData(){
 
