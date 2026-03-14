@@ -19,10 +19,6 @@ margin-bottom:20px;
 box-shadow:0 2px 6px rgba(0,0,0,0.1);
 }
 
-h1{
-margin-bottom:30px;
-}
-
 .agenda-item{
 display:flex;
 align-items:center;
@@ -42,22 +38,6 @@ width:90px;
 flex:1;
 }
 
-.tipo{
-font-size:12px;
-background:#e2e8f0;
-padding:3px 8px;
-border-radius:5px;
-margin-right:8px;
-}
-
-.cancelado{
-border-left:5px solid #ef4444;
-}
-
-.faltou{
-border-left:5px solid #f59e0b;
-}
-
 </style>
 
 </head>
@@ -68,7 +48,18 @@ border-left:5px solid #f59e0b;
 
 <div class="card">
 
-<h2>Agenda de Hoje</h2>
+<input type="date" id="dataSelecionada">
+<button onclick="buscarData()">Buscar</button>
+
+<button onclick="hoje()">Hoje</button>
+<button onclick="ontem()">Ontem</button>
+<button onclick="amanha()">Amanhã</button>
+
+</div>
+
+<div class="card">
+
+<h2>Agenda</h2>
 
 <div id="agenda"></div>
 
@@ -76,99 +67,124 @@ border-left:5px solid #f59e0b;
 
 <div class="card">
 
-<h2>Resumo do Dia</h2>
+<h2>Resumo</h2>
 
 <p>Consultas: <span id="consultas">0</span></p>
 <p>Retornos: <span id="retornos">0</span></p>
 <p>Cancelamentos: <span id="cancelamentos">0</span></p>
-<p><b>Faturamento: R$ <span id="faturamento">0</span></b></p>
+<p>Faturamento: R$ <span id="faturamento">0</span></p>
 
 </div>
 
 <script>
 
-async function carregarAgenda(){
+function formatarData(data){
 
-const response = await fetch('/api/agenda');
-const data = await response.json();
+const d = new Date(data);
+
+const dia = String(d.getDate()).padStart(2,'0');
+const mes = String(d.getMonth()+1).padStart(2,'0');
+const ano = d.getFullYear();
+
+return `${dia}-${mes}-${ano}`;
+
+}
+
+async function carregarAgenda(data){
+
+const response = await fetch(`/api/agenda?data=${data}`);
+const agenda = await response.json();
 
 const lista = document.getElementById("agenda");
 
-let consultas = 0;
-let retornos = 0;
-let cancelados = 0;
-let faturamento = 0;
-
 lista.innerHTML = "";
 
-data.content.forEach(item =>{
+let consultas=0;
+let retornos=0;
+let cancelados=0;
+let faturamento=0;
 
-let statusTexto = "Confirmado";
-let classeStatus = "";
+agenda.content.forEach(item=>{
 
-if(item.status_id == 2){
-statusTexto = "Cancelado";
-classeStatus = "cancelado";
-cancelados++;
-}
-
-if(item.status_id == 3){
-statusTexto = "Faltou";
-classeStatus = "faltou";
-}
-
-if(item.status_id == 4){
-statusTexto = "Reagendado";
-}
-
-let tipo = "Consulta";
+let tipo="Consulta";
 
 if(item.retorno){
-tipo = "Retorno";
+tipo="Retorno";
 retornos++;
 }else{
 consultas++;
 }
 
-const bloco = document.createElement("div");
-bloco.className = "agenda-item " + classeStatus;
+if(item.status_id==2){
+cancelados++;
+}
 
-const horario = item.horario.substring(0,5);
-const nome = item.paciente_nome || ("Paciente " + item.paciente_id);
+const horario=item.horario.substring(0,5);
+const nome=item.paciente_nome;
 
-bloco.innerHTML = `
+const bloco=document.createElement("div");
+bloco.className="agenda-item";
+
+bloco.innerHTML=`
 <div class="hora">${horario}</div>
-<div class="paciente">
-<span class="tipo">${tipo}</span>
-${nome} - ${statusTexto}
-</div>
+<div class="paciente">${tipo} - ${nome}</div>
 `;
 
 lista.appendChild(bloco);
 
 if(item.valor){
 
-const valor = item.valor
-.replace("R$","")
-.replace(",",".")
-.trim();
-
-faturamento += parseFloat(valor) || 0;
+const valor=item.valor.replace("R$","").replace(",",".");
+faturamento+=parseFloat(valor);
 
 }
 
 });
 
-document.getElementById("consultas").innerText = consultas;
-document.getElementById("retornos").innerText = retornos;
-document.getElementById("cancelamentos").innerText = cancelados;
-document.getElementById("faturamento").innerText = faturamento.toFixed(2);
+document.getElementById("consultas").innerText=consultas;
+document.getElementById("retornos").innerText=retornos;
+document.getElementById("cancelamentos").innerText=cancelados;
+document.getElementById("faturamento").innerText=faturamento.toFixed(2);
 
 }
 
-carregarAgenda();
+function buscarData(){
 
-setInterval(carregarAgenda,60000);
+const data=document.getElementById("dataSelecionada").value;
+
+carregarAgenda(formatarData(data));
+
+}
+
+function hoje(){
+
+const d=new Date();
+
+carregarAgenda(formatarData(d));
+
+}
+
+function ontem(){
+
+const d=new Date();
+
+d.setDate(d.getDate()-1);
+
+carregarAgenda(formatarData(d));
+
+}
+
+function amanha(){
+
+const d=new Date();
+
+d.setDate(d.getDate()+1);
+
+carregarAgenda(formatarData(d));
+
+}
+
+hoje();
 
 </script>
 
