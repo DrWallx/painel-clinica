@@ -6,10 +6,31 @@ export default async function handler(req,res){
 
 const { paciente_id, tipo } = req.query
 
-const dbPath = path.join(process.cwd(),"database","pacientes.json")
-const db = JSON.parse(fs.readFileSync(dbPath))
+const token = process.env.FEEGOW_TOKEN
 
-const paciente = db[paciente_id]
+/* BUSCAR PACIENTE NO FEEGOW */
+
+const pacienteResponse = await fetch(
+`https://api.feegow.com/v1/api/patient/search?paciente_id=${paciente_id}`,
+{
+headers:{
+"Content-Type":"application/json",
+"x-access-token":token
+}
+}
+)
+
+const pacienteData = await pacienteResponse.json()
+
+const paciente = pacienteData.content
+
+const emailPaciente = paciente.email?.[0]
+
+if(!emailPaciente){
+return res.status(400).json({erro:"Paciente sem email"})
+}
+
+/* ANEXOS */
 
 const anexos = []
 
@@ -18,10 +39,12 @@ if(tipo === "receita" || tipo === "ambos"){
 const receita = path.join(process.cwd(),"uploads/receitas",`${paciente_id}.pdf`)
 
 if(fs.existsSync(receita)){
+
 anexos.push({
 filename:"receita.pdf",
 path:receita
 })
+
 }
 
 }
@@ -31,13 +54,17 @@ if(tipo === "nota" || tipo === "ambos"){
 const nota = path.join(process.cwd(),"uploads/notas",`${paciente_id}.pdf`)
 
 if(fs.existsSync(nota)){
+
 anexos.push({
 filename:"nota_fiscal.pdf",
 path:nota
 })
+
 }
 
 }
+
+/* CONFIGURA EMAIL */
 
 const transporter = nodemailer.createTransport({
 
@@ -50,13 +77,27 @@ pass:process.env.EMAIL_PASS
 
 })
 
+/* ENVIA EMAIL */
+
 await transporter.sendMail({
 
 from:process.env.EMAIL_USER,
-to:"email_do_paciente",
+to: emailPaciente,
+
 subject:"Documentos da consulta",
-text:"Segue em anexo os documentos da sua consulta.",
-attachments:anexos
+
+text:`
+Olá ${paciente.nome},
+
+Segue em anexo os documentos da sua consulta.
+
+Qualquer dúvida estamos à disposição.
+
+Atenciosamente
+Clínica
+`,
+
+attachments: anexos
 
 })
 
