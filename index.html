@@ -86,7 +86,7 @@ flex:1;
 
 <script>
 
-/* CONVERTE DATA SEM PROBLEMA DE FUSO */
+/* CONVERTE DATA DO INPUT PARA DD-MM-YYYY */
 
 function formatarData(data){
 
@@ -100,7 +100,7 @@ return `${dia}-${mes}-${ano}`;
 
 }
 
-/* BUSCA AGENDA */
+/* CARREGA AGENDA */
 
 async function carregarAgenda(data){
 
@@ -117,7 +117,7 @@ let retornos = 0;
 let cancelados = 0;
 let faturamento = 0;
 
-/* FILTRA DATA */
+/* FILTRA SOMENTE A DATA */
 
 const agendaDoDia = agenda.content.filter(item => item.data === data);
 
@@ -138,13 +138,14 @@ retornos++;
 
 }else{
 
+tipo = "Consulta";
 consultas++;
 
 }
 
-/* CANCELAMENTOS */
+/* CANCELAMENTOS CORRETOS */
 
-if(item.status_id == 5){
+if(item.status_id == 4 || item.status_id == 5){
 cancelados++;
 }
 
@@ -175,13 +176,16 @@ faturamento += parseFloat(valor);
 });
 
 document.getElementById("consultas").innerText = consultas;
+
 document.getElementById("retornos").innerText = retornos;
+
 document.getElementById("cancelamentos").innerText = cancelados;
+
 document.getElementById("faturamento").innerText = faturamento.toFixed(2);
 
 }
 
-/* BUSCAR DATA MANUAL */
+/* BUSCAR DATA */
 
 function buscarData(){
 
@@ -249,7 +253,7 @@ carregarAgenda(`${dia}-${mes}-${ano}`);
 
 }
 
-/* CARREGA HOJE AUTOMATICAMENTE */
+/* CARREGA HOJE */
 
 hoje();
 
