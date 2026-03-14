@@ -32,7 +32,15 @@ if(!agendaData.content){
 return res.status(200).json(agendaData);
 }
 
-for(const agendamento of agendaData.content){
+/* FILTRA APENAS A DATA EXATA */
+
+const agendaFiltrada = agendaData.content.filter(
+item => item.data === data
+);
+
+/* BUSCA NOME DO PACIENTE */
+
+for(const agendamento of agendaFiltrada){
 
 try{
 
@@ -65,6 +73,8 @@ agendamento.paciente_nome = "Paciente";
 }
 
 }
+
+agendaData.content = agendaFiltrada;
 
 res.status(200).json(agendaData);
 
