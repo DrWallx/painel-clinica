@@ -101,7 +101,6 @@ flex:1;
 function formatarData(data){
 
 const partes = data.split("-");
-
 return `${partes[2]}-${partes[1]}-${partes[0]}`;
 
 }
@@ -109,7 +108,6 @@ return `${partes[2]}-${partes[1]}-${partes[0]}`;
 async function carregarAgenda(data){
 
 const response = await fetch(`/api/agenda?data=${data}`);
-
 const agenda = await response.json();
 
 const lista = document.getElementById("agenda");
@@ -168,16 +166,34 @@ retornos++;
 consultas++;
 }
 
+/* STATUS VISUAL */
+
+let statusIcon = "";
+
+if(item.status_id == 1){
+statusIcon = "🟡 Agendada";
+}
+
+if(item.status_id == 7){
+statusIcon = "🔵 Confirmada";
+}
+
+if(item.status_id == 2 || item.status_id == 3){
+statusIcon = "🟢 Realizada";
+}
+
 const bloco = document.createElement("div");
 
 bloco.className = "agenda-item";
 
 bloco.innerHTML = `
 <div class="hora">${horario}</div>
-<div class="paciente">${tipo} - ${nome}</div>
+<div class="paciente">${tipo} - ${nome} ${statusIcon}</div>
 `;
 
 lista.appendChild(bloco);
+
+/* FATURAMENTO */
 
 if(item.valor){
 
@@ -198,7 +214,6 @@ document.getElementById("faturamento").innerText = faturamento.toFixed(2);
 function buscarData(){
 
 const data = document.getElementById("dataSelecionada").value;
-
 carregarAgenda(formatarData(data));
 
 }
@@ -220,7 +235,6 @@ carregarAgenda(`${dia}-${mes}-${ano}`);
 function ontem(){
 
 const d = new Date();
-
 d.setDate(d.getDate()-1);
 
 const ano = d.getFullYear();
@@ -236,7 +250,6 @@ carregarAgenda(`${dia}-${mes}-${ano}`);
 function amanha(){
 
 const d = new Date();
-
 d.setDate(d.getDate()+1);
 
 const ano = d.getFullYear();
