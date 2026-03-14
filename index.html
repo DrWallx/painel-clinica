@@ -123,7 +123,7 @@ let retornos = 0;
 let cancelados = 0;
 let faturamento = 0;
 
-const agendaDoDia = agenda.content.filter(item => item.data === data);
+const agendaDoDia = agenda.content;
 
 agendaDoDia.sort((a,b)=>a.horario.localeCompare(b.horario));
 
@@ -162,14 +162,10 @@ return;
 let tipo = "Consulta";
 
 if(item.procedimento_id == 22){
-
 tipo = "Retorno";
 retornos++;
-
 }else{
-
 consultas++;
-
 }
 
 const bloco = document.createElement("div");
@@ -182,8 +178,6 @@ bloco.innerHTML = `
 `;
 
 lista.appendChild(bloco);
-
-/* FATURAMENTO */
 
 if(item.valor){
 
