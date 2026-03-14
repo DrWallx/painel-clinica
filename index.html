@@ -221,7 +221,12 @@ bloco.className = "agenda-item";
 
 bloco.innerHTML = `
 <div class="hora">${horario}</div>
-<div class="paciente">${tipo} - ${nome} ${statusIcon}</div>
+<div class="paciente">
+<a href="/paciente.html?paciente_id=${item.paciente_id}" 
+style="text-decoration:none;color:inherit;font-weight:bold">
+${tipo} - ${nome} ${statusIcon}
+</a>
+</div>
 `;
 
 lista.appendChild(bloco);
