@@ -4,7 +4,7 @@ const token = process.env.FEEGOW_TOKEN;
 
 let { data, data_start, data_end } = req.query;
 
-/* SE RECEBER APENAS DATA (AGENDA DO DIA) */
+/* CASO RECEBA APENAS UMA DATA */
 
 if(data && !data_start && !data_end){
 
@@ -13,7 +13,7 @@ data_end = data;
 
 }
 
-/* SE NÃO RECEBER NADA USA HOJE */
+/* CASO NÃO RECEBA NADA → USA HOJE */
 
 if(!data && !data_start && !data_end){
 
@@ -28,10 +28,10 @@ data_end = `${dia}-${mes}-${ano}`;
 
 }
 
-/* CHAMA API DO FEEGOW */
+/* CHAMADA API FEEGOW */
 
 const agendaResponse = await fetch(
-`https://api.feegow.com/v1/api/appoints/search?data_start=${data_start}&data_end=${data_end}`,
+`https://api.feegow.com/v1/api/appoints/search?data_start=${data_start}&data_end=${data_end}&limit=500`,
 {
 headers:{
 "Content-Type":"application/json",
@@ -46,25 +46,17 @@ if(!agendaData.content){
 return res.status(200).json(agendaData);
 }
 
-/* FILTRO DE DATA (SOMENTE QUANDO FOR UM DIA ESPECÍFICO) */
+/* FILTRO DE DATA (quando usa data única) */
 
 let agendaFiltrada = agendaData.content;
 
 if(data){
 
-agendaFiltrada = [];
-
-agendaData.content.forEach(item => {
-
-if(item.data === data){
-agendaFiltrada.push(item);
-}
-
-});
+agendaFiltrada = agendaData.content.filter(item => item.data === data);
 
 }
 
-/* BUSCA NOME DO PACIENTE */
+/* BUSCAR NOME DO PACIENTE */
 
 for(const agendamento of agendaFiltrada){
 
@@ -99,6 +91,8 @@ agendamento.paciente_nome = "Paciente";
 }
 
 }
+
+/* RETORNO FINAL */
 
 agendaData.content = agendaFiltrada;
 
