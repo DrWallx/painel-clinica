@@ -4,6 +4,8 @@ import nodemailer from "nodemailer"
 
 export default async function handler(req,res){
 
+try{
+
 const { paciente_id, tipo } = req.query
 
 const token = process.env.FEEGOW_TOKEN
@@ -27,40 +29,66 @@ const paciente = pacienteData.content
 const emailPaciente = paciente.email?.[0]
 
 if(!emailPaciente){
-return res.status(400).json({erro:"Paciente sem email"})
+return res.status(400).json({erro:"Paciente sem email cadastrado"})
 }
 
-/* ANEXOS */
+/* MONTAR ANEXOS */
 
 const anexos = []
 
+/* RECEITA */
+
 if(tipo === "receita" || tipo === "ambos"){
 
-const receita = path.join(process.cwd(),"uploads/receitas",`${paciente_id}.pdf`)
+const receitaPath = path.join(process.cwd(),"uploads","receitas",`${paciente_id}.pdf`)
 
-if(fs.existsSync(receita)){
+if(fs.existsSync(receitaPath)){
+
+console.log("Receita encontrada")
 
 anexos.push({
 filename:"receita.pdf",
-path:receita
+path:receitaPath
 })
 
+}else{
+
+console.log("Receita NÃO encontrada")
+
 }
 
 }
+
+/* NOTA */
 
 if(tipo === "nota" || tipo === "ambos"){
 
-const nota = path.join(process.cwd(),"uploads/notas",`${paciente_id}.pdf`)
+const notaPath = path.join(process.cwd(),"uploads","notas",`${paciente_id}.pdf`)
 
-if(fs.existsSync(nota)){
+if(fs.existsSync(notaPath)){
+
+console.log("Nota encontrada")
 
 anexos.push({
 filename:"nota_fiscal.pdf",
-path:nota
+path:notaPath
 })
 
+}else{
+
+console.log("Nota NÃO encontrada")
+
 }
+
+}
+
+/* SE NÃO EXISTIR DOCUMENTO */
+
+if(anexos.length === 0){
+
+return res.status(400).json({
+erro:"Nenhum documento encontrado para envio"
+})
 
 }
 
@@ -77,30 +105,39 @@ pass:process.env.EMAIL_PASS
 
 })
 
-/* ENVIA EMAIL */
+/* ENVIAR EMAIL */
 
 await transporter.sendMail({
 
 from:process.env.EMAIL_USER,
+
 to: emailPaciente,
 
 subject:"Documentos da consulta",
 
-text:`
-Olá ${paciente.nome},
+text:`Olá ${paciente.nome},
 
 Segue em anexo os documentos da sua consulta.
 
 Qualquer dúvida estamos à disposição.
 
 Atenciosamente
-Clínica
-`,
+Clínica`,
 
 attachments: anexos
 
 })
 
 res.status(200).json({success:true})
+
+}catch(error){
+
+console.log("ERRO EMAIL:",error)
+
+res.status(500).json({
+erro:error.message
+})
+
+}
 
 }
