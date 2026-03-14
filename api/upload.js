@@ -10,14 +10,21 @@ bodyParser: false
 
 export default async function handler(req,res){
 
-const form = new formidable.IncomingForm()
+try{
 
-form.parse(req, async (err,fields,files)=>{
+const form = formidable({ multiples:false })
+
+form.parse(req,(err,fields,files)=>{
+
+if(err){
+console.log(err)
+return res.status(500).json({erro:"Erro no upload"})
+}
 
 const paciente_id = fields.paciente_id
 const tipo = fields.tipo
 
-const file = files.file
+const file = files.file[0]
 
 let pasta = ""
 
@@ -29,14 +36,20 @@ if(tipo === "nota"){
 pasta = "uploads/notas"
 }
 
-const novoNome = `${paciente_id}.pdf`
+const destino = path.join(process.cwd(),pasta,`${paciente_id}.pdf`)
 
-const destino = path.join(process.cwd(),pasta,novoNome)
-
-fs.renameSync(file.filepath,destino)
+fs.copyFileSync(file.filepath,destino)
 
 res.status(200).json({success:true})
 
 })
+
+}catch(error){
+
+console.log(error)
+
+res.status(500).json({erro:error.message})
+
+}
 
 }
