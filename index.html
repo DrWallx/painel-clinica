@@ -53,11 +53,8 @@ flex:1;
 <input type="date" id="dataSelecionada">
 
 <button onclick="buscarData()">Buscar</button>
-
 <button onclick="hoje()">Hoje</button>
-
 <button onclick="ontem()">Ontem</button>
-
 <button onclick="amanha()">Amanhã</button>
 
 </div>
@@ -75,32 +72,21 @@ flex:1;
 <h2>Resumo</h2>
 
 <p>Consultas: <span id="consultas">0</span></p>
-
 <p>Retornos: <span id="retornos">0</span></p>
-
 <p>Cancelamentos: <span id="cancelamentos">0</span></p>
-
 <p><b>Faturamento: R$ <span id="faturamento">0</span></b></p>
 
 </div>
 
 <script>
 
-/* CONVERTE DATA DO INPUT PARA DD-MM-YYYY */
-
 function formatarData(data){
 
 const partes = data.split("-");
 
-const ano = partes[0];
-const mes = partes[1];
-const dia = partes[2];
-
-return `${dia}-${mes}-${ano}`;
+return `${partes[2]}-${partes[1]}-${partes[0]}`;
 
 }
-
-/* CARREGA AGENDA */
 
 async function carregarAgenda(data){
 
@@ -117,36 +103,25 @@ let retornos = 0;
 let cancelados = 0;
 let faturamento = 0;
 
-/* FILTRA SOMENTE A DATA */
-
 const agendaDoDia = agenda.content.filter(item => item.data === data);
-
-/* ORDENA POR HORÁRIO */
 
 agendaDoDia.sort((a,b)=>a.horario.localeCompare(b.horario));
 
-agendaDoDia.forEach(item=>{
+/* consultas válidas */
+
+const agendaValida = agendaDoDia.filter(item =>
+item.status_id == 1 || item.status_id == 7
+);
+
+agendaValida.forEach(item=>{
 
 let tipo = "Consulta";
 
-/* CONSULTA OU RETORNO */
-
 if(item.procedimento_id == 22){
-
 tipo = "Retorno";
 retornos++;
-
 }else{
-
-tipo = "Consulta";
 consultas++;
-
-}
-
-/* CANCELAMENTOS CORRETOS */
-
-if(item.status_id == 4 || item.status_id == 5){
-cancelados++;
 }
 
 const horario = item.horario.substring(0,5);
@@ -164,8 +139,6 @@ bloco.innerHTML = `
 
 lista.appendChild(bloco);
 
-/* FATURAMENTO */
-
 if(item.valor){
 
 const valor = item.valor.replace("R$","").replace(",",".");
@@ -175,17 +148,16 @@ faturamento += parseFloat(valor);
 
 });
 
+/* cancelamentos */
+
+cancelados = agendaDoDia.filter(item => item.status_id == 11).length;
+
 document.getElementById("consultas").innerText = consultas;
-
 document.getElementById("retornos").innerText = retornos;
-
 document.getElementById("cancelamentos").innerText = cancelados;
-
 document.getElementById("faturamento").innerText = faturamento.toFixed(2);
 
 }
-
-/* BUSCAR DATA */
 
 function buscarData(){
 
@@ -195,8 +167,6 @@ carregarAgenda(formatarData(data));
 
 }
 
-/* HOJE */
-
 function hoje(){
 
 const hoje = new Date();
@@ -205,15 +175,11 @@ const ano = hoje.getFullYear();
 const mes = String(hoje.getMonth()+1).padStart(2,'0');
 const dia = String(hoje.getDate()).padStart(2,'0');
 
-const dataInput = `${ano}-${mes}-${dia}`;
-
-document.getElementById("dataSelecionada").value = dataInput;
+document.getElementById("dataSelecionada").value = `${ano}-${mes}-${dia}`;
 
 carregarAgenda(`${dia}-${mes}-${ano}`);
 
 }
-
-/* ONTEM */
 
 function ontem(){
 
@@ -225,15 +191,11 @@ const ano = d.getFullYear();
 const mes = String(d.getMonth()+1).padStart(2,'0');
 const dia = String(d.getDate()).padStart(2,'0');
 
-const dataInput = `${ano}-${mes}-${dia}`;
-
-document.getElementById("dataSelecionada").value = dataInput;
+document.getElementById("dataSelecionada").value = `${ano}-${mes}-${dia}`;
 
 carregarAgenda(`${dia}-${mes}-${ano}`);
 
 }
-
-/* AMANHÃ */
 
 function amanha(){
 
@@ -245,15 +207,11 @@ const ano = d.getFullYear();
 const mes = String(d.getMonth()+1).padStart(2,'0');
 const dia = String(d.getDate()).padStart(2,'0');
 
-const dataInput = `${ano}-${mes}-${dia}`;
-
-document.getElementById("dataSelecionada").value = dataInput;
+document.getElementById("dataSelecionada").value = `${ano}-${mes}-${dia}`;
 
 carregarAgenda(`${dia}-${mes}-${ano}`);
 
 }
-
-/* CARREGA HOJE */
 
 hoje();
 
