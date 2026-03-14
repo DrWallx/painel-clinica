@@ -111,8 +111,6 @@ flex:1;
 
 <script>
 
-/* CONVERSÃO SEGURA DE VALOR */
-
 function converterValor(valor){
 
 if(!valor) return 0
@@ -127,16 +125,12 @@ valor
 
 }
 
-/* FORMATAR DATA */
-
 function formatarData(data){
 
 const partes = data.split("-");
 return `${partes[2]}-${partes[1]}-${partes[0]}`;
 
 }
-
-/* AGENDA DO DIA */
 
 async function carregarAgenda(data){
 
@@ -152,7 +146,6 @@ listaCancelados.innerHTML = "";
 let consultas = 0;
 let retornos = 0;
 let cancelados = 0;
-
 let faturamentoPrevisto = 0;
 
 const agendaDoDia = agenda.content;
@@ -163,8 +156,6 @@ agendaDoDia.forEach(item=>{
 
 const horario = item.horario.substring(0,5);
 const nome = item.paciente_nome;
-
-/* CANCELADOS */
 
 if(item.status_id == 11){
 
@@ -185,8 +176,6 @@ return;
 
 }
 
-/* STATUS PERMITIDOS */
-
 if(item.status_id != 1 && item.status_id != 7 && item.status_id != 2 && item.status_id != 3){
 return;
 }
@@ -200,25 +189,12 @@ retornos++;
 consultas++;
 }
 
-/* STATUS VISUAL */
-
 let statusIcon = "";
 
-if(item.status_id == 1){
-statusIcon = "🟡 Agendada";
-}
-
-if(item.status_id == 7){
-statusIcon = "🔵 Confirmada";
-}
-
-if(item.status_id == 2){
-statusIcon = "🟢 Confirmada";
-}
-
-if(item.status_id == 3){
-statusIcon = "✅ Realizada";
-}
+if(item.status_id == 1) statusIcon = "🟡 Agendada";
+if(item.status_id == 7) statusIcon = "🔵 Confirmada";
+if(item.status_id == 2) statusIcon = "🟢 Confirmada";
+if(item.status_id == 3) statusIcon = "✅ Realizada";
 
 const bloco = document.createElement("div");
 
@@ -230,8 +206,6 @@ bloco.innerHTML = `
 `;
 
 lista.appendChild(bloco);
-
-/* FATURAMENTO PREVISTO */
 
 if(item.procedimento_id != 22){
 
@@ -249,8 +223,6 @@ document.getElementById("faturamentoPrevisto").innerText = faturamentoPrevisto.t
 
 }
 
-/* PRODUÇÃO DO MÊS */
-
 async function carregarMes(){
 
 const hoje = new Date();
@@ -265,19 +237,33 @@ const dataEnd = `${dia}-${mes}-${ano}`;
 const response = await fetch(`/api/agenda?data_start=${dataStart}&data_end=${dataEnd}`);
 const agenda = await response.json();
 
+/* REMOVE DUPLICIDADES */
+
+const mapa = new Map();
+
+agenda.content.forEach(item => {
+
+const chave = item.data + item.horario + item.paciente_id;
+
+if(!mapa.has(chave) || mapa.get(chave).agendamento_id < item.agendamento_id){
+mapa.set(chave,item);
+}
+
+});
+
+const agendaFiltrada = Array.from(mapa.values());
+
 let consultas = 0;
 let retornos = 0;
 let cancelados = 0;
 let faturamento = 0;
 
-agenda.content.forEach(item=>{
+agendaFiltrada.forEach(item=>{
 
 if(item.status_id == 11){
 cancelados++;
 return;
 }
-
-/* SOMENTE CONSULTAS REALIZADAS */
 
 if(item.status_id != 3){
 return;
@@ -303,8 +289,6 @@ document.getElementById("cancelamentosMes").innerText = cancelados;
 document.getElementById("faturamentoMes").innerText = faturamento.toFixed(2);
 
 }
-
-/* BOTÕES DATA */
 
 function buscarData(){
 
@@ -363,5 +347,4 @@ carregarMes();
 </script>
 
 </body>
-
 </html>
