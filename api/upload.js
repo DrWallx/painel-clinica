@@ -1,55 +1,41 @@
-import formidable from "formidable"
-import fs from "fs"
-import path from "path"
+import formidable from "formidable";
+import fs from "fs";
+import { put } from "@vercel/blob";
 
 export const config = {
-api: {
-bodyParser: false
-}
-}
+  api: {
+    bodyParser: false,
+  },
+};
 
-export default async function handler(req,res){
+export default async function handler(req, res) {
+  try {
+    const form = formidable({ multiples: false });
 
-try{
+    form.parse(req, async (err, fields, files) => {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ erro: "Erro no upload" });
+      }
 
-const form = formidable({ multiples:false })
+      const paciente_id = fields.paciente_id;
+      const tipo = fields.tipo;
 
-form.parse(req,(err,fields,files)=>{
+      const file = files.file[0];
 
-if(err){
-console.log(err)
-return res.status(500).json({erro:"Erro no upload"})
-}
+      const nomeArquivo = `${paciente_id}_${tipo}.pdf`;
 
-const paciente_id = fields.paciente_id
-const tipo = fields.tipo
+      const blob = await put(nomeArquivo, fs.createReadStream(file.filepath), {
+        access: "public",
+      });
 
-const file = files.file[0]
-
-let pasta = ""
-
-if(tipo === "receita"){
-pasta = "uploads/receitas"
-}
-
-if(tipo === "nota"){
-pasta = "uploads/notas"
-}
-
-const destino = path.join(process.cwd(),pasta,`${paciente_id}.pdf`)
-
-fs.copyFileSync(file.filepath,destino)
-
-res.status(200).json({success:true})
-
-})
-
-}catch(error){
-
-console.log(error)
-
-res.status(500).json({erro:error.message})
-
-}
-
+      res.status(200).json({
+        success: true,
+        url: blob.url,
+      });
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ erro: error.message });
+  }
 }
