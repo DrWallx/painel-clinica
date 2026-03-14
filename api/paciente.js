@@ -3,7 +3,9 @@ export default async function handler(req, res){
 const token = process.env.FEEGOW_TOKEN
 const paciente_id = req.query.paciente_id
 
-const response = await fetch(
+/* BUSCAR PACIENTE */
+
+const pacienteResponse = await fetch(
 `https://api.feegow.com/v1/api/patient/search?paciente_id=${paciente_id}`,
 {
 headers:{
@@ -13,21 +15,50 @@ headers:{
 }
 )
 
-const data = await response.json()
+const pacienteData = await pacienteResponse.json()
 
-if(!data.success){
+if(!pacienteData.success){
 return res.status(200).json({})
 }
 
-const p = data.content
+const p = pacienteData.content
+
+/* BUSCAR AGENDAMENTO PARA PEGAR RETORNO */
+
+const hoje = new Date()
+
+const dia = String(hoje.getDate()).padStart(2,'0')
+const mes = String(hoje.getMonth()+1).padStart(2,'0')
+const ano = hoje.getFullYear()
+
+const data = `${dia}-${mes}-${ano}`
+
+const agendaResponse = await fetch(
+`https://api.feegow.com/v1/api/appoints/search?data_start=${data}&data_end=${data}&paciente_id=${paciente_id}`,
+{
+headers:{
+"Content-Type":"application/json",
+"x-access-token":token
+}
+}
+)
+
+const agendaData = await agendaResponse.json()
+
+let dias_limite_retorno = null
+
+if(agendaData.content && agendaData.content.length > 0){
+dias_limite_retorno = agendaData.content[0].dias_limite_retorno
+}
 
 res.status(200).json({
 
 nome: p.nome,
-email: p.email,
-telefone: p.telefone1,
-nascimento: p.data_nascimento,
-cpf: p.cpf,
+nascimento: p.nascimento,
+cpf: p.documentos?.cpf || "",
+
+email: p.email?.[0] || "",
+telefone: p.celulares?.[0] || "",
 
 cep: p.cep,
 rua: p.endereco,
@@ -36,7 +67,7 @@ bairro: p.bairro,
 cidade: p.cidade,
 estado: p.estado,
 
-dias_limite_retorno: p.dias_limite_retorno
+dias_limite_retorno
 
 })
 
