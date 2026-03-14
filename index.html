@@ -1,63 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Painel da Clínica</title>
+<style>
+body{
+font-family:Arial;
+background:#f4f6f8;
+padding:40px;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:10px;
+margin-bottom:20px;
+box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+h1{
+margin-bottom:30px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Painel da Clínica</h1>
+
+<div class="card">
+<h2>Agenda de Hoje</h2>
+<ul id="agenda"></ul>
+</div>
+
+<div class="card">
+<h2>Resumo do Dia</h2>
+
+<p>Consultas: <span id="consultas">0</span></p>
+<p>Cancelamentos: <span id="cancelamentos">0</span></p>
+<p><b>Faturamento: R$ <span id="faturamento">0</span></b></p>
+
+</div>
+
 <script>
 
 async function carregarAgenda(){
 
-try{
-
 const response = await fetch('/api/agenda');
 const data = await response.json();
 
-if(!data || !data.content){
-console.log("API retornou vazio");
-return;
-}
-
 const lista = document.getElementById("agenda");
 
-if(!lista){
-console.log("Elemento agenda não encontrado");
-return;
-}
+let total = 0;
+let cancelados = 0;
+let faturamento = 0;
 
-lista.innerHTML="";
+lista.innerHTML = "";
 
-let total=0;
-let cancelados=0;
-let faturamento=0;
+data.content.forEach(item =>{
 
-data.content.forEach(item=>{
+const li = document.createElement("li");
 
-const li=document.createElement("li");
-
-li.innerText=item.horario+" - Paciente "+item.paciente_id;
+li.innerText = item.horario + " - Paciente " + item.paciente_id;
 
 lista.appendChild(li);
 
 total++;
 
-if(item.status_id!=1){
+if(item.status_id != 1){
 cancelados++;
 }
 
-if(item.valor){
-let valor=item.valor.replace("R$","").replace(",",".");
-faturamento+=parseFloat(valor);
-}
+const valor = item.valor.replace("R$","").replace(",",".");
+faturamento += parseFloat(valor);
 
 });
 
-document.getElementById("consultas").innerText=total;
-document.getElementById("cancelamentos").innerText=cancelados;
-document.getElementById("faturamento").innerText=faturamento;
-
-}catch(err){
-
-console.log("Erro no painel:",err);
-
-}
+document.getElementById("consultas").innerText = total;
+document.getElementById("cancelamentos").innerText = cancelados;
+document.getElementById("faturamento").innerText = faturamento;
 
 }
 
 carregarAgenda();
 
+setInterval(carregarAgenda,60000);
+
 </script>
+
+</body>
+</html>
