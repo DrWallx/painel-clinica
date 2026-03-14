@@ -1,46 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Painel da Clínica</title>
-<style>
-body{
-font-family:Arial;
-background:#f4f6f8;
-padding:40px;
-}
-
-.card{
-background:white;
-padding:20px;
-border-radius:10px;
-margin-bottom:20px;
-box-shadow:0 2px 6px rgba(0,0,0,0.1);
-}
-
-h1{
-margin-bottom:30px;
-}
-</style>
-</head>
-
-<body>
-
-<h1>Painel da Clínica</h1>
-
-<div class="card">
-<h2>Agenda de Hoje</h2>
-<ul id="agenda"></ul>
-</div>
-
-<div class="card">
-<h2>Resumo do Dia</h2>
-
-<p>Consultas: <span id="consultas">0</span></p>
-<p>Cancelamentos: <span id="cancelamentos">0</span></p>
-<p><b>Faturamento: R$ <span id="faturamento">0</span></b></p>
-
-</div>
-
 <script>
 
 async function carregarAgenda(){
@@ -50,7 +7,8 @@ const data = await response.json();
 
 const lista = document.getElementById("agenda");
 
-let total = 0;
+let consultas = 0;
+let retornos = 0;
 let cancelados = 0;
 let faturamento = 0;
 
@@ -58,24 +16,41 @@ lista.innerHTML = "";
 
 data.content.forEach(item =>{
 
-const li = document.createElement("li");
+const bloco = document.createElement("div");
+bloco.style.marginBottom="15px";
 
-li.innerText = item.horario + " - Paciente " + item.paciente_id;
+let tipo = "Consulta";
 
-lista.appendChild(li);
-
-total++;
+if(item.retorno){
+tipo="Retorno";
+retornos++;
+}else{
+consultas++;
+}
 
 if(item.status_id != 1){
 cancelados++;
 }
 
-const valor = item.valor.replace("R$","").replace(",",".");
-faturamento += parseFloat(valor);
+let valor = 0;
+
+if(item.valor){
+valor = parseFloat(item.valor.replace("R$","").replace(",","."));
+faturamento += valor;
+}
+
+bloco.innerHTML = `
+<b>${item.horario}</b> - Paciente ${item.paciente_id}<br>
+Tipo: ${tipo}<br>
+Valor: ${item.valor}<br>
+Status: ${item.status_id == 1 ? "Confirmado":"Cancelado"}
+`;
+
+lista.appendChild(bloco);
 
 });
 
-document.getElementById("consultas").innerText = total;
+document.getElementById("consultas").innerText = consultas;
 document.getElementById("cancelamentos").innerText = cancelados;
 document.getElementById("faturamento").innerText = faturamento;
 
@@ -86,6 +61,3 @@ carregarAgenda();
 setInterval(carregarAgenda,60000);
 
 </script>
-
-</body>
-</html>
