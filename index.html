@@ -2,14 +2,12 @@
 
 async function carregarAgenda(){
 
-try{
-
 const response = await fetch('/api/agenda');
 const data = await response.json();
 
 const lista = document.getElementById("agenda");
 
-let consultas = 0;
+let total = 0;
 let cancelados = 0;
 let faturamento = 0;
 
@@ -23,30 +21,23 @@ li.innerText = item.horario + " - Paciente " + item.paciente_id;
 
 lista.appendChild(li);
 
-consultas++;
+total++;
 
 if(item.status_id != 1){
 cancelados++;
 }
 
-let valor = item.valor.replace("R$","").replace(",",".");
+const valor = item.valor.replace("R$","").replace(",",".");
 faturamento += parseFloat(valor);
 
 });
 
-document.getElementById("consultas").innerText = consultas;
+document.getElementById("consultas").innerText = total;
 document.getElementById("cancelamentos").innerText = cancelados;
 document.getElementById("faturamento").innerText = faturamento;
-
-}catch(error){
-
-console.log("Erro:",error);
-
-}
 
 }
 
 carregarAgenda();
-setInterval(carregarAgenda,60000);
 
 </script>
