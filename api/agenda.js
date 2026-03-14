@@ -2,10 +2,22 @@ export default async function handler(req, res) {
 
 const token = process.env.FEEGOW_TOKEN;
 
-const hoje = new Date().toLocaleDateString("pt-BR").split('/').reverse().join('-');
+let data = req.query.data;
+
+if(!data){
+
+const hoje = new Date();
+
+const dia = String(hoje.getDate()).padStart(2,'0');
+const mes = String(hoje.getMonth()+1).padStart(2,'0');
+const ano = hoje.getFullYear();
+
+data = `${dia}-${mes}-${ano}`;
+
+}
 
 const agendaResponse = await fetch(
-`https://api.feegow.com/v1/api/appoints/search?data_start=${hoje}&data_end=${hoje}`,
+`https://api.feegow.com/v1/api/appoints/search?data_start=${data}&data_end=${data}`,
 {
 headers:{
 "Content-Type":"application/json",
