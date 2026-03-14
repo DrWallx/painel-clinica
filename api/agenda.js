@@ -4,6 +4,8 @@ const token = process.env.FEEGOW_TOKEN;
 
 let data = req.query.data;
 
+/* SE NÃO RECEBER DATA USA HOJE */
+
 if(!data){
 
 const hoje = new Date();
@@ -15,6 +17,8 @@ const ano = hoje.getFullYear();
 data = `${dia}-${mes}-${ano}`;
 
 }
+
+/* CHAMA API DO FEEGOW */
 
 const agendaResponse = await fetch(
 `https://api.feegow.com/v1/api/appoints/search?data_start=${data}&data_end=${data}`,
@@ -32,11 +36,17 @@ if(!agendaData.content){
 return res.status(200).json(agendaData);
 }
 
-/* FILTRA APENAS A DATA EXATA */
+/* FILTRO CORRETO DE DATA */
 
-const agendaFiltrada = agendaData.content.filter(
-item => item.data === data
-);
+const agendaFiltrada = [];
+
+agendaData.content.forEach(item => {
+
+if(item.data === data){
+agendaFiltrada.push(item);
+}
+
+});
 
 /* BUSCA NOME DO PACIENTE */
 
