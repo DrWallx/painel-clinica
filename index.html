@@ -86,17 +86,21 @@ flex:1;
 
 <script>
 
+/* CONVERTE DATA SEM PROBLEMA DE FUSO */
+
 function formatarData(data){
 
-const d = new Date(data);
+const partes = data.split("-");
 
-const dia = String(d.getDate()).padStart(2,'0');
-const mes = String(d.getMonth()+1).padStart(2,'0');
-const ano = d.getFullYear();
+const ano = partes[0];
+const mes = partes[1];
+const dia = partes[2];
 
 return `${dia}-${mes}-${ano}`;
 
 }
+
+/* BUSCA AGENDA */
 
 async function carregarAgenda(data){
 
@@ -113,7 +117,7 @@ let retornos = 0;
 let cancelados = 0;
 let faturamento = 0;
 
-/* FILTRA SOMENTE A DATA SELECIONADA */
+/* FILTRA DATA */
 
 const agendaDoDia = agenda.content.filter(item => item.data === data);
 
@@ -125,7 +129,7 @@ agendaDoDia.forEach(item=>{
 
 let tipo = "Consulta";
 
-/* IDENTIFICA CONSULTA OU RETORNO PELO PROCEDIMENTO */
+/* CONSULTA OU RETORNO */
 
 if(item.procedimento_id == 22){
 
@@ -134,7 +138,6 @@ retornos++;
 
 }else{
 
-tipo = "Consulta";
 consultas++;
 
 }
@@ -165,7 +168,6 @@ lista.appendChild(bloco);
 if(item.valor){
 
 const valor = item.valor.replace("R$","").replace(",",".");
-
 faturamento += parseFloat(valor);
 
 }
@@ -173,14 +175,13 @@ faturamento += parseFloat(valor);
 });
 
 document.getElementById("consultas").innerText = consultas;
-
 document.getElementById("retornos").innerText = retornos;
-
 document.getElementById("cancelamentos").innerText = cancelados;
-
 document.getElementById("faturamento").innerText = faturamento.toFixed(2);
 
 }
+
+/* BUSCAR DATA MANUAL */
 
 function buscarData(){
 
@@ -190,15 +191,25 @@ carregarAgenda(formatarData(data));
 
 }
 
+/* HOJE */
+
 function hoje(){
 
-const d = new Date();
+const hoje = new Date();
 
-document.getElementById("dataSelecionada").value = d.toISOString().split('T')[0];
+const ano = hoje.getFullYear();
+const mes = String(hoje.getMonth()+1).padStart(2,'0');
+const dia = String(hoje.getDate()).padStart(2,'0');
 
-carregarAgenda(formatarData(d));
+const dataInput = `${ano}-${mes}-${dia}`;
+
+document.getElementById("dataSelecionada").value = dataInput;
+
+carregarAgenda(`${dia}-${mes}-${ano}`);
 
 }
+
+/* ONTEM */
 
 function ontem(){
 
@@ -206,11 +217,19 @@ const d = new Date();
 
 d.setDate(d.getDate()-1);
 
-document.getElementById("dataSelecionada").value = d.toISOString().split('T')[0];
+const ano = d.getFullYear();
+const mes = String(d.getMonth()+1).padStart(2,'0');
+const dia = String(d.getDate()).padStart(2,'0');
 
-carregarAgenda(formatarData(d));
+const dataInput = `${ano}-${mes}-${dia}`;
+
+document.getElementById("dataSelecionada").value = dataInput;
+
+carregarAgenda(`${dia}-${mes}-${ano}`);
 
 }
+
+/* AMANHÃ */
 
 function amanha(){
 
@@ -218,9 +237,15 @@ const d = new Date();
 
 d.setDate(d.getDate()+1);
 
-document.getElementById("dataSelecionada").value = d.toISOString().split('T')[0];
+const ano = d.getFullYear();
+const mes = String(d.getMonth()+1).padStart(2,'0');
+const dia = String(d.getDate()).padStart(2,'0');
 
-carregarAgenda(formatarData(d));
+const dataInput = `${ano}-${mes}-${dia}`;
+
+document.getElementById("dataSelecionada").value = dataInput;
+
+carregarAgenda(`${dia}-${mes}-${ano}`);
 
 }
 
