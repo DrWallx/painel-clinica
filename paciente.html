@@ -21,13 +21,6 @@ margin-bottom:20px;
 box-shadow:0 2px 6px rgba(0,0,0,0.1);
 }
 
-input{
-padding:8px;
-margin-top:5px;
-margin-bottom:10px;
-width:100%;
-}
-
 button{
 padding:10px;
 border:none;
@@ -40,6 +33,11 @@ margin-right:10px;
 
 button:hover{
 background:#2563eb;
+}
+
+input[type=file]{
+margin-top:10px;
+margin-bottom:10px;
 }
 
 </style>
@@ -84,8 +82,7 @@ Paciente possui <b>direito de retorno</b>
 
 <br><br>
 
-<label>Data limite retorno</label>
-<input type="date" id="data_retorno">
+<p><b>Data limite retorno:</b> <span id="data_retorno"></span></p>
 
 <button onclick="salvarRetorno()">Salvar</button>
 
@@ -97,6 +94,8 @@ Paciente possui <b>direito de retorno</b>
 
 <input type="file" id="receita" accept="application/pdf">
 
+<br>
+
 <button onclick="uploadReceita()">Enviar Receita</button>
 
 </div>
@@ -106,6 +105,8 @@ Paciente possui <b>direito de retorno</b>
 <h3>Nota Fiscal (PDF)</h3>
 
 <input type="file" id="nota" accept="application/pdf">
+
+<br>
 
 <button onclick="uploadNota()">Enviar Nota</button>
 
@@ -134,6 +135,7 @@ const data = await response.json()
 document.getElementById("nome").innerText = data.nome
 document.getElementById("nascimento").innerText = data.nascimento
 document.getElementById("cpf").innerText = data.cpf
+
 document.getElementById("email").innerText = data.email
 document.getElementById("telefone").innerText = data.telefone
 
@@ -144,20 +146,8 @@ document.getElementById("bairro").innerText = data.bairro
 document.getElementById("cidade").innerText = data.cidade
 document.getElementById("estado").innerText = data.estado
 
-/* CALCULAR DATA LIMITE RETORNO */
-
 if(data.dias_limite_retorno){
-
-const hoje = new Date()
-
-hoje.setDate(hoje.getDate() + data.dias_limite_retorno)
-
-const ano = hoje.getFullYear()
-const mes = String(hoje.getMonth()+1).padStart(2,'0')
-const dia = String(hoje.getDate()).padStart(2,'0')
-
-document.getElementById("data_retorno").value = `${ano}-${mes}-${dia}`
-
+document.getElementById("data_retorno").innerText = data.dias_limite_retorno
 }
 
 }
@@ -165,7 +155,6 @@ document.getElementById("data_retorno").value = `${ano}-${mes}-${dia}`
 async function salvarRetorno(){
 
 const retorno_valido = document.getElementById("retorno_valido").checked
-const data_retorno = document.getElementById("data_retorno").value
 
 await fetch("/api/salvarPaciente",{
 
@@ -178,8 +167,7 @@ headers:{
 body:JSON.stringify({
 
 paciente_id,
-retorno_valido,
-data_retorno
+retorno_valido
 
 })
 
@@ -235,7 +223,7 @@ async function enviarReceita(){
 
 await fetch(`/api/enviarEmail?paciente_id=${paciente_id}&tipo=receita`)
 
-alert("Receita enviada ao paciente")
+alert("Receita enviada")
 
 }
 
@@ -243,7 +231,7 @@ async function enviarNota(){
 
 await fetch(`/api/enviarEmail?paciente_id=${paciente_id}&tipo=nota`)
 
-alert("Nota enviada ao paciente")
+alert("Nota enviada")
 
 }
 
