@@ -94,7 +94,6 @@ flex:1;
 <p>Cancelamentos: <span id="cancelamentos">0</span></p>
 
 <p><b>Receita prevista do dia: R$ <span id="faturamentoPrevisto">0</span></b></p>
-<p><b>Receita realizada até agora: R$ <span id="faturamentoRealizado">0</span></b></p>
 
 </div>
 
@@ -135,7 +134,6 @@ let retornos = 0;
 let cancelados = 0;
 
 let faturamentoPrevisto = 0;
-let faturamentoRealizado = 0;
 
 const agendaDoDia = agenda.content;
 
@@ -209,17 +207,12 @@ bloco.innerHTML = `
 
 lista.appendChild(bloco);
 
-/* FATURAMENTO */
+/* FATURAMENTO PREVISTO */
 
 if(item.valor){
 
 const valor = item.valor.replace("R$","").replace(",",".");
-
 faturamentoPrevisto += parseFloat(valor);
-
-if(item.status_id == 2 || item.status_id == 3){
-faturamentoRealizado += parseFloat(valor);
-}
 
 }
 
@@ -230,7 +223,6 @@ document.getElementById("retornos").innerText = retornos;
 document.getElementById("cancelamentos").innerText = cancelados;
 
 document.getElementById("faturamentoPrevisto").innerText = faturamentoPrevisto.toFixed(2);
-document.getElementById("faturamentoRealizado").innerText = faturamentoRealizado.toFixed(2);
 
 }
 
