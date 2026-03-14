@@ -184,7 +184,7 @@ return;
 
 }
 
-/* STATUS PERMITIDOS */
+/* STATUS VISÍVEIS NA AGENDA */
 
 if(item.status_id != 1 && item.status_id != 7 && item.status_id != 2 && item.status_id != 3){
 return;
@@ -198,8 +198,6 @@ retornos++;
 }else{
 consultas++;
 }
-
-/* STATUS VISUAL */
 
 let statusIcon = "";
 
@@ -266,9 +264,9 @@ cancelados++;
 return;
 }
 
-/* ATENDIMENTO REALIZADO */
+/* SOMENTE REALIZADOS */
 
-if(!item.data_atendimento){
+if(item.status_id != 3){
 return;
 }
 
