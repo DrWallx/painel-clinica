@@ -2,11 +2,20 @@ export default async function handler(req, res) {
 
 const token = process.env.FEEGOW_TOKEN;
 
-let data = req.query.data;
+let { data, data_start, data_end } = req.query;
 
-/* SE NÃO RECEBER DATA USA HOJE */
+/* SE RECEBER APENAS DATA (AGENDA DO DIA) */
 
-if(!data){
+if(data && !data_start && !data_end){
+
+data_start = data;
+data_end = data;
+
+}
+
+/* SE NÃO RECEBER NADA USA HOJE */
+
+if(!data && !data_start && !data_end){
 
 const hoje = new Date();
 
@@ -14,14 +23,15 @@ const dia = String(hoje.getDate()).padStart(2,'0');
 const mes = String(hoje.getMonth()+1).padStart(2,'0');
 const ano = hoje.getFullYear();
 
-data = `${dia}-${mes}-${ano}`;
+data_start = `${dia}-${mes}-${ano}`;
+data_end = `${dia}-${mes}-${ano}`;
 
 }
 
 /* CHAMA API DO FEEGOW */
 
 const agendaResponse = await fetch(
-`https://api.feegow.com/v1/api/appoints/search?data_start=${data}&data_end=${data}`,
+`https://api.feegow.com/v1/api/appoints/search?data_start=${data_start}&data_end=${data_end}`,
 {
 headers:{
 "Content-Type":"application/json",
@@ -36,9 +46,13 @@ if(!agendaData.content){
 return res.status(200).json(agendaData);
 }
 
-/* FILTRO CORRETO DE DATA */
+/* FILTRO DE DATA (SOMENTE QUANDO FOR UM DIA ESPECÍFICO) */
 
-const agendaFiltrada = [];
+let agendaFiltrada = agendaData.content;
+
+if(data){
+
+agendaFiltrada = [];
 
 agendaData.content.forEach(item => {
 
@@ -47,6 +61,8 @@ agendaFiltrada.push(item);
 }
 
 });
+
+}
 
 /* BUSCA NOME DO PACIENTE */
 
