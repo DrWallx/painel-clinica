@@ -1,1 +1,225 @@
+<!DOCTYPE html>
+<html>
 
+<head>
+
+<title>Paciente</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f4f6f8;
+padding:40px;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:10px;
+margin-bottom:20px;
+box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+input{
+padding:8px;
+margin-top:5px;
+margin-bottom:10px;
+width:100%;
+}
+
+button{
+padding:10px;
+border:none;
+background:#3b82f6;
+color:white;
+border-radius:5px;
+cursor:pointer;
+}
+
+button:hover{
+background:#2563eb;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Paciente</h1>
+
+<div class="card">
+
+<h3>Dados do Paciente</h3>
+
+<p><b>Nome:</b> <span id="nome"></span></p>
+<p><b>Nascimento:</b> <span id="nascimento"></span></p>
+<p><b>Email:</b> <span id="email"></span></p>
+<p><b>Telefone:</b> <span id="telefone"></span></p>
+
+</div>
+
+<div class="card">
+
+<h3>Controle de Retorno</h3>
+
+<label>
+<input type="checkbox" id="retorno_valido">
+Paciente possui retorno
+</label>
+
+<label>Data limite retorno</label>
+<input type="date" id="data_retorno">
+
+<button onclick="salvarRetorno()">Salvar</button>
+
+</div>
+
+<div class="card">
+
+<h3>Receita (PDF)</h3>
+
+<input type="file" id="receita">
+
+<button onclick="uploadReceita()">Enviar Receita</button>
+
+</div>
+
+<div class="card">
+
+<h3>Nota Fiscal (PDF)</h3>
+
+<input type="file" id="nota">
+
+<button onclick="uploadNota()">Enviar Nota</button>
+
+</div>
+
+<div class="card">
+
+<h3>Enviar documentos</h3>
+
+<button onclick="enviarReceita()">Enviar Receita</button>
+<button onclick="enviarNota()">Enviar Nota</button>
+<button onclick="enviarAmbos()">Enviar Ambos</button>
+
+</div>
+
+<script>
+
+const params = new URLSearchParams(window.location.search)
+const paciente_id = params.get("paciente_id")
+
+async function carregarPaciente(){
+
+const response = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
+const data = await response.json()
+
+document.getElementById("nome").innerText = data.nome
+document.getElementById("nascimento").innerText = data.nascimento
+document.getElementById("email").innerText = data.email
+document.getElementById("telefone").innerText = data.telefone
+
+}
+
+async function salvarRetorno(){
+
+const retorno_valido = document.getElementById("retorno_valido").checked
+const data_retorno = document.getElementById("data_retorno").value
+
+await fetch("/api/salvarPaciente",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+paciente_id,
+retorno_valido,
+data_retorno
+
+})
+
+})
+
+alert("Salvo")
+
+}
+
+async function uploadReceita(){
+
+const file = document.getElementById("receita").files[0]
+
+const form = new FormData()
+
+form.append("file",file)
+form.append("paciente_id",paciente_id)
+form.append("tipo","receita")
+
+await fetch("/api/upload",{
+
+method:"POST",
+body:form
+
+})
+
+alert("Receita enviada")
+
+}
+
+async function uploadNota(){
+
+const file = document.getElementById("nota").files[0]
+
+const form = new FormData()
+
+form.append("file",file)
+form.append("paciente_id",paciente_id)
+form.append("tipo","nota")
+
+await fetch("/api/upload",{
+
+method:"POST",
+body:form
+
+})
+
+alert("Nota enviada")
+
+}
+
+async function enviarReceita(){
+
+await fetch(`/api/enviarEmail?paciente_id=${paciente_id}&tipo=receita`)
+
+alert("Receita enviada")
+
+}
+
+async function enviarNota(){
+
+await fetch(`/api/enviarEmail?paciente_id=${paciente_id}&tipo=nota`)
+
+alert("Nota enviada")
+
+}
+
+async function enviarAmbos(){
+
+await fetch(`/api/enviarEmail?paciente_id=${paciente_id}&tipo=ambos`)
+
+alert("Documentos enviados")
+
+}
+
+carregarPaciente()
+
+</script>
+
+</body>
+
+</html>
