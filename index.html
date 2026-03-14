@@ -1,19 +1,12 @@
 <!DOCTYPE html>
 <html>
-
 <head>
 <title>Painel da Clínica</title>
-
 <style>
-
 body{
-font-family: Arial;
+font-family:Arial;
 background:#f4f6f8;
 padding:40px;
-}
-
-h1{
-color:#333;
 }
 
 .card{
@@ -24,8 +17,10 @@ margin-bottom:20px;
 box-shadow:0 2px 6px rgba(0,0,0,0.1);
 }
 
+h1{
+margin-bottom:30px;
+}
 </style>
-
 </head>
 
 <body>
@@ -33,30 +28,64 @@ box-shadow:0 2px 6px rgba(0,0,0,0.1);
 <h1>Painel da Clínica</h1>
 
 <div class="card">
-
 <h2>Agenda de Hoje</h2>
-
-<ul>
-<li>09:00 João Silva</li>
-<li>09:30 Maria Souza</li>
-<li>10:00 Pedro Santos</li>
-
-</ul>
-
+<ul id="agenda"></ul>
 </div>
 
 <div class="card">
-
 <h2>Resumo do Dia</h2>
 
-<p>Consultas: 3</p>
-<p>Retornos: 1</p>
-<p>Cancelamentos: 0</p>
-
-<h3>Faturamento: R$900</h3>
+<p>Consultas: <span id="consultas">0</span></p>
+<p>Cancelamentos: <span id="cancelamentos">0</span></p>
+<p><b>Faturamento: R$ <span id="faturamento">0</span></b></p>
 
 </div>
 
-</body>
+<script>
 
+async function carregarAgenda(){
+
+const response = await fetch('/api/agenda');
+const data = await response.json();
+
+const lista = document.getElementById("agenda");
+
+let total = 0;
+let cancelados = 0;
+let faturamento = 0;
+
+lista.innerHTML = "";
+
+data.content.forEach(item =>{
+
+const li = document.createElement("li");
+
+li.innerText = item.horario + " - Paciente " + item.paciente_id;
+
+lista.appendChild(li);
+
+total++;
+
+if(item.status_id != 1){
+cancelados++;
+}
+
+const valor = item.valor.replace("R$","").replace(",",".");
+faturamento += parseFloat(valor);
+
+});
+
+document.getElementById("consultas").innerText = total;
+document.getElementById("cancelamentos").innerText = cancelados;
+document.getElementById("faturamento").innerText = faturamento;
+
+}
+
+carregarAgenda();
+
+setInterval(carregarAgenda,60000);
+
+</script>
+
+</body>
 </html>
