@@ -5,7 +5,12 @@ const token = process.env.FEEGOW_TOKEN;
 try {
 
 const hoje = new Date();
-const data = hoje.toISOString().split("T")[0];
+
+const dia = String(hoje.getDate()).padStart(2,'0');
+const mes = String(hoje.getMonth()+1).padStart(2,'0');
+const ano = hoje.getFullYear();
+
+const data = `${dia}-${mes}-${ano}`;
 
 const url = `https://api.feegow.com/v1/api/appoints/search?data_start=${data}&data_end=${data}`;
 
