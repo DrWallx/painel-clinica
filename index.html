@@ -70,7 +70,7 @@ const li = document.createElement("li");
 const horario = item.horario || "Sem horário";
 const paciente = item.paciente_id || "Paciente";
 
-li.innerText = horario + " - Paciente " + paciente;
+li.innerText = horario + " - " + (item.paciente_nome || ("Paciente " + paciente));
 
 lista.appendChild(li);
 
