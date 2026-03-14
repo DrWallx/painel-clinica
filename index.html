@@ -111,7 +111,7 @@ flex:1;
 
 <script>
 
-/* CONVERSÃO SEGURA DE VALOR */
+/* CONVERTER VALOR */
 
 function converterValor(valor){
 
@@ -152,7 +152,6 @@ listaCancelados.innerHTML = "";
 let consultas = 0;
 let retornos = 0;
 let cancelados = 0;
-
 let faturamentoPrevisto = 0;
 
 const agendaDoDia = agenda.content;
@@ -204,21 +203,10 @@ consultas++;
 
 let statusIcon = "";
 
-if(item.status_id == 1){
-statusIcon = "🟡 Agendada";
-}
-
-if(item.status_id == 7){
-statusIcon = "🔵 Confirmada";
-}
-
-if(item.status_id == 2){
-statusIcon = "🟢 Confirmada";
-}
-
-if(item.status_id == 3){
-statusIcon = "✅ Realizada";
-}
+if(item.status_id == 1) statusIcon = "🟡 Agendada";
+if(item.status_id == 7) statusIcon = "🔵 Confirmada";
+if(item.status_id == 2) statusIcon = "🟢 Confirmada";
+if(item.status_id == 3) statusIcon = "✅ Realizada";
 
 const bloco = document.createElement("div");
 
@@ -244,7 +232,6 @@ faturamentoPrevisto += converterValor(item.valor_total_agendamento);
 document.getElementById("consultas").innerText = consultas;
 document.getElementById("retornos").innerText = retornos;
 document.getElementById("cancelamentos").innerText = cancelados;
-
 document.getElementById("faturamentoPrevisto").innerText = faturamentoPrevisto.toFixed(2);
 
 }
@@ -272,16 +259,20 @@ let faturamento = 0;
 
 agenda.content.forEach(item=>{
 
+/* CANCELADOS */
+
 if(item.status_id == 11){
 cancelados++;
 return;
 }
 
-/* CONSULTAS REALIZADAS */
+/* ATENDIMENTO REALIZADO */
 
-if(item.status_id != 3 && item.status_id != 7){
+if(!item.data_atendimento){
 return;
 }
+
+/* RETORNO */
 
 if(item.procedimento_id == 22){
 
@@ -304,7 +295,7 @@ document.getElementById("faturamentoMes").innerText = faturamento.toFixed(2);
 
 }
 
-/* BOTÕES DATA */
+/* BOTÕES */
 
 function buscarData(){
 
