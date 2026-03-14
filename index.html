@@ -87,12 +87,26 @@ flex:1;
 
 <div class="card">
 
-<h2>Resumo</h2>
+<h2>Resumo do Dia</h2>
 
 <p>Consultas: <span id="consultas">0</span></p>
 <p>Retornos: <span id="retornos">0</span></p>
 <p>Cancelamentos: <span id="cancelamentos">0</span></p>
-<p><b>Faturamento: R$ <span id="faturamento">0</span></b></p>
+
+<p><b>Receita prevista do dia: R$ <span id="faturamentoPrevisto">0</span></b></p>
+<p><b>Receita realizada até agora: R$ <span id="faturamentoRealizado">0</span></b></p>
+
+</div>
+
+<div class="card">
+
+<h2>Produção do Mês</h2>
+
+<p>Consultas realizadas: <span id="consultasMes">0</span></p>
+<p>Retornos realizados: <span id="retornosMes">0</span></p>
+<p>Cancelamentos: <span id="cancelamentosMes">0</span></p>
+
+<p><b>Receita do mês: R$ <span id="faturamentoMes">0</span></b></p>
 
 </div>
 
@@ -119,7 +133,9 @@ listaCancelados.innerHTML = "";
 let consultas = 0;
 let retornos = 0;
 let cancelados = 0;
-let faturamento = 0;
+
+let faturamentoPrevisto = 0;
+let faturamentoRealizado = 0;
 
 const agendaDoDia = agenda.content;
 
@@ -198,7 +214,12 @@ lista.appendChild(bloco);
 if(item.valor){
 
 const valor = item.valor.replace("R$","").replace(",",".");
-faturamento += parseFloat(valor);
+
+faturamentoPrevisto += parseFloat(valor);
+
+if(item.status_id == 2 || item.status_id == 3){
+faturamentoRealizado += parseFloat(valor);
+}
 
 }
 
@@ -207,7 +228,61 @@ faturamento += parseFloat(valor);
 document.getElementById("consultas").innerText = consultas;
 document.getElementById("retornos").innerText = retornos;
 document.getElementById("cancelamentos").innerText = cancelados;
-document.getElementById("faturamento").innerText = faturamento.toFixed(2);
+
+document.getElementById("faturamentoPrevisto").innerText = faturamentoPrevisto.toFixed(2);
+document.getElementById("faturamentoRealizado").innerText = faturamentoRealizado.toFixed(2);
+
+}
+
+async function carregarMes(){
+
+const hoje = new Date();
+
+const ano = hoje.getFullYear();
+const mes = String(hoje.getMonth()+1).padStart(2,'0');
+const dia = String(hoje.getDate()).padStart(2,'0');
+
+const dataStart = `01-${mes}-${ano}`;
+const dataEnd = `${dia}-${mes}-${ano}`;
+
+const response = await fetch(`/api/agenda?data_start=${dataStart}&data_end=${dataEnd}`);
+const agenda = await response.json();
+
+let consultas = 0;
+let retornos = 0;
+let cancelados = 0;
+let faturamento = 0;
+
+agenda.content.forEach(item=>{
+
+if(item.status_id == 11){
+cancelados++;
+return;
+}
+
+if(item.status_id != 2 && item.status_id != 3){
+return;
+}
+
+if(item.procedimento_id == 22){
+retornos++;
+}else{
+consultas++;
+}
+
+if(item.valor){
+
+const valor = item.valor.replace("R$","").replace(",",".");
+faturamento += parseFloat(valor);
+
+}
+
+});
+
+document.getElementById("consultasMes").innerText = consultas;
+document.getElementById("retornosMes").innerText = retornos;
+document.getElementById("cancelamentosMes").innerText = cancelados;
+document.getElementById("faturamentoMes").innerText = faturamento.toFixed(2);
 
 }
 
@@ -263,6 +338,7 @@ carregarAgenda(`${dia}-${mes}-${ano}`);
 }
 
 hoje();
+carregarMes();
 
 </script>
 
