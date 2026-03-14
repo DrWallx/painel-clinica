@@ -52,6 +52,13 @@ width:90px;
 flex:1;
 }
 
+.linhaSemana{
+display:flex;
+justify-content:space-between;
+padding:8px;
+border-bottom:1px solid #eee;
+}
+
 </style>
 
 </head>
@@ -109,6 +116,14 @@ flex:1;
 
 </div>
 
+<div class="card">
+
+<h2>Agenda da Semana</h2>
+
+<div id="semana"></div>
+
+</div>
+
 <script>
 
 function converterValor(valor){
@@ -161,8 +176,6 @@ agendaDoDia.forEach(item=>{
 const horario = item.horario.substring(0,5);
 const nome = item.paciente_nome;
 
-/* CANCELADOS */
-
 if(item.status_id == 11){
 
 cancelados++;
@@ -182,13 +195,9 @@ return;
 
 }
 
-/* STATUS VISÍVEIS */
-
 if(item.status_id != 1 && item.status_id != 7 && item.status_id != 2 && item.status_id != 3){
 return;
 }
-
-/* TIPO */
 
 let tipo = "Consulta";
 
@@ -198,8 +207,6 @@ retornos++;
 }else{
 consultas++;
 }
-
-/* STATUS */
 
 let statusIcon = "";
 
@@ -218,8 +225,6 @@ bloco.innerHTML = `
 `;
 
 lista.appendChild(bloco);
-
-/* RECEITA PREVISTA */
 
 if(item.procedimento_id != 22){
 
@@ -261,14 +266,10 @@ let faturamento = 0;
 
 agenda.content.forEach(item => {
 
-/* CANCELADO */
-
 if(item.status_id == 11){
 cancelados++;
 return;
 }
-
-/* CONSULTA */
 
 if(item.procedimento_id == 23){
 
@@ -277,8 +278,6 @@ faturamento += converterValor(item.valor_total_agendamento);
 return;
 
 }
-
-/* RETORNO */
 
 if(item.procedimento_id == 22){
 
@@ -293,6 +292,80 @@ document.getElementById("consultasMes").innerText = consultas;
 document.getElementById("retornosMes").innerText = retornos;
 document.getElementById("cancelamentosMes").innerText = cancelados;
 document.getElementById("faturamentoMes").innerText = faturamento.toFixed(2);
+
+}
+
+/* ===================== */
+/* AGENDA DA SEMANA */
+/* ===================== */
+
+async function carregarSemana(){
+
+const hoje = new Date();
+const diaSemana = hoje.getDay();
+
+const segunda = new Date(hoje);
+segunda.setDate(hoje.getDate() - diaSemana + 1);
+
+const domingo = new Date(segunda);
+domingo.setDate(segunda.getDate() + 6);
+
+function format(d){
+
+const dia = String(d.getDate()).padStart(2,'0');
+const mes = String(d.getMonth()+1).padStart(2,'0');
+const ano = d.getFullYear();
+
+return `${dia}-${mes}-${ano}`;
+
+}
+
+const dataStart = format(segunda);
+const dataEnd = format(domingo);
+
+const response = await fetch(`/api/agenda?data_start=${dataStart}&data_end=${dataEnd}`);
+const agenda = await response.json();
+
+const dias = {
+"Segunda":0,
+"Terça":0,
+"Quarta":0,
+"Quinta":0,
+"Sexta":0,
+"Sábado":0,
+"Domingo":0
+};
+
+agenda.content.forEach(item=>{
+
+if(item.status_id == 11) return;
+
+const partes = item.data.split("-");
+const d = new Date(`${partes[2]}-${partes[1]}-${partes[0]}`);
+
+const nomes = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
+
+const nomeDia = nomes[d.getDay()];
+
+dias[nomeDia]++;
+
+});
+
+const container = document.getElementById("semana");
+
+container.innerHTML = "";
+
+for(const dia in dias){
+
+const linha = document.createElement("div");
+
+linha.className = "linhaSemana";
+
+linha.innerHTML = `<span>${dia}</span><b>${dias[dia]}</b>`;
+
+container.appendChild(linha);
+
+}
 
 }
 
@@ -321,38 +394,11 @@ carregarAgenda(`${dia}-${mes}-${ano}`);
 
 }
 
-function ontem(){
-
-const d = new Date();
-d.setDate(d.getDate()-1);
-
-const ano = d.getFullYear();
-const mes = String(d.getMonth()+1).padStart(2,'0');
-const dia = String(d.getDate()).padStart(2,'0');
-
-document.getElementById("dataSelecionada").value = `${ano}-${mes}-${dia}`;
-
-carregarAgenda(`${dia}-${mes}-${ano}`);
-
-}
-
-function amanha(){
-
-const d = new Date();
-d.setDate(d.getDate()+1);
-
-const ano = d.getFullYear();
-const mes = String(d.getMonth()+1).padStart(2,'0');
-const dia = String(d.getDate()).padStart(2,'0');
-
-document.getElementById("dataSelecionada").value = `${ano}-${mes}-${dia}`;
-
-carregarAgenda(`${dia}-${mes}-${ano}`);
-
-}
+/* INICIAR */
 
 hoje();
 carregarMes();
+carregarSemana();
 
 </script>
 
