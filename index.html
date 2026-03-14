@@ -2,13 +2,14 @@
 
 async function carregarAgenda(){
 
+try{
+
 const response = await fetch('/api/agenda');
 const data = await response.json();
 
 const lista = document.getElementById("agenda");
 
 let consultas = 0;
-let retornos = 0;
 let cancelados = 0;
 let faturamento = 0;
 
@@ -16,37 +17,20 @@ lista.innerHTML = "";
 
 data.content.forEach(item =>{
 
-const bloco = document.createElement("div");
-bloco.style.marginBottom="15px";
+const li = document.createElement("li");
 
-let tipo = "Consulta";
+li.innerText = item.horario + " - Paciente " + item.paciente_id;
 
-if(item.retorno){
-tipo="Retorno";
-retornos++;
-}else{
+lista.appendChild(li);
+
 consultas++;
-}
 
 if(item.status_id != 1){
 cancelados++;
 }
 
-let valor = 0;
-
-if(item.valor){
-valor = parseFloat(item.valor.replace("R$","").replace(",","."));
-faturamento += valor;
-}
-
-bloco.innerHTML = `
-<b>${item.horario}</b> - Paciente ${item.paciente_id}<br>
-Tipo: ${tipo}<br>
-Valor: ${item.valor}<br>
-Status: ${item.status_id == 1 ? "Confirmado":"Cancelado"}
-`;
-
-lista.appendChild(bloco);
+let valor = item.valor.replace("R$","").replace(",",".");
+faturamento += parseFloat(valor);
 
 });
 
@@ -54,10 +38,15 @@ document.getElementById("consultas").innerText = consultas;
 document.getElementById("cancelamentos").innerText = cancelados;
 document.getElementById("faturamento").innerText = faturamento;
 
+}catch(error){
+
+console.log("Erro:",error);
+
+}
+
 }
 
 carregarAgenda();
-
 setInterval(carregarAgenda,60000);
 
 </script>
