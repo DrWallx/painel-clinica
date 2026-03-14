@@ -111,12 +111,32 @@ flex:1;
 
 <script>
 
+/* CONVERSÃO SEGURA DE VALOR */
+
+function converterValor(valor){
+
+if(!valor) return 0
+
+return parseFloat(
+valor
+.replace("R$","")
+.replace(/\./g,"")
+.replace(",",".")
+.trim()
+)
+
+}
+
+/* FORMATAR DATA */
+
 function formatarData(data){
 
 const partes = data.split("-");
 return `${partes[2]}-${partes[1]}-${partes[0]}`;
 
 }
+
+/* AGENDA DO DIA */
 
 async function carregarAgenda(data){
 
@@ -165,7 +185,7 @@ return;
 
 }
 
-/* CONSULTAS VÁLIDAS */
+/* STATUS PERMITIDOS */
 
 if(item.status_id != 1 && item.status_id != 7 && item.status_id != 2 && item.status_id != 3){
 return;
@@ -192,8 +212,12 @@ if(item.status_id == 7){
 statusIcon = "🔵 Confirmada";
 }
 
-if(item.status_id == 2 || item.status_id == 3){
-statusIcon = "🟢 Realizada";
+if(item.status_id == 2){
+statusIcon = "🟢 Confirmada";
+}
+
+if(item.status_id == 3){
+statusIcon = "✅ Realizada";
 }
 
 const bloco = document.createElement("div");
@@ -209,10 +233,9 @@ lista.appendChild(bloco);
 
 /* FATURAMENTO PREVISTO */
 
-if(item.valor){
+if(item.procedimento_id != 22){
 
-const valor = item.valor.replace("R$","").replace(",",".");
-faturamentoPrevisto += parseFloat(valor);
+faturamentoPrevisto += converterValor(item.valor_total_agendamento);
 
 }
 
@@ -225,6 +248,8 @@ document.getElementById("cancelamentos").innerText = cancelados;
 document.getElementById("faturamentoPrevisto").innerText = faturamentoPrevisto.toFixed(2);
 
 }
+
+/* PRODUÇÃO DO MÊS */
 
 async function carregarMes(){
 
@@ -252,20 +277,21 @@ cancelados++;
 return;
 }
 
-if(item.status_id != 2 && item.status_id != 3){
+/* SOMENTE CONSULTAS REALIZADAS */
+
+if(item.status_id != 3){
 return;
 }
 
 if(item.procedimento_id == 22){
+
 retornos++;
+
 }else{
+
 consultas++;
-}
 
-if(item.valor){
-
-const valor = item.valor.replace("R$","").replace(",",".");
-faturamento += parseFloat(valor);
+faturamento += converterValor(item.valor_total_agendamento);
 
 }
 
@@ -277,6 +303,8 @@ document.getElementById("cancelamentosMes").innerText = cancelados;
 document.getElementById("faturamentoMes").innerText = faturamento.toFixed(2);
 
 }
+
+/* BOTÕES DATA */
 
 function buscarData(){
 
