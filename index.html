@@ -45,6 +45,8 @@ margin-bottom:30px;
 
 async function carregarAgenda(){
 
+try{
+
 const response = await fetch('/api/agenda');
 const data = await response.json();
 
@@ -56,28 +58,50 @@ let faturamento = 0;
 
 lista.innerHTML = "";
 
+if(!data.content){
+console.log("API retornou sem conteúdo");
+return;
+}
+
 data.content.forEach(item =>{
 
 const li = document.createElement("li");
 
-li.innerText = item.horario + " - Paciente " + item.paciente_id;
+const horario = item.horario || "Sem horário";
+const paciente = item.paciente_id || "Paciente";
+
+li.innerText = horario + " - Paciente " + paciente;
 
 lista.appendChild(li);
 
 total++;
 
-if(item.status_id != 1){
+if(item.status_id && item.status_id != 1){
 cancelados++;
 }
 
-const valor = item.valor.replace("R$","").replace(",",".");
-faturamento += parseFloat(valor);
+if(item.valor){
+
+const valor = item.valor
+.replace("R$","")
+.replace(",",".")
+.trim();
+
+faturamento += parseFloat(valor) || 0;
+
+}
 
 });
 
 document.getElementById("consultas").innerText = total;
 document.getElementById("cancelamentos").innerText = cancelados;
-document.getElementById("faturamento").innerText = faturamento;
+document.getElementById("faturamento").innerText = faturamento.toFixed(2);
+
+}catch(error){
+
+console.log("Erro ao carregar agenda:",error);
+
+}
 
 }
 
