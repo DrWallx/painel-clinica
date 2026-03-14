@@ -2,7 +2,9 @@
 <html>
 <head>
 <title>Painel da Clínica</title>
+
 <style>
+
 body{
 font-family:Arial;
 background:#f4f6f8;
@@ -20,7 +22,28 @@ box-shadow:0 2px 6px rgba(0,0,0,0.1);
 h1{
 margin-bottom:30px;
 }
+
+.agenda-item{
+display:flex;
+align-items:center;
+padding:10px;
+margin-bottom:8px;
+background:#f8fafc;
+border-radius:6px;
+border-left:5px solid #3b82f6;
+}
+
+.hora{
+font-weight:bold;
+width:90px;
+}
+
+.paciente{
+flex:1;
+}
+
 </style>
+
 </head>
 
 <body>
@@ -29,10 +52,13 @@ margin-bottom:30px;
 
 <div class="card">
 <h2>Agenda de Hoje</h2>
-<ul id="agenda"></ul>
+
+<div id="agenda"></div>
+
 </div>
 
 <div class="card">
+
 <h2>Resumo do Dia</h2>
 
 <p>Consultas: <span id="consultas">0</span></p>
@@ -45,8 +71,6 @@ margin-bottom:30px;
 
 async function carregarAgenda(){
 
-try{
-
 const response = await fetch('/api/agenda');
 const data = await response.json();
 
@@ -58,25 +82,24 @@ let faturamento = 0;
 
 lista.innerHTML = "";
 
-if(!data.content){
-console.log("API retornou sem conteúdo");
-return;
-}
-
 data.content.forEach(item =>{
 
-const li = document.createElement("li");
+const bloco = document.createElement("div");
+bloco.className="agenda-item";
 
-const horario = item.horario || "Sem horário";
-const paciente = item.paciente_id || "Paciente";
+const horario = item.horario || "";
+const nome = item.paciente_nome || ("Paciente " + item.paciente_id);
 
-li.innerText = horario + " - " + (item.paciente_nome || ("Paciente " + paciente));
+bloco.innerHTML = `
+<div class="hora">${horario}</div>
+<div class="paciente">${nome}</div>
+`;
 
-lista.appendChild(li);
+lista.appendChild(bloco);
 
 total++;
 
-if(item.status_id && item.status_id != 1){
+if(item.status_id != 1){
 cancelados++;
 }
 
@@ -96,12 +119,6 @@ faturamento += parseFloat(valor) || 0;
 document.getElementById("consultas").innerText = total;
 document.getElementById("cancelamentos").innerText = cancelados;
 document.getElementById("faturamento").innerText = faturamento.toFixed(2);
-
-}catch(error){
-
-console.log("Erro ao carregar agenda:",error);
-
-}
 
 }
 
