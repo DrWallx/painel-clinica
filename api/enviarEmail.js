@@ -11,21 +11,20 @@ export default async function handler(req, res) {
     const baseUrl = process.env.BASE_URL
 
     const pacienteResponse = await fetch(`${baseUrl}/api/paciente?paciente_id=${paciente_id}`)
-
-    let paciente
-
-    try {
-      paciente = await pacienteResponse.json()
-    } catch {
-      const erroTexto = await pacienteResponse.text()
-      console.log("ERRO API PACIENTE:", erroTexto)
-      throw new Error("Erro ao buscar paciente")
-    }
+    const paciente = await pacienteResponse.json()
 
     const emailPaciente = paciente.email
 
-    const receitaURL = `https://blob.vercel-storage.com/${paciente_id}_receita.pdf`
-    const notaURL = `https://blob.vercel-storage.com/${paciente_id}_nota.pdf`
+    const receitaURL = paciente.receita_url
+    const notaURL = paciente.nota_url
+
+    if ((tipo === "receita" || tipo === "ambos") && !receitaURL) {
+      throw new Error("Receita não encontrada")
+    }
+
+    if ((tipo === "nota" || tipo === "ambos") && !notaURL) {
+      throw new Error("Nota não encontrada")
+    }
 
     let html = `
     <div style="font-family:Arial;max-width:600px;margin:auto;background:#ffffff;padding:20px;border-radius:10px">
@@ -34,37 +33,32 @@ export default async function handler(req, res) {
 
     <p>Olá <b>${paciente.nome}</b>,</p>
 
-    <p>Seus documentos da consulta estão disponíveis abaixo:</p>
+    <p>Seus documentos estão disponíveis abaixo:</p>
     `
 
     if (tipo === "receita" || tipo === "ambos") {
       html += `
-      <a href="${receitaURL}" 
-      style="display:block;margin:10px 0;padding:12px;background:#3b82f6;color:white;text-decoration:none;border-radius:5px;text-align:center">
+      <a href="${receitaURL}" style="display:block;margin:10px 0;padding:12px;background:#3b82f6;color:white;text-decoration:none;border-radius:5px;text-align:center">
       📄 Baixar Receita
-      </a>
-      `
+      </a>`
     }
 
     if (tipo === "nota" || tipo === "ambos") {
       html += `
-      <a href="${notaURL}" 
-      style="display:block;margin:10px 0;padding:12px;background:#10b981;color:white;text-decoration:none;border-radius:5px;text-align:center">
+      <a href="${notaURL}" style="display:block;margin:10px 0;padding:12px;background:#10b981;color:white;text-decoration:none;border-radius:5px;text-align:center">
       🧾 Baixar Nota Fiscal
-      </a>
-      `
+      </a>`
     }
 
     html += `
     <p style="margin-top:20px;font-size:14px;color:#555">
-    Se tiver qualquer dúvida, estamos à disposição.
+    Se precisar de algo, estamos à disposição.
     </p>
 
     <hr>
 
     <p style="font-size:12px;color:#999">
-    Clínica Haux<br>
-    Cuidado completo para sua saúde
+    Clínica Haux
     </p>
 
     </div>
@@ -74,11 +68,9 @@ export default async function handler(req, res) {
       from: 'Clínica Haux <hauxlife@hauxlife.com.br>',
       reply_to: 'drwall@hauxlife.com.br',
       to: emailPaciente,
-      subject: 'Seus documentos da consulta',
+      subject: 'Seus documentos',
       html
     })
-
-    console.log("EMAIL ENVIADO PARA:", emailPaciente)
 
     return res.status(200).json({ success: true })
 
