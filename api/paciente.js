@@ -1,3 +1,6 @@
+import fs from "fs"
+import path from "path"
+
 export default async function handler(req, res){
 
 try{
@@ -5,9 +8,7 @@ try{
 const token = process.env.FEEGOW_TOKEN
 const paciente_id = req.query.paciente_id
 
-/* ===================== */
-/* BUSCAR PACIENTE */
-/* ===================== */
+/* PACIENTE */
 
 const pacienteResponse = await fetch(
 `https://api.feegow.com/v1/api/patient/search?paciente_id=${paciente_id}`,
@@ -19,15 +20,7 @@ headers:{
 }
 )
 
-let pacienteData
-
-try{
-pacienteData = await pacienteResponse.json()
-}catch{
-const erroTexto = await pacienteResponse.text()
-console.log("ERRO FEEGOW PACIENTE:", erroTexto)
-return res.status(500).json({erro:"Erro ao buscar paciente"})
-}
+const pacienteData = await pacienteResponse.json()
 
 if(!pacienteData.success){
 return res.status(200).json({})
@@ -35,9 +28,7 @@ return res.status(200).json({})
 
 const p = pacienteData.content
 
-/* ===================== */
-/* BUSCAR AGENDAMENTO */
-/* ===================== */
+/* AGENDA */
 
 const hoje = new Date()
 
@@ -57,19 +48,7 @@ headers:{
 }
 )
 
-let agendaData
-
-try{
-agendaData = await agendaResponse.json()
-}catch{
-const erroTexto = await agendaResponse.text()
-console.log("ERRO FEEGOW AGENDA:", erroTexto)
-agendaData = {}
-}
-
-/* ===================== */
-/* RETORNO */
-/* ===================== */
+const agendaData = await agendaResponse.json()
 
 let dias_limite_retorno = null
 
@@ -77,9 +56,12 @@ if(agendaData.content && agendaData.content.length > 0){
 dias_limite_retorno = agendaData.content[0].dias_limite_retorno
 }
 
-/* ===================== */
-/* RESPOSTA FINAL */
-/* ===================== */
+/* 🔥 BUSCA LOCAL (URLs) */
+
+const dbPath = path.join(process.cwd(),"database","pacientes.json")
+const db = JSON.parse(fs.readFileSync(dbPath))
+
+const local = db[paciente_id] || {}
 
 return res.status(200).json({
 
@@ -97,17 +79,19 @@ bairro: p.bairro,
 cidade: p.cidade,
 estado: p.estado,
 
-dias_limite_retorno
+dias_limite_retorno,
+
+/* 🔥 IMPORTANTE */
+receita_url: local.receita_url || null,
+nota_url: local.nota_url || null
 
 })
 
 }catch(error){
 
-console.log("ERRO API PACIENTE:", error)
+console.log(error)
 
-return res.status(500).json({
-erro: error.message
-})
+return res.status(500).json({erro:error.message})
 
 }
 
