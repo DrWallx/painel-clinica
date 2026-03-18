@@ -1,26 +1,61 @@
 import fs from "fs"
 import path from "path"
 
-export default async function handler(req,res){
+export default async function handler(req, res) {
 
-if(req.method !== "POST"){
-return res.status(405).json({})
-}
+  if (req.method !== "POST") {
+    return res.status(405).json({})
+  }
 
-const { paciente_id, retorno_valido } = req.body
+  try {
 
-const dbPath = path.join(process.cwd(),"database","pacientes.json")
+    const {
+      paciente_id,
+      retorno_valido,
+      receita_url,
+      nota_url
+    } = req.body
 
-const db = JSON.parse(fs.readFileSync(dbPath))
+    const dbPath = path.join(process.cwd(), "database", "pacientes.json")
 
-if(!db[paciente_id]){
-db[paciente_id] = {}
-}
+    const db = JSON.parse(fs.readFileSync(dbPath))
 
-db[paciente_id].retorno_valido = retorno_valido
+    if (!db[paciente_id]) {
+      db[paciente_id] = {}
+    }
 
-fs.writeFileSync(dbPath, JSON.stringify(db,null,2))
+    /* ===================== */
+    /* ATUALIZA CAMPOS */
+    /* ===================== */
 
-res.status(200).json({success:true})
+    if (retorno_valido !== undefined) {
+      db[paciente_id].retorno_valido = retorno_valido
+    }
+
+    if (receita_url) {
+      db[paciente_id].receita_url = receita_url
+    }
+
+    if (nota_url) {
+      db[paciente_id].nota_url = nota_url
+    }
+
+    /* ===================== */
+    /* SALVAR NO ARQUIVO */
+    /* ===================== */
+
+    fs.writeFileSync(dbPath, JSON.stringify(db, null, 2))
+
+    return res.status(200).json({ success: true })
+
+  } catch (error) {
+
+    console.log(error)
+
+    return res.status(500).json({
+      error: error.message
+    })
+
+  }
 
 }
