@@ -56,7 +56,7 @@ if(agendaData.content && agendaData.content.length > 0){
 dias_limite_retorno = agendaData.content[0].dias_limite_retorno
 }
 
-/* 🔥 BUSCA LOCAL (URLs) */
+/* 🔥 BUSCA LOCAL */
 
 const dbPath = path.join(process.cwd(),"database","pacientes.json")
 const db = JSON.parse(fs.readFileSync(dbPath))
@@ -81,7 +81,7 @@ estado: p.estado,
 
 dias_limite_retorno,
 
-/* 🔥 IMPORTANTE */
+/* 🔥 ESSENCIAL */
 receita_url: local.receita_url || null,
 nota_url: local.nota_url || null
 
