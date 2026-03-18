@@ -1,5 +1,4 @@
-import fs from "fs"
-import path from "path"
+import { kv } from '@vercel/kv'
 
 export default async function handler(req, res) {
 
@@ -14,19 +13,15 @@ export default async function handler(req, res) {
       retorno_valido
     } = req.body
 
-    const dbPath = path.join(process.cwd(), "database", "pacientes.json")
+    const key = `paciente:${paciente_id}`
 
-    const db = JSON.parse(fs.readFileSync(dbPath))
-
-    if (!db[paciente_id]) {
-      db[paciente_id] = {}
-    }
+    let data = await kv.get(key) || {}
 
     if (retorno_valido !== undefined) {
-      db[paciente_id].retorno_valido = retorno_valido
+      data.retorno_valido = retorno_valido
     }
 
-    fs.writeFileSync(dbPath, JSON.stringify(db, null, 2))
+    await kv.set(key, data)
 
     return res.status(200).json({ success: true })
 
