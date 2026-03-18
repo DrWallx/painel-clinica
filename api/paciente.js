@@ -1,5 +1,4 @@
-import fs from "fs"
-import path from "path"
+import { kv } from "@vercel/kv"
 
 export default async function handler(req, res){
 
@@ -8,7 +7,7 @@ try{
 const token = process.env.FEEGOW_TOKEN
 const paciente_id = req.query.paciente_id
 
-/* PACIENTE */
+/* FEEGOW */
 
 const pacienteResponse = await fetch(
 `https://api.feegow.com/v1/api/patient/search?paciente_id=${paciente_id}`,
@@ -52,16 +51,13 @@ const agendaData = await agendaResponse.json()
 
 let dias_limite_retorno = null
 
-if(agendaData.content && agendaData.content.length > 0){
+if(agendaData.content?.length){
 dias_limite_retorno = agendaData.content[0].dias_limite_retorno
 }
 
-/* 🔥 BUSCA LOCAL */
+/* 🔥 KV */
 
-const dbPath = path.join(process.cwd(),"database","pacientes.json")
-const db = JSON.parse(fs.readFileSync(dbPath))
-
-const local = db[paciente_id] || {}
+const local = await kv.get(`paciente:${paciente_id}`) || {}
 
 return res.status(200).json({
 
@@ -81,7 +77,6 @@ estado: p.estado,
 
 dias_limite_retorno,
 
-/* 🔥 ESSENCIAL */
 receita_url: local.receita_url || null,
 nota_url: local.nota_url || null
 
