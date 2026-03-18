@@ -11,9 +11,7 @@ export default async function handler(req, res) {
 
     const {
       paciente_id,
-      retorno_valido,
-      receita_url,
-      nota_url
+      retorno_valido
     } = req.body
 
     const dbPath = path.join(process.cwd(), "database", "pacientes.json")
@@ -26,14 +24,6 @@ export default async function handler(req, res) {
 
     if (retorno_valido !== undefined) {
       db[paciente_id].retorno_valido = retorno_valido
-    }
-
-    if (receita_url) {
-      db[paciente_id].receita_url = receita_url
-    }
-
-    if (nota_url) {
-      db[paciente_id].nota_url = nota_url
     }
 
     fs.writeFileSync(dbPath, JSON.stringify(db, null, 2))
