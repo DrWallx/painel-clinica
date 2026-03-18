@@ -1,9 +1,13 @@
 export default async function handler(req, res){
 
+try{
+
 const token = process.env.FEEGOW_TOKEN
 const paciente_id = req.query.paciente_id
 
+/* ===================== */
 /* BUSCAR PACIENTE */
+/* ===================== */
 
 const pacienteResponse = await fetch(
 `https://api.feegow.com/v1/api/patient/search?paciente_id=${paciente_id}`,
@@ -15,7 +19,15 @@ headers:{
 }
 )
 
-const pacienteData = await pacienteResponse.json()
+let pacienteData
+
+try{
+pacienteData = await pacienteResponse.json()
+}catch{
+const erroTexto = await pacienteResponse.text()
+console.log("ERRO FEEGOW PACIENTE:", erroTexto)
+return res.status(500).json({erro:"Erro ao buscar paciente"})
+}
 
 if(!pacienteData.success){
 return res.status(200).json({})
@@ -23,7 +35,9 @@ return res.status(200).json({})
 
 const p = pacienteData.content
 
-/* BUSCAR AGENDAMENTO PARA PEGAR RETORNO */
+/* ===================== */
+/* BUSCAR AGENDAMENTO */
+/* ===================== */
 
 const hoje = new Date()
 
@@ -43,7 +57,19 @@ headers:{
 }
 )
 
-const agendaData = await agendaResponse.json()
+let agendaData
+
+try{
+agendaData = await agendaResponse.json()
+}catch{
+const erroTexto = await agendaResponse.text()
+console.log("ERRO FEEGOW AGENDA:", erroTexto)
+agendaData = {}
+}
+
+/* ===================== */
+/* RETORNO */
+/* ===================== */
 
 let dias_limite_retorno = null
 
@@ -51,7 +77,11 @@ if(agendaData.content && agendaData.content.length > 0){
 dias_limite_retorno = agendaData.content[0].dias_limite_retorno
 }
 
-res.status(200).json({
+/* ===================== */
+/* RESPOSTA FINAL */
+/* ===================== */
+
+return res.status(200).json({
 
 nome: p.nome,
 nascimento: p.nascimento,
@@ -70,5 +100,15 @@ estado: p.estado,
 dias_limite_retorno
 
 })
+
+}catch(error){
+
+console.log("ERRO API PACIENTE:", error)
+
+return res.status(500).json({
+erro: error.message
+})
+
+}
 
 }
