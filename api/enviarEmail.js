@@ -8,38 +8,24 @@ export default async function handler(req, res) {
 
     const { paciente_id, tipo } = req.query
 
-    /* ===================== */
-    /* BUSCAR PACIENTE */
-    /* ===================== */
-
-    const baseUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : 'http://localhost:3000'
+    const baseUrl = process.env.BASE_URL
 
     const pacienteResponse = await fetch(`${baseUrl}/api/paciente?paciente_id=${paciente_id}`)
-    
-    const paciente = await pacienteResponse.json()
+
+    let paciente
+
+    try {
+      paciente = await pacienteResponse.json()
+    } catch {
+      const erroTexto = await pacienteResponse.text()
+      console.log("ERRO API PACIENTE:", erroTexto)
+      throw new Error("Erro ao buscar paciente")
+    }
 
     const emailPaciente = paciente.email
 
-    const receitaURL = paciente.receita_url
-    const notaURL = paciente.nota_url
-
-    /* ===================== */
-    /* VALIDAÇÕES */
-    /* ===================== */
-
-    if ((tipo === "receita" || tipo === "ambos") && !receitaURL) {
-      throw new Error("Receita não encontrada")
-    }
-
-    if ((tipo === "nota" || tipo === "ambos") && !notaURL) {
-      throw new Error("Nota fiscal não encontrada")
-    }
-
-    /* ===================== */
-    /* HTML PROFISSIONAL */
-    /* ===================== */
+    const receitaURL = `https://blob.vercel-storage.com/${paciente_id}_receita.pdf`
+    const notaURL = `https://blob.vercel-storage.com/${paciente_id}_nota.pdf`
 
     let html = `
     <div style="font-family:Arial;max-width:600px;margin:auto;background:#ffffff;padding:20px;border-radius:10px">
@@ -84,21 +70,12 @@ export default async function handler(req, res) {
     </div>
     `
 
-    /* ===================== */
-    /* ENVIO EMAIL */
-    /* ===================== */
-
     await resend.emails.send({
-
       from: 'Clínica Haux <hauxlife@hauxlife.com.br>',
       reply_to: 'drwall@hauxlife.com.br',
-
       to: emailPaciente,
-
       subject: 'Seus documentos da consulta',
-
       html
-
     })
 
     console.log("EMAIL ENVIADO PARA:", emailPaciente)
