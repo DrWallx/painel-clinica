@@ -41,7 +41,26 @@ export default async function handler(req, res) {
         }
       )
 
-      res.status(200).json({
+      /* ===================== */
+      /* SALVAR URL NO PACIENTE */
+      /* ===================== */
+
+      const baseUrl = process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : 'http://localhost:3000'
+
+      await fetch(`${baseUrl}/api/salvarPaciente`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          paciente_id,
+          [`${tipo}_url`]: blob.url
+        })
+      })
+
+      return res.status(200).json({
         success: true,
         url: blob.url
       })
@@ -52,7 +71,7 @@ export default async function handler(req, res) {
 
     console.log(error)
 
-    res.status(500).json({
+    return res.status(500).json({
       erro: error.message
     })
 
