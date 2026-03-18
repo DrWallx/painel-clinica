@@ -4,107 +4,116 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 
 export default async function handler(req, res) {
 
-try{
+  try {
 
-const { paciente_id, tipo } = req.query
+    const { paciente_id, tipo } = req.query
 
-/* ===================== */
-/* BUSCAR PACIENTE */
-/* ===================== */
+    /* ===================== */
+    /* BUSCAR PACIENTE */
+    /* ===================== */
 
-const baseUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : 'http://localhost:3000'
+    const baseUrl = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : 'http://localhost:3000'
 
-const pacienteResponse = await fetch(`${baseUrl}/api/paciente?paciente_id=${paciente_id}`)
-const paciente = await pacienteResponse.json()
+    const pacienteResponse = await fetch(`${baseUrl}/api/paciente?paciente_id=${paciente_id}`)
+    
+    const paciente = await pacienteResponse.json()
 
-const emailPaciente = paciente.email
+    const emailPaciente = paciente.email
 
-/* ===================== */
-/* LINKS DOS PDFs */
-/* ===================== */
+    const receitaURL = paciente.receita_url
+    const notaURL = paciente.nota_url
 
-const receitaURL = `https://blob.vercel-storage.com/${paciente_id}_receita.pdf`
-const notaURL = `https://blob.vercel-storage.com/${paciente_id}_nota.pdf`
+    /* ===================== */
+    /* VALIDAÇÕES */
+    /* ===================== */
 
-/* ===================== */
-/* HTML PROFISSIONAL */
-/* ===================== */
+    if ((tipo === "receita" || tipo === "ambos") && !receitaURL) {
+      throw new Error("Receita não encontrada")
+    }
 
-let html = `
-<div style="font-family:Arial;max-width:600px;margin:auto;background:#ffffff;padding:20px;border-radius:10px">
+    if ((tipo === "nota" || tipo === "ambos") && !notaURL) {
+      throw new Error("Nota fiscal não encontrada")
+    }
 
-<h2 style="color:#3b82f6">Clínica Haux</h2>
+    /* ===================== */
+    /* HTML PROFISSIONAL */
+    /* ===================== */
 
-<p>Olá <b>${paciente.nome}</b>,</p>
+    let html = `
+    <div style="font-family:Arial;max-width:600px;margin:auto;background:#ffffff;padding:20px;border-radius:10px">
 
-<p>Seus documentos da consulta estão disponíveis abaixo:</p>
-`
+    <h2 style="color:#3b82f6">Clínica Haux</h2>
 
-if(tipo === "receita" || tipo === "ambos"){
-html += `
-<a href="${receitaURL}" 
-style="display:block;margin:10px 0;padding:12px;background:#3b82f6;color:white;text-decoration:none;border-radius:5px;text-align:center">
-📄 Baixar Receita
-</a>
-`
-}
+    <p>Olá <b>${paciente.nome}</b>,</p>
 
-if(tipo === "nota" || tipo === "ambos"){
-html += `
-<a href="${notaURL}" 
-style="display:block;margin:10px 0;padding:12px;background:#10b981;color:white;text-decoration:none;border-radius:5px;text-align:center">
-🧾 Baixar Nota Fiscal
-</a>
-`
-}
+    <p>Seus documentos da consulta estão disponíveis abaixo:</p>
+    `
 
-html += `
-<p style="margin-top:20px;font-size:14px;color:#555">
-Se tiver qualquer dúvida, estamos à disposição.
-</p>
+    if (tipo === "receita" || tipo === "ambos") {
+      html += `
+      <a href="${receitaURL}" 
+      style="display:block;margin:10px 0;padding:12px;background:#3b82f6;color:white;text-decoration:none;border-radius:5px;text-align:center">
+      📄 Baixar Receita
+      </a>
+      `
+    }
 
-<hr>
+    if (tipo === "nota" || tipo === "ambos") {
+      html += `
+      <a href="${notaURL}" 
+      style="display:block;margin:10px 0;padding:12px;background:#10b981;color:white;text-decoration:none;border-radius:5px;text-align:center">
+      🧾 Baixar Nota Fiscal
+      </a>
+      `
+    }
 
-<p style="font-size:12px;color:#999">
-Clínica Haux<br>
-Cuidado completo para sua saúde
-</p>
+    html += `
+    <p style="margin-top:20px;font-size:14px;color:#555">
+    Se tiver qualquer dúvida, estamos à disposição.
+    </p>
 
-</div>
-`
+    <hr>
 
-/* ===================== */
-/* ENVIO EMAIL */
-/* ===================== */
+    <p style="font-size:12px;color:#999">
+    Clínica Haux<br>
+    Cuidado completo para sua saúde
+    </p>
 
-await resend.emails.send({
+    </div>
+    `
 
-from: 'Clínica Haux <hauxlife@hauxlife.com.br>',
-reply_to: 'drwall@hauxlife.com.br',
+    /* ===================== */
+    /* ENVIO EMAIL */
+    /* ===================== */
 
-to: emailPaciente,
+    await resend.emails.send({
 
-subject: 'Seus documentos da consulta',
+      from: 'Clínica Haux <hauxlife@hauxlife.com.br>',
+      reply_to: 'drwall@hauxlife.com.br',
 
-html
+      to: emailPaciente,
 
-})
+      subject: 'Seus documentos da consulta',
 
-console.log("EMAIL ENVIADO PARA:", emailPaciente)
+      html
 
-return res.status(200).json({ success: true })
+    })
 
-}catch(error){
+    console.log("EMAIL ENVIADO PARA:", emailPaciente)
 
-console.log("ERRO EMAIL:", error)
+    return res.status(200).json({ success: true })
 
-return res.status(500).json({
-success:false,
-error:error.message
-})
+  } catch (error) {
 
-}
+    console.log("ERRO EMAIL:", error)
+
+    return res.status(500).json({
+      success: false,
+      error: error.message
+    })
+
+  }
 
 }
