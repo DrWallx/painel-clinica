@@ -1,7 +1,7 @@
 import formidable from "formidable"
 import fs from "fs"
-import path from "path"
 import { put } from "@vercel/blob"
+import { kv } from "@vercel/kv"
 
 export const config = {
   api: {
@@ -42,18 +42,15 @@ export default async function handler(req, res) {
         }
       )
 
-      /* 🔥 SALVAR DIRETO NO BANCO (SEM FETCH) */
+      /* 🔥 SALVAR NO KV */
 
-      const dbPath = path.join(process.cwd(),"database","pacientes.json")
-      const db = JSON.parse(fs.readFileSync(dbPath))
+      const key = `paciente:${paciente_id}`
 
-      if(!db[paciente_id]){
-        db[paciente_id] = {}
-      }
+      let data = await kv.get(key) || {}
 
-      db[paciente_id][`${tipo}_url`] = blob.url
+      data[`${tipo}_url`] = blob.url
 
-      fs.writeFileSync(dbPath, JSON.stringify(db,null,2))
+      await kv.set(key, data)
 
       return res.status(200).json({
         success: true,
