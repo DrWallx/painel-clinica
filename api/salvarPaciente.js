@@ -24,10 +24,6 @@ export default async function handler(req, res) {
       db[paciente_id] = {}
     }
 
-    /* ===================== */
-    /* ATUALIZA CAMPOS */
-    /* ===================== */
-
     if (retorno_valido !== undefined) {
       db[paciente_id].retorno_valido = retorno_valido
     }
@@ -39,10 +35,6 @@ export default async function handler(req, res) {
     if (nota_url) {
       db[paciente_id].nota_url = nota_url
     }
-
-    /* ===================== */
-    /* SALVAR NO ARQUIVO */
-    /* ===================== */
 
     fs.writeFileSync(dbPath, JSON.stringify(db, null, 2))
 
