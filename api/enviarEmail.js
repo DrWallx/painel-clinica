@@ -8,7 +8,7 @@ export default async function handler(req, res) {
 
     const { paciente_id, tipo } = req.query
 
-    const baseUrl = process.env.BASE_URL
+    const baseUrl = "https://project-dvdik.vercel.app"
 
     const pacienteResponse = await fetch(`${baseUrl}/api/paciente?paciente_id=${paciente_id}`)
     const paciente = await pacienteResponse.json()
@@ -17,14 +17,6 @@ export default async function handler(req, res) {
 
     const receitaURL = paciente.receita_url
     const notaURL = paciente.nota_url
-
-    if ((tipo === "receita" || tipo === "ambos") && !receitaURL) {
-      throw new Error("Receita não encontrada")
-    }
-
-    if ((tipo === "nota" || tipo === "ambos") && !notaURL) {
-      throw new Error("Nota não encontrada")
-    }
 
     let html = `
     <div style="font-family:Arial;max-width:600px;margin:auto;background:#ffffff;padding:20px;border-radius:10px">
@@ -36,14 +28,14 @@ export default async function handler(req, res) {
     <p>Seus documentos estão disponíveis abaixo:</p>
     `
 
-    if (tipo === "receita" || tipo === "ambos") {
+    if ((tipo === "receita" || tipo === "ambos") && receitaURL) {
       html += `
       <a href="${receitaURL}" style="display:block;margin:10px 0;padding:12px;background:#3b82f6;color:white;text-decoration:none;border-radius:5px;text-align:center">
       📄 Baixar Receita
       </a>`
     }
 
-    if (tipo === "nota" || tipo === "ambos") {
+    if ((tipo === "nota" || tipo === "ambos") && notaURL) {
       html += `
       <a href="${notaURL}" style="display:block;margin:10px 0;padding:12px;background:#10b981;color:white;text-decoration:none;border-radius:5px;text-align:center">
       🧾 Baixar Nota Fiscal
