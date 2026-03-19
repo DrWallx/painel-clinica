@@ -15,9 +15,10 @@ export default async function handler(req, res) {
 
     const emailPaciente = paciente.email
 
-    const receitas = paciente.receitas || []
+    // 🔥 SUPORTE PARA ANTIGO + NOVO
+    const receitas = paciente.receitas || (paciente.receita_url ? [paciente.receita_url] : [])
     const exames = paciente.exames || []
-    const notas = paciente.notas || []
+    const notas = paciente.notas || (paciente.nota_url ? [paciente.nota_url] : [])
 
     let html = `
     <div style="font-family:Arial;max-width:600px;margin:auto">
@@ -51,13 +52,17 @@ export default async function handler(req, res) {
     let attachments = []
 
     for (const url of notas) {
-      const response = await fetch(url)
-      const buffer = await response.arrayBuffer()
+      try {
+        const response = await fetch(url)
+        const buffer = await response.arrayBuffer()
 
-      attachments.push({
-        filename: "nota.pdf",
-        content: Buffer.from(buffer)
-      })
+        attachments.push({
+          filename: "nota.pdf",
+          content: Buffer.from(buffer)
+        })
+      } catch (e) {
+        console.log("ERRO AO BAIXAR NOTA:", e.message)
+      }
     }
 
     await resend.emails.send({
