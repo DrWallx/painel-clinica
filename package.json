@@ -2,7 +2,7 @@
   "dependencies": {
     "formidable": "^3.5.0",
     "@vercel/blob": "^0.23.0",
-    "resend": "^3.2.0"
+    "resend": "^3.2.0",
     "@vercel/kv": "^1.0.1"
 }
   }
