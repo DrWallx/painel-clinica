@@ -35,9 +35,11 @@ button:hover{
 background:#2563eb;
 }
 
-input[type=file]{
+input{
 margin-top:10px;
 margin-bottom:10px;
+padding:8px;
+width:100%;
 }
 
 </style>
@@ -88,37 +90,42 @@ Paciente possui <b>direito de retorno</b>
 
 </div>
 
+<!-- 🔥 RECEITAS (LINKS) -->
 <div class="card">
 
-<h3>Receita (PDF)</h3>
+<h3>Receitas (links)</h3>
 
-<input type="file" id="receita" accept="application/pdf">
+<input type="text" id="receita_link" placeholder="Cole o link da receita">
 
-<br>
+<button onclick="adicionarReceita()">Adicionar receita</button>
 
-<button onclick="uploadReceita()">Enviar Receita</button>
+<div id="lista_receitas"></div>
 
 </div>
 
+<!-- 🔥 EXAMES (LINKS) -->
 <div class="card">
 
-<h3>Nota Fiscal (PDF)</h3>
+<h3>Exames (links)</h3>
 
-<input type="file" id="nota" accept="application/pdf">
+<input type="text" id="exame_link" placeholder="Cole o link do exame">
 
-<br>
+<button onclick="adicionarExame()">Adicionar exame</button>
 
-<button onclick="uploadNota()">Enviar Nota</button>
+<div id="lista_exames"></div>
 
 </div>
 
+<!-- 🧾 NOTAS (UPLOAD MULTIPLO) -->
 <div class="card">
 
-<h3>Enviar documentos</h3>
+<h3>Notas fiscais (PDF)</h3>
 
-<button onclick="enviarReceita()">Enviar Receita</button>
-<button onclick="enviarNota()">Enviar Nota</button>
-<button onclick="enviarAmbos()">Enviar Ambos</button>
+<input type="file" id="nota" multiple accept="application/pdf">
+
+<br>
+
+<button onclick="uploadNota()">Enviar notas</button>
 
 </div>
 
@@ -150,6 +157,10 @@ if(data.dias_limite_retorno){
 document.getElementById("data_retorno").innerText = data.dias_limite_retorno
 }
 
+// 🔥 render listas
+renderReceitas(data.receitas || [])
+renderExames(data.exames || [])
+
 }
 
 async function salvarRetorno(){
@@ -165,10 +176,8 @@ headers:{
 },
 
 body:JSON.stringify({
-
 paciente_id,
 retorno_valido
-
 })
 
 })
@@ -177,69 +186,157 @@ alert("Informação salva")
 
 }
 
-async function uploadReceita(){
+/* ===================== */
+/* RECEITAS */
+/* ===================== */
 
-const file = document.getElementById("receita").files[0]
+async function adicionarReceita(){
 
-const form = new FormData()
+const link = document.getElementById("receita_link").value
 
-form.append("file",file)
-form.append("paciente_id",paciente_id)
-form.append("tipo","receita")
+if(!link) return alert("Cole o link")
 
-await fetch("/api/upload",{
+const res = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
+const paciente = await res.json()
 
+let receitas = paciente.receitas || []
+
+receitas.push(link)
+
+await fetch("/api/salvarPaciente",{
 method:"POST",
-body:form
-
+headers:{ "Content-Type":"application/json" },
+body:JSON.stringify({ paciente_id, receitas })
 })
 
-alert("Receita enviada")
+renderReceitas(receitas)
+
+document.getElementById("receita_link").value = ""
 
 }
+
+function renderReceitas(lista){
+
+const div = document.getElementById("lista_receitas")
+div.innerHTML = ""
+
+lista.forEach((link, i)=>{
+div.innerHTML += `
+<p>
+<a href="${link}" target="_blank">📄 Receita ${i+1}</a>
+<button onclick="removerReceita(${i})">❌</button>
+</p>`
+})
+
+}
+
+async function removerReceita(index){
+
+const res = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
+const paciente = await res.json()
+
+let receitas = paciente.receitas || []
+
+receitas.splice(index,1)
+
+await fetch("/api/salvarPaciente",{
+method:"POST",
+headers:{ "Content-Type":"application/json" },
+body:JSON.stringify({ paciente_id, receitas })
+})
+
+renderReceitas(receitas)
+
+}
+
+/* ===================== */
+/* EXAMES */
+/* ===================== */
+
+async function adicionarExame(){
+
+const link = document.getElementById("exame_link").value
+
+if(!link) return alert("Cole o link")
+
+const res = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
+const paciente = await res.json()
+
+let exames = paciente.exames || []
+
+exames.push(link)
+
+await fetch("/api/salvarPaciente",{
+method:"POST",
+headers:{ "Content-Type":"application/json" },
+body:JSON.stringify({ paciente_id, exames })
+})
+
+renderExames(exames)
+
+document.getElementById("exame_link").value = ""
+
+}
+
+function renderExames(lista){
+
+const div = document.getElementById("lista_exames")
+div.innerHTML = ""
+
+lista.forEach((link, i)=>{
+div.innerHTML += `
+<p>
+<a href="${link}" target="_blank">🧪 Exame ${i+1}</a>
+<button onclick="removerExame(${i})">❌</button>
+</p>`
+})
+
+}
+
+async function removerExame(index){
+
+const res = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
+const paciente = await res.json()
+
+let exames = paciente.exames || []
+
+exames.splice(index,1)
+
+await fetch("/api/salvarPaciente",{
+method:"POST",
+headers:{ "Content-Type":"application/json" },
+body:JSON.stringify({ paciente_id, exames })
+})
+
+renderExames(exames)
+
+}
+
+/* ===================== */
+/* NOTAS */
+/* ===================== */
 
 async function uploadNota(){
 
-const file = document.getElementById("nota").files[0]
+const files = document.getElementById("nota").files
+
+if(!files.length) return alert("Selecione arquivos")
+
+for(let file of files){
 
 const form = new FormData()
-
-form.append("file",file)
-form.append("paciente_id",paciente_id)
+form.append("file", file)
+form.append("paciente_id", paciente_id)
 form.append("tipo","nota")
 
 await fetch("/api/upload",{
-
 method:"POST",
 body:form
-
 })
 
-alert("Nota enviada")
-
 }
 
-async function enviarReceita(){
-
-await fetch(`/api/enviarEmail?paciente_id=${paciente_id}&tipo=receita`)
-
-alert("Receita enviada")
-
-}
-
-async function enviarNota(){
-
-await fetch(`/api/enviarEmail?paciente_id=${paciente_id}&tipo=nota`)
-
-alert("Nota enviada")
-
-}
-
-async function enviarAmbos(){
-
-await fetch(`/api/enviarEmail?paciente_id=${paciente_id}&tipo=ambos`)
-
-alert("Documentos enviados")
+alert("Notas enviadas")
 
 }
 
