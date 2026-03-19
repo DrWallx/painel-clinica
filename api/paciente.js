@@ -71,7 +71,7 @@ console.log("ERRO AGENDA:", e.message)
 }
 
 /* ===================== */
-/* KV (CORRIGIDO) */
+/* KV */
 /* ===================== */
 
 let local = {}
@@ -82,6 +82,15 @@ try {
 } catch (e) {
   console.log("KV ERRO:", e.message)
 }
+
+/* ===================== */
+/* NORMALIZAÇÃO (NOVO) */
+/* ===================== */
+
+// 🔥 suporte antigo + novo
+const receitas = local.receitas || (local.receita_url ? [local.receita_url] : [])
+const exames = local.exames || []
+const notas = local.notas || (local.nota_url ? [local.nota_url] : [])
 
 /* ===================== */
 /* RETORNO */
@@ -105,8 +114,14 @@ estado: p?.estado || "",
 
 dias_limite_retorno,
 
-receita_url: local?.receita_url || null,
-nota_url: local?.nota_url || null
+// 🔥 NOVO FORMATO
+receitas,
+exames,
+notas,
+
+// 🔥 COMPATIBILIDADE ANTIGA
+receita_url: receitas[0] || null,
+nota_url: notas[0] || null
 
 })
 
