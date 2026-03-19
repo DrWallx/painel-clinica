@@ -1,3 +1,5 @@
+import { kv } from "@vercel/kv"
+
 export default async function handler(req, res){
 
 try{
@@ -9,7 +11,7 @@ let p = {}
 let dias_limite_retorno = null
 
 /* ===================== */
-/* FEEGOW (PROTEGIDO) */
+/* FEEGOW */
 /* ===================== */
 
 try{
@@ -35,7 +37,7 @@ console.log("ERRO FEEGOW:", e.message)
 }
 
 /* ===================== */
-/* AGENDA (PROTEGIDO) */
+/* AGENDA */
 /* ===================== */
 
 try{
@@ -69,20 +71,20 @@ console.log("ERRO AGENDA:", e.message)
 }
 
 /* ===================== */
-/* KV (PROTEGIDO) */
+/* KV (CORRIGIDO) */
 /* ===================== */
 
 let local = {}
 
 try {
-  const { kv } = await import("@vercel/kv")
   local = await kv.get(`paciente:${paciente_id}`) || {}
+  console.log("KV DATA:", local)
 } catch (e) {
   console.log("KV ERRO:", e.message)
 }
 
 /* ===================== */
-/* RETORNO SEGURO */
+/* RETORNO */
 /* ===================== */
 
 return res.status(200).json({
