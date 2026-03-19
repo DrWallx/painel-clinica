@@ -18,12 +18,7 @@ export default async function handler(req, res) {
     const receitaURL = paciente.receita_url
     const notaURL = paciente.nota_url
 
-    // 🔥 validação importante
-    if (!receitaURL && !notaURL) {
-      return res.status(400).json({
-        error: "Nenhum documento encontrado para este paciente"
-      })
-    }
+    console.log("PACIENTE:", paciente)
 
     let html = `
     <div style="font-family:Arial;max-width:600px;margin:auto;background:#ffffff;padding:20px;border-radius:10px">
@@ -33,11 +28,8 @@ export default async function handler(req, res) {
     <p>Olá <b>${paciente.nome}</b>,</p>
 
     <p>Seus documentos estão disponíveis abaixo:</p>
-
-    <p><b>Importante:</b> clique no botão para visualizar ou baixar.</p>
     `
 
-    // 🔥 AGORA SEM DEPENDER DO TIPO
     if (receitaURL) {
       html += `
       <a href="${receitaURL}" target="_blank"
@@ -52,6 +44,15 @@ export default async function handler(req, res) {
       style="display:block;margin:10px 0;padding:12px;background:#10b981;color:white;text-decoration:none;border-radius:5px;text-align:center">
       🧾 Baixar Nota Fiscal
       </a>`
+    }
+
+    // 🔥 SE NÃO TIVER NADA, AVISA NO EMAIL
+    if (!receitaURL && !notaURL) {
+      html += `
+      <p style="color:red;margin-top:15px;">
+      Nenhum documento foi encontrado. Se isso for um erro, entre em contato com a clínica.
+      </p>
+      `
     }
 
     html += `
