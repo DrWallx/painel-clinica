@@ -87,7 +87,17 @@ if (!tipo) {
       let data = await kv.get(key) || {}
 
       data[`${tipo}_url`] = blob.url
+      console.log("SALVANDO NO KV:", tipo, blob.url)
 
+      let data = await kv.get(key) || {}
+
+console.log("DADOS ANTES:", data)
+
+data[`${tipo}_url`] = blob.url
+
+console.log("SALVANDO NO KV:", tipo, blob.url)
+
+await kv.set(key, data)
       await kv.set(key, data)
 
       console.log("SALVO NO KV:", data)
