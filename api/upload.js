@@ -14,7 +14,7 @@ export default async function handler(req, res) {
 
     const form = formidable({ multiples: false })
 
-    // 🔥 TRANSFORMA EM PROMISE (mais estável)
+    // 🔥 PARSE
     const { fields, files } = await new Promise((resolve, reject) => {
       form.parse(req, (err, fields, files) => {
         if (err) reject(err)
@@ -23,15 +23,19 @@ export default async function handler(req, res) {
     })
 
     /* ===================== */
-    /* PACIENTE ID */
+    /* PACIENTE */
     /* ===================== */
 
     const paciente_id = Array.isArray(fields.paciente_id)
       ? fields.paciente_id[0]
       : fields.paciente_id
 
+    if (!paciente_id) {
+      return res.status(400).json({ erro: "paciente_id não enviado" })
+    }
+
     /* ===================== */
-    /* TIPO (FORÇADO PARA RECEITA) */
+    /* TIPO */
     /* ===================== */
 
     let tipo = Array.isArray(fields.tipo)
@@ -41,6 +45,9 @@ export default async function handler(req, res) {
     if (!tipo) {
       tipo = "receita"
     }
+
+    console.log("PACIENTE ID:", paciente_id)
+    console.log("TIPO:", tipo)
 
     /* ===================== */
     /* FILE */
@@ -80,25 +87,28 @@ export default async function handler(req, res) {
     console.log("UPLOAD OK:", blob.url)
 
     /* ===================== */
-    /* SALVAR NO KV */
+    /* KV */
     /* ===================== */
 
     try {
 
       const key = `paciente:${paciente_id}`
 
+      console.log("KEY USADA:", key)
+
       let data = await kv.get(key) || {}
 
-      console.log("DADOS ANTES:", data)
+      console.log("ANTES DO SALVAR:", data)
 
-      // 🔥 SALVA CORRETAMENTE
+      // 🔥 SALVA
       data[`${tipo}_url`] = blob.url
-
-      console.log("SALVANDO NO KV:", tipo, blob.url)
 
       await kv.set(key, data)
 
-      console.log("SALVO NO KV:", data)
+      // 🔥 CONFERE SE SALVOU
+      const teste = await kv.get(key)
+
+      console.log("DEPOIS DO SALVAR:", teste)
 
     } catch (kvError) {
 
