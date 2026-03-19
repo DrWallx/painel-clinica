@@ -1,5 +1,3 @@
-import { kv } from "@vercel/kv"
-
 export default async function handler(req, res){
 
 try{
@@ -7,7 +5,14 @@ try{
 const token = process.env.FEEGOW_TOKEN
 const paciente_id = req.query.paciente_id
 
-/* FEEGOW */
+let p = {}
+let dias_limite_retorno = null
+
+/* ===================== */
+/* FEEGOW (PROTEGIDO) */
+/* ===================== */
+
+try{
 
 const pacienteResponse = await fetch(
 `https://api.feegow.com/v1/api/patient/search?paciente_id=${paciente_id}`,
@@ -21,13 +26,19 @@ headers:{
 
 const pacienteData = await pacienteResponse.json()
 
-if(!pacienteData.success){
-return res.status(200).json({})
+if(pacienteData.success){
+p = pacienteData.content
 }
 
-const p = pacienteData.content
+}catch(e){
+console.log("ERRO FEEGOW:", e.message)
+}
 
-/* AGENDA */
+/* ===================== */
+/* AGENDA (PROTEGIDO) */
+/* ===================== */
+
+try{
 
 const hoje = new Date()
 
@@ -49,44 +60,61 @@ headers:{
 
 const agendaData = await agendaResponse.json()
 
-let dias_limite_retorno = null
-
 if(agendaData.content?.length){
 dias_limite_retorno = agendaData.content[0].dias_limite_retorno
 }
 
-/* 🔥 KV */
+}catch(e){
+console.log("ERRO AGENDA:", e.message)
+}
 
-const local = await kv.get(`paciente:${paciente_id}`) || {}
+/* ===================== */
+/* KV (PROTEGIDO) */
+/* ===================== */
+
+let local = {}
+
+try {
+  const { kv } = await import("@vercel/kv")
+  local = await kv.get(`paciente:${paciente_id}`) || {}
+} catch (e) {
+  console.log("KV ERRO:", e.message)
+}
+
+/* ===================== */
+/* RETORNO SEGURO */
+/* ===================== */
 
 return res.status(200).json({
 
-nome: p.nome,
-nascimento: p.nascimento,
-cpf: p.documentos?.cpf || "",
+nome: p?.nome || "",
+nascimento: p?.nascimento || "",
+cpf: p?.documentos?.cpf || "",
 
-email: p.email?.[0] || "",
-telefone: p.celulares?.[0] || "",
+email: p?.email?.[0] || "",
+telefone: p?.celulares?.[0] || "",
 
-cep: p.cep,
-rua: p.endereco,
-numero: p.numero,
-bairro: p.bairro,
-cidade: p.cidade,
-estado: p.estado,
+cep: p?.cep || "",
+rua: p?.endereco || "",
+numero: p?.numero || "",
+bairro: p?.bairro || "",
+cidade: p?.cidade || "",
+estado: p?.estado || "",
 
 dias_limite_retorno,
 
-receita_url: local.receita_url || null,
-nota_url: local.nota_url || null
+receita_url: local?.receita_url || null,
+nota_url: local?.nota_url || null
 
 })
 
 }catch(error){
 
-console.log(error)
+console.log("ERRO GERAL:", error)
 
-return res.status(500).json({erro:error.message})
+return res.status(500).json({
+erro:error.message
+})
 
 }
 
