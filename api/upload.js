@@ -43,11 +43,7 @@ export default async function handler(req, res) {
       ? file.originalFilename.split(".").pop()
       : "pdf"
 
-    const nomeArquivo = `${paciente_id}_${tipo}.${ext}`
-
-    /* ===================== */
-    /* UPLOAD */
-    /* ===================== */
+    const nomeArquivo = `${paciente_id}_${Date.now()}.${ext}`
 
     const blob = await put(
       nomeArquivo,
@@ -61,35 +57,42 @@ export default async function handler(req, res) {
     console.log("UPLOAD OK:", blob.url)
 
     /* ===================== */
-    /* SALVAR KV */
+    /* KV MULTIPLO */
     /* ===================== */
 
     const key = `paciente:${paciente_id}`
 
     let data = await kv.get(key) || {}
 
-    data[`${tipo}_url`] = blob.url
+    if (!data.receitas) data.receitas = []
+    if (!data.notas) data.notas = []
+    if (!data.exames) data.exames = []
+
+    if (tipo === "receita") {
+      data.receitas.push(blob.url)
+    }
+
+    if (tipo === "nota") {
+      data.notas.push(blob.url)
+    }
+
+    if (tipo === "exame") {
+      data.exames.push(blob.url)
+    }
 
     await kv.set(key, data)
 
     console.log("SALVO NO KV:", data)
 
     /* ===================== */
-    /* 🔥 ENVIO AUTOMÁTICO */
+    /* EMAIL AUTOMATICO */
     /* ===================== */
 
     try {
-
       const baseUrl = "https://project-dvdik.vercel.app"
-
-      await fetch(`${baseUrl}/api/enviarEmail?paciente_id=${paciente_id}&tipo=${tipo}`)
-
-      console.log("EMAIL ENVIADO AUTOMATICAMENTE")
-
-    } catch (emailError) {
-
-      console.log("ERRO AO ENVIAR EMAIL:", emailError.message)
-
+      await fetch(`${baseUrl}/api/enviarEmail?paciente_id=${paciente_id}`)
+    } catch (e) {
+      console.log("ERRO EMAIL:", e.message)
     }
 
     return res.status(200).json({
