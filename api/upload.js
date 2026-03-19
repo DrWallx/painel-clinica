@@ -14,7 +14,6 @@ export default async function handler(req, res) {
 
     const form = formidable({ multiples: false })
 
-    // 🔥 PARSE
     const { fields, files } = await new Promise((resolve, reject) => {
       form.parse(req, (err, fields, files) => {
         if (err) reject(err)
@@ -22,36 +21,15 @@ export default async function handler(req, res) {
       })
     })
 
-    /* ===================== */
-    /* PACIENTE */
-    /* ===================== */
-
     const paciente_id = Array.isArray(fields.paciente_id)
       ? fields.paciente_id[0]
       : fields.paciente_id
-
-    if (!paciente_id) {
-      return res.status(400).json({ erro: "paciente_id não enviado" })
-    }
-
-    /* ===================== */
-    /* TIPO */
-    /* ===================== */
 
     let tipo = Array.isArray(fields.tipo)
       ? fields.tipo[0]
       : fields.tipo
 
-    if (!tipo) {
-      tipo = "receita"
-    }
-
-    console.log("PACIENTE ID:", paciente_id)
-    console.log("TIPO:", tipo)
-
-    /* ===================== */
-    /* FILE */
-    /* ===================== */
+    if (!tipo) tipo = "receita"
 
     const file = Array.isArray(files.file)
       ? files.file[0]
@@ -60,10 +38,6 @@ export default async function handler(req, res) {
     if (!file) {
       return res.status(400).json({ erro: "Arquivo não enviado" })
     }
-
-    /* ===================== */
-    /* EXTENSÃO */
-    /* ===================== */
 
     const ext = file.originalFilename
       ? file.originalFilename.split(".").pop()
@@ -87,32 +61,34 @@ export default async function handler(req, res) {
     console.log("UPLOAD OK:", blob.url)
 
     /* ===================== */
-    /* KV */
+    /* SALVAR KV */
+    /* ===================== */
+
+    const key = `paciente:${paciente_id}`
+
+    let data = await kv.get(key) || {}
+
+    data[`${tipo}_url`] = blob.url
+
+    await kv.set(key, data)
+
+    console.log("SALVO NO KV:", data)
+
+    /* ===================== */
+    /* 🔥 ENVIO AUTOMÁTICO */
     /* ===================== */
 
     try {
 
-      const key = `paciente:${paciente_id}`
+      const baseUrl = "https://project-dvdik.vercel.app"
 
-      console.log("KEY USADA:", key)
+      await fetch(`${baseUrl}/api/enviarEmail?paciente_id=${paciente_id}&tipo=${tipo}`)
 
-      let data = await kv.get(key) || {}
+      console.log("EMAIL ENVIADO AUTOMATICAMENTE")
 
-      console.log("ANTES DO SALVAR:", data)
+    } catch (emailError) {
 
-      // 🔥 SALVA
-      data[`${tipo}_url`] = blob.url
-
-      await kv.set(key, data)
-
-      // 🔥 CONFERE SE SALVOU
-      const teste = await kv.get(key)
-
-      console.log("DEPOIS DO SALVAR:", teste)
-
-    } catch (kvError) {
-
-      console.log("ERRO KV:", kvError.message)
+      console.log("ERRO AO ENVIAR EMAIL:", emailError.message)
 
     }
 
