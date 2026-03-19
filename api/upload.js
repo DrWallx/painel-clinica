@@ -30,9 +30,14 @@ export default async function handler(req, res) {
       ? fields.paciente_id[0]
       : fields.paciente_id
 
-    const tipo = Array.isArray(fields.tipo)
-      ? fields.tipo[0]
-      : fields.tipo
+    let tipo = Array.isArray(fields.tipo)
+  ? fields.tipo[0]
+  : fields.tipo
+
+// 🔥 GARANTE QUE SEMPRE TENHA UM VALOR
+if (!tipo) {
+  tipo = "receita" // pode usar "receita" como padrão
+}
 
     /* ===================== */
     /* CORREÇÃO FILE */
