@@ -18,20 +18,33 @@ export default async function handler(req, res) {
     form.parse(req, async (err, fields, files) => {
 
       if (err) {
-        console.log(err)
+        console.log("ERRO FORM:", err)
         return res.status(500).json({ erro: "Erro no upload" })
       }
 
-      const paciente_id = fields.paciente_id
-      const tipo = fields.tipo
+      /* ===================== */
+      /* CORREÇÃO FIELDS */
+      /* ===================== */
 
-      const file = files.file[0]
+      const paciente_id = Array.isArray(fields.paciente_id)
+        ? fields.paciente_id[0]
+        : fields.paciente_id
+
+      const tipo = Array.isArray(fields.tipo)
+        ? fields.tipo[0]
+        : fields.tipo
+
+      const file = files.file?.[0]
 
       if (!file) {
         return res.status(400).json({ erro: "Arquivo não enviado" })
       }
 
       const nomeArquivo = `${paciente_id}_${tipo}.pdf`
+
+      /* ===================== */
+      /* UPLOAD BLOB */
+      /* ===================== */
 
       const blob = await put(
         nomeArquivo,
@@ -42,15 +55,29 @@ export default async function handler(req, res) {
         }
       )
 
-      /* 🔥 SALVAR NO KV */
+      console.log("UPLOAD OK:", blob.url)
 
-      const key = `paciente:${paciente_id}`
+      /* ===================== */
+      /* SALVAR NO KV */
+      /* ===================== */
 
-      let data = await kv.get(key) || {}
+      try {
 
-      data[`${tipo}_url`] = blob.url
+        const key = `paciente:${paciente_id}`
 
-      await kv.set(key, data)
+        let data = await kv.get(key) || {}
+
+        data[`${tipo}_url`] = blob.url
+
+        await kv.set(key, data)
+
+        console.log("SALVO NO KV:", data)
+
+      } catch (kvError) {
+
+        console.log("ERRO KV:", kvError.message)
+
+      }
 
       return res.status(200).json({
         success: true,
@@ -61,7 +88,7 @@ export default async function handler(req, res) {
 
   } catch (error) {
 
-    console.log(error)
+    console.log("ERRO GERAL:", error)
 
     return res.status(500).json({
       erro: error.message
