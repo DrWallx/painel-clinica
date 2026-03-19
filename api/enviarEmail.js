@@ -6,7 +6,7 @@ export default async function handler(req, res) {
 
   try {
 
-    const { paciente_id, tipo } = req.query
+    const { paciente_id } = req.query
 
     const baseUrl = "https://project-dvdik.vercel.app"
 
@@ -18,6 +18,13 @@ export default async function handler(req, res) {
     const receitaURL = paciente.receita_url
     const notaURL = paciente.nota_url
 
+    // 🔥 validação importante
+    if (!receitaURL && !notaURL) {
+      return res.status(400).json({
+        error: "Nenhum documento encontrado para este paciente"
+      })
+    }
+
     let html = `
     <div style="font-family:Arial;max-width:600px;margin:auto;background:#ffffff;padding:20px;border-radius:10px">
 
@@ -26,18 +33,23 @@ export default async function handler(req, res) {
     <p>Olá <b>${paciente.nome}</b>,</p>
 
     <p>Seus documentos estão disponíveis abaixo:</p>
+
+    <p><b>Importante:</b> clique no botão para visualizar ou baixar.</p>
     `
 
-    if ((tipo === "receita" || tipo === "ambos") && receitaURL) {
+    // 🔥 AGORA SEM DEPENDER DO TIPO
+    if (receitaURL) {
       html += `
-      <a href="${receitaURL}" style="display:block;margin:10px 0;padding:12px;background:#3b82f6;color:white;text-decoration:none;border-radius:5px;text-align:center">
+      <a href="${receitaURL}" target="_blank"
+      style="display:block;margin:10px 0;padding:12px;background:#3b82f6;color:white;text-decoration:none;border-radius:5px;text-align:center">
       📄 Baixar Receita
       </a>`
     }
 
-    if ((tipo === "nota" || tipo === "ambos") && notaURL) {
+    if (notaURL) {
       html += `
-      <a href="${notaURL}" style="display:block;margin:10px 0;padding:12px;background:#10b981;color:white;text-decoration:none;border-radius:5px;text-align:center">
+      <a href="${notaURL}" target="_blank"
+      style="display:block;margin:10px 0;padding:12px;background:#10b981;color:white;text-decoration:none;border-radius:5px;text-align:center">
       🧾 Baixar Nota Fiscal
       </a>`
     }
