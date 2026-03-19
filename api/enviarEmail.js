@@ -15,66 +15,57 @@ export default async function handler(req, res) {
 
     const emailPaciente = paciente.email
 
-    const receitaURL = paciente.receita_url
-    const notaURL = paciente.nota_url
-
-    console.log("PACIENTE:", paciente)
+    const receitas = paciente.receitas || []
+    const exames = paciente.exames || []
+    const notas = paciente.notas || []
 
     let html = `
-    <div style="font-family:Arial;max-width:600px;margin:auto;background:#ffffff;padding:20px;border-radius:10px">
+    <div style="font-family:Arial;max-width:600px;margin:auto">
 
-    <h2 style="color:#3b82f6">Clínica Haux</h2>
+    <h2>Clínica Haux</h2>
 
     <p>Olá <b>${paciente.nome}</b>,</p>
 
-    <p>Seus documentos estão disponíveis abaixo:</p>
+    <p>Seus documentos:</p>
     `
 
-    if (receitaURL) {
-      html += `
-      <a href="${receitaURL}" target="_blank"
-      style="display:block;margin:10px 0;padding:12px;background:#3b82f6;color:white;text-decoration:none;border-radius:5px;text-align:center">
-      📄 Baixar Receita
-      </a>`
+    /* RECEITAS (LINK) */
+    if (receitas.length) {
+      html += `<h3>Receitas</h3>`
+      receitas.forEach(url => {
+        html += `<p><a href="${url}">📄 Abrir Receita</a></p>`
+      })
     }
 
-    if (notaURL) {
-      html += `
-      <a href="${notaURL}" target="_blank"
-      style="display:block;margin:10px 0;padding:12px;background:#10b981;color:white;text-decoration:none;border-radius:5px;text-align:center">
-      🧾 Baixar Nota Fiscal
-      </a>`
+    /* EXAMES (LINK) */
+    if (exames.length) {
+      html += `<h3>Exames</h3>`
+      exames.forEach(url => {
+        html += `<p><a href="${url}">🧪 Ver Exame</a></p>`
+      })
     }
 
-    // 🔥 SE NÃO TIVER NADA, AVISA NO EMAIL
-    if (!receitaURL && !notaURL) {
-      html += `
-      <p style="color:red;margin-top:15px;">
-      Nenhum documento foi encontrado. Se isso for um erro, entre em contato com a clínica.
-      </p>
-      `
+    html += `</div>`
+
+    /* NOTAS (ANEXO) */
+    let attachments = []
+
+    for (const url of notas) {
+      const response = await fetch(url)
+      const buffer = await response.arrayBuffer()
+
+      attachments.push({
+        filename: "nota.pdf",
+        content: Buffer.from(buffer)
+      })
     }
-
-    html += `
-    <p style="margin-top:20px;font-size:14px;color:#555">
-    Se precisar de algo, estamos à disposição.
-    </p>
-
-    <hr>
-
-    <p style="font-size:12px;color:#999">
-    Clínica Haux
-    </p>
-
-    </div>
-    `
 
     await resend.emails.send({
       from: 'Clínica Haux <hauxlife@hauxlife.com.br>',
-      reply_to: 'drwall@hauxlife.com.br',
       to: emailPaciente,
       subject: 'Seus documentos',
-      html
+      html,
+      attachments
     })
 
     return res.status(200).json({ success: true })
@@ -84,7 +75,6 @@ export default async function handler(req, res) {
     console.log("ERRO EMAIL:", error)
 
     return res.status(500).json({
-      success: false,
       error: error.message
     })
 
