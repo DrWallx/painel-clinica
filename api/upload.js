@@ -14,7 +14,7 @@ export default async function handler(req, res) {
 
     const form = formidable({ multiples: false })
 
-    // 🔥 TRANSFORMA EM PROMISE (mais estável na Vercel)
+    // 🔥 TRANSFORMA EM PROMISE (mais estável)
     const { fields, files } = await new Promise((resolve, reject) => {
       form.parse(req, (err, fields, files) => {
         if (err) reject(err)
@@ -23,24 +23,27 @@ export default async function handler(req, res) {
     })
 
     /* ===================== */
-    /* CORREÇÃO FIELDS */
+    /* PACIENTE ID */
     /* ===================== */
 
     const paciente_id = Array.isArray(fields.paciente_id)
       ? fields.paciente_id[0]
       : fields.paciente_id
 
-    let tipo = Array.isArray(fields.tipo)
-  ? fields.tipo[0]
-  : fields.tipo
+    /* ===================== */
+    /* TIPO (FORÇADO PARA RECEITA) */
+    /* ===================== */
 
-// 🔥 GARANTE QUE SEMPRE TENHA UM VALOR
-if (!tipo) {
-  tipo = "receita" // pode usar "receita" como padrão
-}
+    let tipo = Array.isArray(fields.tipo)
+      ? fields.tipo[0]
+      : fields.tipo
+
+    if (!tipo) {
+      tipo = "receita"
+    }
 
     /* ===================== */
-    /* CORREÇÃO FILE */
+    /* FILE */
     /* ===================== */
 
     const file = Array.isArray(files.file)
@@ -52,7 +55,7 @@ if (!tipo) {
     }
 
     /* ===================== */
-    /* EXTENSÃO DINÂMICA */
+    /* EXTENSÃO */
     /* ===================== */
 
     const ext = file.originalFilename
@@ -62,7 +65,7 @@ if (!tipo) {
     const nomeArquivo = `${paciente_id}_${tipo}.${ext}`
 
     /* ===================== */
-    /* UPLOAD PARA BLOB */
+    /* UPLOAD */
     /* ===================== */
 
     const blob = await put(
@@ -86,18 +89,13 @@ if (!tipo) {
 
       let data = await kv.get(key) || {}
 
+      console.log("DADOS ANTES:", data)
+
+      // 🔥 SALVA CORRETAMENTE
       data[`${tipo}_url`] = blob.url
+
       console.log("SALVANDO NO KV:", tipo, blob.url)
 
-      let data = await kv.get(key) || {}
-
-console.log("DADOS ANTES:", data)
-
-data[`${tipo}_url`] = blob.url
-
-console.log("SALVANDO NO KV:", tipo, blob.url)
-
-await kv.set(key, data)
       await kv.set(key, data)
 
       console.log("SALVO NO KV:", data)
