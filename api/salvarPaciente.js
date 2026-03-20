@@ -12,7 +12,8 @@ export default async function handler(req, res) {
       paciente_id,
       retorno_valido,
       receitas,
-      exames
+      exames,
+      notas
     } = req.body
 
     if (!paciente_id) {
@@ -24,18 +25,37 @@ export default async function handler(req, res) {
     // 🔥 pega dados atuais
     let data = await kv.get(key) || {}
 
-    // 🔥 NÃO perde dados antigos
+    /* ===================== */
+    /* RETORNO */
+    /* ===================== */
+
     if (retorno_valido !== undefined) {
       data.retorno_valido = retorno_valido
     }
 
-    if (receitas) {
-      data.receitas = receitas
+    /* ===================== */
+    /* LISTAS (SEM PERDER DADOS) */
+    /* ===================== */
+
+    if (receitas !== undefined) {
+      data.receitas = Array.isArray(receitas) ? receitas : []
     }
 
-    if (exames) {
-      data.exames = exames
+    if (exames !== undefined) {
+      data.exames = Array.isArray(exames) ? exames : []
     }
+
+    if (notas !== undefined) {
+      data.notas = Array.isArray(notas) ? notas : []
+    }
+
+    /* ===================== */
+    /* GARANTE ESTRUTURA */
+    /* ===================== */
+
+    if (!data.receitas) data.receitas = []
+    if (!data.exames) data.exames = []
+    if (!data.notas) data.notas = []
 
     await kv.set(key, data)
 
