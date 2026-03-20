@@ -48,69 +48,39 @@ width:100%;
 
 <div class="card">
 <h3>Dados do Paciente</h3>
-
 <p><b>Nome:</b> <span id="nome"></span></p>
-<p><b>Data de nascimento:</b> <span id="nascimento"></span></p>
-<p><b>CPF:</b> <span id="cpf"></span></p>
 <p><b>Email:</b> <span id="email"></span></p>
-<p><b>Telefone:</b> <span id="telefone"></span></p>
-
-<br>
-
-<h4>Endereço</h4>
-
-<p><b>CEP:</b> <span id="cep"></span></p>
-<p><b>Rua:</b> <span id="rua"></span></p>
-<p><b>Número:</b> <span id="numero"></span></p>
-<p><b>Bairro:</b> <span id="bairro"></span></p>
-<p><b>Cidade:</b> <span id="cidade"></span></p>
-<p><b>Estado:</b> <span id="estado"></span></p>
 </div>
 
+<!-- RECEITAS -->
 <div class="card">
-<h3>Controle de Retorno</h3>
-
-<label>
-<input type="checkbox" id="retorno_valido">
-Paciente possui <b>direito de retorno</b>
-</label>
-
-<br><br>
-
-<p><b>Data limite retorno:</b> <span id="data_retorno"></span></p>
-
-<button onclick="salvarRetorno()">Salvar</button>
-</div>
-
-<div class="card">
-<h3>Receitas (links)</h3>
+<h3>Receitas</h3>
 <input type="text" id="receita_link">
 <button onclick="adicionarReceita()">Adicionar</button>
 <div id="lista_receitas"></div>
 </div>
 
+<!-- EXAMES -->
 <div class="card">
-<h3>Exames (links)</h3>
+<h3>Exames</h3>
 <input type="text" id="exame_link">
 <button onclick="adicionarExame()">Adicionar</button>
 <div id="lista_exames"></div>
 </div>
 
+<!-- NOTAS -->
 <div class="card">
-<h3>Notas fiscais</h3>
+<h3>Notas</h3>
 <input type="file" id="nota" multiple>
-<button onclick="uploadNota()">Enviar notas</button>
+<button onclick="adicionarNota()">Adicionar nota</button>
 <div id="lista_notas"></div>
 </div>
 
+<!-- ENVIO -->
 <div class="card">
-<h3>Enviar documentos</h3>
-
-<p id="status_envio" style="font-size:14px;color:#666;"></p>
-
-<button onclick="enviarReceita()">Receita</button>
-<button onclick="enviarNota()">Nota</button>
-<button onclick="enviarAmbos()">Todos</button>
+<h3>Enviar</h3>
+<p id="status_envio"></p>
+<button onclick="enviarNota()">Enviar</button>
 </div>
 
 <script>
@@ -120,8 +90,8 @@ const paciente_id = params.get("paciente_id")
 
 async function carregarPaciente(){
 
-const response = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
-const data = await response.json()
+const res = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
+const data = await res.json()
 
 document.getElementById("nome").innerText = data.nome
 document.getElementById("email").innerText = data.email
@@ -134,47 +104,137 @@ document.getElementById("status_envio").innerText =
 renderReceitas(data.receitas || [])
 renderExames(data.exames || [])
 renderNotas(data.notas || [])
+
+}
+
+/* RECEITAS */
+
+async function adicionarReceita(){
+
+const input = document.getElementById("receita_link")
+const link = input.value.trim()
+
+if(!link) return alert("Cole o link")
+
+const res = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
+const paciente = await res.json()
+
+let receitas = paciente.receitas || []
+
+if(receitas.includes(link)){
+alert("Já existe")
+return
+}
+
+receitas.push(link)
+
+await fetch("/api/salvarPaciente",{
+method:"POST",
+headers:{ "Content-Type":"application/json" },
+body:JSON.stringify({ paciente_id, receitas })
+})
+
+renderReceitas(receitas)
+input.value = ""
+
 }
 
 function renderReceitas(lista){
-const div = document.getElementById("lista_receitas")
-div.innerHTML = lista.map((l,i)=>
-`<p><a href="${l}" target="_blank">Receita ${i+1}</a>
-<button onclick="removerReceita(${i})">❌</button></p>`
-).join("")
+document.getElementById("lista_receitas").innerHTML =
+lista.map((l,i)=>`<p>${l}</p>`).join("")
+}
+
+/* EXAMES */
+
+async function adicionarExame(){
+
+const input = document.getElementById("exame_link")
+const link = input.value.trim()
+
+if(!link) return alert("Cole o link")
+
+const res = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
+const paciente = await res.json()
+
+let exames = paciente.exames || []
+
+if(exames.includes(link)){
+alert("Já existe")
+return
+}
+
+exames.push(link)
+
+await fetch("/api/salvarPaciente",{
+method:"POST",
+headers:{ "Content-Type":"application/json" },
+body:JSON.stringify({ paciente_id, exames })
+})
+
+renderExames(exames)
+input.value = ""
+
 }
 
 function renderExames(lista){
-const div = document.getElementById("lista_exames")
-div.innerHTML = lista.map((l,i)=>
-`<p><a href="${l}" target="_blank">Exame ${i+1}</a>
-<button onclick="removerExame(${i})">❌</button></p>`
-).join("")
+document.getElementById("lista_exames").innerHTML =
+lista.map((l,i)=>`<p>${l}</p>`).join("")
 }
 
-function renderNotas(lista){
-const div = document.getElementById("lista_notas")
-div.innerHTML = lista.map((l,i)=>
-`<p><a href="${l}" target="_blank">Nota ${i+1}</a>
-<button onclick="removerNota(${i})">❌</button></p>`
-).join("")
-}
+/* NOTAS */
 
-async function uploadNota(){
-const files = document.getElementById("nota").files
+async function adicionarNota(){
+
+const input = document.getElementById("nota")
+const files = input.files
+
+if(!files.length) return alert("Selecione arquivos")
+
+const resPaciente = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
+const paciente = await resPaciente.json()
+
+let notas = paciente.notas || []
 
 for(let file of files){
+
 const form = new FormData()
 form.append("file", file)
 form.append("paciente_id", paciente_id)
 form.append("tipo","nota")
 
-await fetch("/api/upload",{method:"POST",body:form})
+const response = await fetch("/api/upload",{
+method:"POST",
+body:form
+})
+
+const data = await response.json()
+
+if(data.url && !notas.includes(data.url)){
+notas.push(data.url)
 }
 
-carregarPaciente()
-alert("Notas enviadas")
 }
+
+await fetch("/api/salvarPaciente",{
+method:"POST",
+headers:{ "Content-Type":"application/json" },
+body:JSON.stringify({ paciente_id, notas })
+})
+
+renderNotas(notas)
+
+input.value = ""
+
+alert("Notas adicionadas")
+
+}
+
+function renderNotas(lista){
+document.getElementById("lista_notas").innerHTML =
+lista.map((l,i)=>`<p><a href="${l}" target="_blank">Nota ${i+1}</a></p>`).join("")
+}
+
+/* ENVIO */
 
 async function enviarNota(){
 
@@ -182,19 +242,12 @@ const res = await fetch(`/api/enviarEmail?paciente_id=${paciente_id}`)
 const data = await res.json()
 
 if(data.success){
-alert("Enviado")
+alert("Enviado com sucesso")
 carregarPaciente()
 }else{
-alert("Erro")
-}
-}
-
-async function enviarAmbos(){
-await enviarNota()
+alert("Erro ao enviar")
 }
 
-async function enviarReceita(){
-await enviarNota()
 }
 
 carregarPaciente()
