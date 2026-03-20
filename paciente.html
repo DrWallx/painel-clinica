@@ -2,11 +2,9 @@
 <html>
 
 <head>
-
 <title>Paciente</title>
 
 <style>
-
 body{
 font-family:Arial;
 background:#f4f6f8;
@@ -41,9 +39,7 @@ margin-bottom:10px;
 padding:8px;
 width:100%;
 }
-
 </style>
-
 </head>
 
 <body>
@@ -51,7 +47,6 @@ width:100%;
 <h1>Paciente</h1>
 
 <div class="card">
-
 <h3>Dados do Paciente</h3>
 
 <p><b>Nome:</b> <span id="nome"></span></p>
@@ -70,11 +65,9 @@ width:100%;
 <p><b>Bairro:</b> <span id="bairro"></span></p>
 <p><b>Cidade:</b> <span id="cidade"></span></p>
 <p><b>Estado:</b> <span id="estado"></span></p>
-
 </div>
 
 <div class="card">
-
 <h3>Controle de Retorno</h3>
 
 <label>
@@ -87,85 +80,37 @@ Paciente possui <b>direito de retorno</b>
 <p><b>Data limite retorno:</b> <span id="data_retorno"></span></p>
 
 <button onclick="salvarRetorno()">Salvar</button>
-
 </div>
 
-<!-- RECEITAS -->
 <div class="card">
-
 <h3>Receitas (links)</h3>
-
-<input type="text" id="receita_link" placeholder="Cole o link da receita">
-
-<button onclick="adicionarReceita()">Adicionar receita</button>
-
+<input type="text" id="receita_link">
+<button onclick="adicionarReceita()">Adicionar</button>
 <div id="lista_receitas"></div>
-
 </div>
 
-<!-- EXAMES -->
 <div class="card">
-
 <h3>Exames (links)</h3>
-
-<input type="text" id="exame_link" placeholder="Cole o link do exame">
-
-<button onclick="adicionarExame()">Adicionar exame</button>
-
+<input type="text" id="exame_link">
+<button onclick="adicionarExame()">Adicionar</button>
 <div id="lista_exames"></div>
-
 </div>
 
-<!-- NOTAS -->
 <div class="card">
-
-<h3>Notas fiscais (PDF)</h3>
-
-<input type="file" id="nota" multiple accept="application/pdf">
-
-<br>
-
+<h3>Notas fiscais</h3>
+<input type="file" id="nota" multiple>
 <button onclick="uploadNota()">Enviar notas</button>
-
 <div id="lista_notas"></div>
-
 </div>
 
-<!-- ENVIO -->
 <div class="card">
-
 <h3>Enviar documentos</h3>
 
-<button onclick="enviarReceita()">Enviar Receita</button>
-<button onclick="enviarNota()">Enviar Nota</button>
-<button onclick="enviarAmbos()">Enviar Ambos</button>
+<p id="status_envio" style="font-size:14px;color:#666;"></p>
 
-  async function enviarAmbos(){
-
-const resPaciente = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
-const paciente = await resPaciente.json()
-
-if(
-  (!paciente.receitas || !paciente.receitas.length) &&
-  (!paciente.exames || !paciente.exames.length) &&
-  (!paciente.notas || !paciente.notas.length)
-){
-  alert("Nenhum documento para enviar")
-  return
-}
-
-const res = await fetch(`/api/enviarEmail?paciente_id=${paciente_id}`)
-const data = await res.json()
-
-if(data.success){
-  alert("Documentos enviados com sucesso")
-  carregarPaciente()
-}else{
-  alert("Erro ao enviar")
-}
-
-}
-
+<button onclick="enviarReceita()">Receita</button>
+<button onclick="enviarNota()">Nota</button>
+<button onclick="enviarAmbos()">Todos</button>
 </div>
 
 <script>
@@ -174,270 +119,82 @@ const params = new URLSearchParams(window.location.search)
 const paciente_id = params.get("paciente_id")
 
 async function carregarPaciente(){
-if(data.ultimo_envio){
-  document.getElementById("status_envio").innerText =
-    "Último envio: " + new Date(data.ultimo_envio).toLocaleString()
-}
- 
+
 const response = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
 const data = await response.json()
 
 document.getElementById("nome").innerText = data.nome
-document.getElementById("nascimento").innerText = data.nascimento
-document.getElementById("cpf").innerText = data.cpf
-
 document.getElementById("email").innerText = data.email
-document.getElementById("telefone").innerText = data.telefone
 
-document.getElementById("cep").innerText = data.cep
-document.getElementById("rua").innerText = data.rua
-document.getElementById("numero").innerText = data.numero
-document.getElementById("bairro").innerText = data.bairro
-document.getElementById("cidade").innerText = data.cidade
-document.getElementById("estado").innerText = data.estado
-
-if(data.dias_limite_retorno){
-document.getElementById("data_retorno").innerText = data.dias_limite_retorno
+if(data.ultimo_envio){
+document.getElementById("status_envio").innerText =
+"Último envio: " + new Date(data.ultimo_envio).toLocaleString()
 }
 
 renderReceitas(data.receitas || [])
 renderExames(data.exames || [])
 renderNotas(data.notas || [])
-
-}
-
-/* RECEITAS */
-
-async function adicionarReceita(){
-
-const input = document.getElementById("receita_link")
-const link = input.value.trim()
-
-if(!link) return alert("Cole o link")
-
-const res = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
-const paciente = await res.json()
-
-let receitas = paciente.receitas || []
-
-if(receitas.includes(link)){
-  alert("Link já adicionado")
-  return
-}
-
-receitas.push(link)
-
-await fetch("/api/salvarPaciente",{
-method:"POST",
-headers:{ "Content-Type":"application/json" },
-body:JSON.stringify({ paciente_id, receitas })
-})
-
-renderReceitas(receitas)
-
-input.value = ""
-input.focus()
-
 }
 
 function renderReceitas(lista){
-
 const div = document.getElementById("lista_receitas")
-div.innerHTML = ""
-
-lista.forEach((link, i)=>{
-div.innerHTML += `
-<p>
-<a href="${link}" target="_blank">📄 Receita ${i+1}</a>
-<button onclick="removerReceita(${i})">❌</button>
-</p>`
-})
-
-}
-
-async function removerReceita(index){
-
-const res = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
-const paciente = await res.json()
-
-let receitas = paciente.receitas || []
-
-receitas.splice(index,1)
-
-await fetch("/api/salvarPaciente",{
-method:"POST",
-headers:{ "Content-Type":"application/json" },
-body:JSON.stringify({ paciente_id, receitas })
-})
-
-renderReceitas(receitas)
-
-}
-
-/* EXAMES */
-
-async function adicionarExame(){
-
-const input = document.getElementById("exame_link")
-const link = input.value.trim()
-
-if(!link) return alert("Cole o link")
-
-const res = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
-const paciente = await res.json()
-
-let exames = paciente.exames || []
-
-if(exames.includes(link)){
-  alert("Link já adicionado")
-  return
-}
-
-exames.push(link)
-
-await fetch("/api/salvarPaciente",{
-method:"POST",
-headers:{ "Content-Type":"application/json" },
-body:JSON.stringify({ paciente_id, exames })
-})
-
-renderExames(exames)
-
-input.value = ""
-input.focus()
-
+div.innerHTML = lista.map((l,i)=>
+`<p><a href="${l}" target="_blank">Receita ${i+1}</a>
+<button onclick="removerReceita(${i})">❌</button></p>`
+).join("")
 }
 
 function renderExames(lista){
-
 const div = document.getElementById("lista_exames")
-div.innerHTML = ""
-
-lista.forEach((link, i)=>{
-div.innerHTML += `
-<p>
-<a href="${link}" target="_blank">🧪 Exame ${i+1}</a>
-<button onclick="removerExame(${i})">❌</button>
-</p>`
-})
-
+div.innerHTML = lista.map((l,i)=>
+`<p><a href="${l}" target="_blank">Exame ${i+1}</a>
+<button onclick="removerExame(${i})">❌</button></p>`
+).join("")
 }
-
-async function removerExame(index){
-
-const res = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
-const paciente = await res.json()
-
-let exames = paciente.exames || []
-
-exames.splice(index,1)
-
-await fetch("/api/salvarPaciente",{
-method:"POST",
-headers:{ "Content-Type":"application/json" },
-body:JSON.stringify({ paciente_id, exames })
-})
-
-renderExames(exames)
-
-}
-
-/* NOTAS */
 
 function renderNotas(lista){
-
 const div = document.getElementById("lista_notas")
-div.innerHTML = ""
-
-lista.forEach((link, i)=>{
-div.innerHTML += `
-<p>
-<a href="${link}" target="_blank">🧾 Nota ${i+1}</a>
-<button onclick="removerNota(${i})">❌</button>
-</p>`
-})
-
-}
-
-async function removerNota(index){
-
-const res = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
-const paciente = await res.json()
-
-let notas = paciente.notas || []
-
-notas.splice(index,1)
-
-await fetch("/api/salvarPaciente",{
-method:"POST",
-headers:{ "Content-Type":"application/json" },
-body:JSON.stringify({ paciente_id, notas })
-})
-
-renderNotas(notas)
-
+div.innerHTML = lista.map((l,i)=>
+`<p><a href="${l}" target="_blank">Nota ${i+1}</a>
+<button onclick="removerNota(${i})">❌</button></p>`
+).join("")
 }
 
 async function uploadNota(){
-
-const input = document.getElementById("nota")
-const files = input.files
-
-if(!files.length) return alert("Selecione arquivos")
+const files = document.getElementById("nota").files
 
 for(let file of files){
-
 const form = new FormData()
 form.append("file", file)
 form.append("paciente_id", paciente_id)
 form.append("tipo","nota")
 
-await fetch("/api/upload",{
-method:"POST",
-body:form
-})
-
+await fetch("/api/upload",{method:"POST",body:form})
 }
 
-const res = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
-const paciente = await res.json()
-
-renderNotas(paciente.notas || [])
-
-input.value = ""
-
+carregarPaciente()
 alert("Notas enviadas")
-
-}
-<p id="status_envio" style="font-size:14px;color:#666;"></p>
-/* ENVIO */
-
-async function enviarReceita(){
-await fetch(`/api/enviarEmail?paciente_id=${paciente_id}&tipo=receita`)
-alert("Receitas enviadas")
 }
 
 async function enviarNota(){
-
-const resPaciente = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
-const paciente = await resPaciente.json()
-
-if(!paciente.notas || !paciente.notas.length){
-  alert("Nenhuma nota para enviar")
-  return
-}
 
 const res = await fetch(`/api/enviarEmail?paciente_id=${paciente_id}`)
 const data = await res.json()
 
 if(data.success){
-  alert("Notas enviadas com sucesso")
-  carregarPaciente()
+alert("Enviado")
+carregarPaciente()
 }else{
-  alert("Erro ao enviar")
+alert("Erro")
+}
 }
 
+async function enviarAmbos(){
+await enviarNota()
 }
+
+async function enviarReceita(){
+await enviarNota()
 }
 
 carregarPaciente()
@@ -445,5 +202,4 @@ carregarPaciente()
 </script>
 
 </body>
-
 </html>
