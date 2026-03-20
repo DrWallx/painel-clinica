@@ -11,11 +11,9 @@ export default async function handler(req, res){
 
   const data = JSON.parse(fs.readFileSync(filePath, "utf-8"))
 
-  // 👉 filtra só quem tem retorno ativo no seu sistema
-  const pacientesComRetorno = data.filter(p => p.retorno_valido)
+  const hoje = new Date()
 
-  // 👉 aqui você deve integrar com a Feegow
-  // (vou deixar estrutura pronta pra você plugar)
+  const pacientesComRetorno = data.filter(p => p.retorno_valido)
 
   const listaFinal = []
 
@@ -23,7 +21,7 @@ export default async function handler(req, res){
 
     try{
 
-      // 🔹 EXEMPLO (ajustar conforme sua API da Feegow)
+      // 🔴 AQUI você conecta com Feegow
       const response = await fetch(`https://api.feegow.com/v1/paciente/${p.id}`, {
         headers:{
           "Authorization": `Bearer ${process.env.FEEGOW_TOKEN}`
@@ -32,9 +30,10 @@ export default async function handler(req, res){
 
       const feegow = await response.json()
 
-      const data_limite = feegow?.data_retorno // 🔴 AJUSTAR NOME DO CAMPO REAL
+      const data_limite = new Date(feegow.data_retorno) // 🔴 ajustar campo real
 
-      if(!data_limite) continue
+      // 👉 NÃO MOSTRAR vencidos
+      if(data_limite < hoje) continue
 
       listaFinal.push({
         id: p.id,
