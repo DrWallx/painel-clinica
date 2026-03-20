@@ -23,7 +23,7 @@ export default async function handler(req, res) {
     const notas = local.notas || []
 
     /* ===================== */
-    /* PACIENTE (FEEGOW) */
+    /* PACIENTE */
     /* ===================== */
 
     const baseUrl = "https://project-dvdik.vercel.app"
@@ -34,36 +34,97 @@ export default async function handler(req, res) {
     const emailPaciente = paciente.email
 
     /* ===================== */
-    /* HTML */
+    /* HTML (NOVO PREMIUM) */
     /* ===================== */
 
     let html = `
-    <div style="font-family:Arial;max-width:600px;margin:auto">
+    <div style="font-family:Arial;max-width:600px;margin:auto;background:#ffffff;padding:20px;border-radius:10px">
 
-    <h2 style="color:#3b82f6">Clínica Haux</h2>
+    <h2 style="color:#3b82f6;margin-bottom:10px">Clínica Haux</h2>
 
     <p>Olá <b>${paciente.nome}</b>,</p>
 
-    <p>Seus documentos:</p>
+    <p>Seus documentos estão disponíveis abaixo:</p>
     `
 
     // RECEITAS
     if (receitas.length) {
-      html += `<h3>Receitas</h3>`
+      html += `<h3 style="margin-top:20px">📄 Receitas</h3>`
       receitas.forEach(url => {
-        html += `<p><a href="${url}">📄 Abrir Receita</a></p>`
+        html += `
+        <a href="${url}" style="
+        display:block;
+        margin:10px 0;
+        padding:12px;
+        background:#3b82f6;
+        color:white;
+        text-decoration:none;
+        border-radius:6px;
+        text-align:center;
+        font-weight:bold;
+        ">
+        📄 Baixar Receita
+        </a>`
       })
     }
 
     // EXAMES
     if (exames.length) {
-      html += `<h3>Exames</h3>`
+      html += `<h3 style="margin-top:20px">🧪 Exames</h3>`
       exames.forEach(url => {
-        html += `<p><a href="${url}">🧪 Ver Exame</a></p>`
+        html += `
+        <a href="${url}" style="
+        display:block;
+        margin:10px 0;
+        padding:12px;
+        background:#6366f1;
+        color:white;
+        text-decoration:none;
+        border-radius:6px;
+        text-align:center;
+        font-weight:bold;
+        ">
+        🧪 Ver Exame
+        </a>`
       })
     }
 
-    html += `</div>`
+    // NOTAS (ANEXO + VISUAL VERDE)
+    if (notas.length) {
+      html += `
+      <h3 style="margin-top:20px">🧾 Nota Fiscal</h3>
+
+      <p style="margin-bottom:10px">
+      Sua nota fiscal está em anexo neste e-mail.
+      </p>
+
+      <div style="
+      margin-top:10px;
+      padding:12px;
+      background:#10b981;
+      color:white;
+      border-radius:6px;
+      text-align:center;
+      font-weight:bold;
+      ">
+      🧾 Nota Fiscal Anexada
+      </div>
+      `
+    }
+
+    html += `
+    <p style="margin-top:20px;font-size:14px;color:#555">
+    Se precisar de algo, estamos à disposição.
+    </p>
+
+    <hr>
+
+    <p style="font-size:12px;color:#999">
+    Clínica Haux
+    </p>
+
+    </div>
+    `
 
     /* ===================== */
     /* ANEXOS (NOTAS) */
@@ -113,23 +174,22 @@ export default async function handler(req, res) {
       attachments
     })
 
+    /* ===================== */
+    /* HISTÓRICO (CORRIGIDO) */
+    /* ===================== */
+
+    local.ultimo_envio = new Date().toISOString()
+    local.total_notas_enviadas = notas.length
+
+    await kv.set(key, local)
+
+    console.log("HISTÓRICO SALVO:", local.ultimo_envio)
+
     return res.status(200).json({ success: true })
 
   } catch (error) {
 
     console.log("ERRO EMAIL:", error)
-
-    // 🔥 salva histórico de envio
-const key = `paciente:${paciente_id}`
-
-let data = await kv.get(key) || {}
-
-data.ultimo_envio = new Date().toISOString()
-data.total_notas_enviadas = notas.length
-
-await kv.set(key, data)
-
-console.log("HISTÓRICO SALVO:", data.ultimo_envio)
 
     return res.status(500).json({
       error: error.message
