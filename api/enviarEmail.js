@@ -119,6 +119,18 @@ export default async function handler(req, res) {
 
     console.log("ERRO EMAIL:", error)
 
+    // 🔥 salva histórico de envio
+const key = `paciente:${paciente_id}`
+
+let data = await kv.get(key) || {}
+
+data.ultimo_envio = new Date().toISOString()
+data.total_notas_enviadas = notas.length
+
+await kv.set(key, data)
+
+console.log("HISTÓRICO SALVO:", data.ultimo_envio)
+
     return res.status(500).json({
       error: error.message
     })
