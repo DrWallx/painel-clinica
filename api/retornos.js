@@ -1,7 +1,7 @@
 import fs from "fs"
 import path from "path"
 
-export default async function handler(req, res){
+export default function handler(req, res){
 
   const filePath = path.join(process.cwd(), "database", "pacientes.json")
 
@@ -13,39 +13,24 @@ export default async function handler(req, res){
 
   const hoje = new Date()
 
-  const pacientesComRetorno = data.filter(p => p.retorno_valido)
+  const listaFinal = data
+    .filter(p => p.retorno_valido == true)
+    .map(p => {
 
-  const listaFinal = []
+      if(!p.data_limite_retorno) return null
 
-  for(const p of pacientesComRetorno){
+      const limite = new Date(p.data_limite_retorno)
 
-    try{
+      if(limite < hoje) return null
 
-      // 🔴 AQUI você conecta com Feegow
-      const response = await fetch(`https://api.feegow.com/v1/paciente/${p.id}`, {
-        headers:{
-          "Authorization": `Bearer ${process.env.FEEGOW_TOKEN}`
-        }
-      })
-
-      const feegow = await response.json()
-
-      const data_limite = new Date(feegow.data_retorno) // 🔴 ajustar campo real
-
-      // 👉 NÃO MOSTRAR vencidos
-      if(data_limite < hoje) continue
-
-      listaFinal.push({
-        id: p.id,
+      return {
+        id: p.id || p.paciente_id,
         nome: p.nome,
-        data_limite_retorno: data_limite
-      })
+        data_limite_retorno: limite
+      }
 
-    }catch(e){
-      console.log("Erro Feegow:", e)
-    }
+    })
+    .filter(p => p !== null)
 
-  }
-
-  res.status(200).json(listaFinal)
+  return res.status(200).json(listaFinal)
 }
