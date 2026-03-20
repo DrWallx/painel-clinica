@@ -36,7 +36,7 @@ if(pacienteData.success && pacienteData.content){
   }else{
     p = pacienteData.content
   }
-
+}
 
 }catch(e){
 console.log("ERRO FEEGOW:", e.message)
