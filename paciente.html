@@ -136,36 +136,47 @@ const paciente_id = params.get("paciente_id")
 
 async function carregarPaciente(){
 
-  const response = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
-  const data = await response.json()
+  try{
 
-  document.getElementById("nome").innerText = data.nome
-  document.getElementById("nascimento").innerText = data.nascimento
-  document.getElementById("cpf").innerText = data.cpf
+    const response = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
 
-  document.getElementById("email").innerText = data.email
-  document.getElementById("telefone").innerText = data.telefone
+    if(!response.ok){
+      throw new Error("Erro na API")
+    }
 
-  document.getElementById("cep").innerText = data.cep
-  document.getElementById("rua").innerText = data.rua
-  document.getElementById("numero").innerText = data.numero
-  document.getElementById("bairro").innerText = data.bairro
-  document.getElementById("cidade").innerText = data.cidade
-  document.getElementById("estado").innerText = data.estado
+    const data = await response.json()
 
-  if(data.dias_limite_retorno){
-    document.getElementById("data_retorno").innerText = data.dias_limite_retorno
-    document.getElementById("retorno_valido").checked = !!data.retorno_valido
+    console.log("DATA:", data)
+
+    document.getElementById("nome").innerText = data.nome || ""
+    document.getElementById("nascimento").innerText = data.nascimento || ""
+    document.getElementById("cpf").innerText = data.cpf || ""
+
+    document.getElementById("email").innerText = data.email || ""
+    document.getElementById("telefone").innerText = data.telefone || ""
+
+    document.getElementById("cep").innerText = data.cep || ""
+    document.getElementById("rua").innerText = data.rua || ""
+    document.getElementById("numero").innerText = data.numero || ""
+    document.getElementById("bairro").innerText = data.bairro || ""
+    document.getElementById("cidade").innerText = data.cidade || ""
+    document.getElementById("estado").innerText = data.estado || ""
+
+    document.getElementById("data_retorno").innerText = data.dias_limite_retorno || ""
+
+    document.getElementById("retorno_valido").checked = data.retorno_valido === true
+
+    renderReceitas(data.receitas || [])
+    renderExames(data.exames || [])
+    renderNotas(data.notas || [])
+
+  }catch(error){
+
+    console.error("ERRO FRONT:", error)
+    alert("Erro ao carregar paciente")
+
   }
 
-  if(data.ultimo_envio){
-    document.getElementById("status_envio").innerText =
-      "Último envio: " + new Date(data.ultimo_envio).toLocaleString()
-  }
-
-  renderReceitas(data.receitas || [])
-  renderExames(data.exames || [])
-  renderNotas(data.notas || [])
 }
 
 /* RECEITAS */
@@ -290,7 +301,6 @@ async function adicionarNota(){
   renderNotas(notas)
 
   input.value = ""
-
   alert("Notas adicionadas")
 }
 
@@ -322,30 +332,27 @@ async function enviarAmbos(){
 
 async function salvarRetorno(){
 
-const retorno_valido = document.getElementById("retorno_valido").checked
-const nome = document.getElementById("nome").innerText
+  const retorno_valido = document.getElementById("retorno_valido").checked
+  const nome = document.getElementById("nome").innerText
 
-await fetch("/api/salvarPaciente",{
+  await fetch("/api/salvarPaciente",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({
+      paciente_id,
+      nome,
+      retorno_valido
+    })
+  })
 
-method:"POST",
-headers:{ "Content-Type":"application/json" },
+  alert("Retorno salvo")
 
-body:JSON.stringify({
-paciente_id,
-nome,
-retorno_valido
-})
-
-})
-
-alert("Retorno salvo")
-
-
-carregarPaciente()
-}
   carregarPaciente()
+}
 
-</script>
+/* 🔥 INICIALIZAÇÃO */
+carregarPaciente()
+
 </script>
 
 </body>
