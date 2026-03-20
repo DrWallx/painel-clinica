@@ -140,6 +140,32 @@ Paciente possui <b>direito de retorno</b>
 <button onclick="enviarNota()">Enviar Nota</button>
 <button onclick="enviarAmbos()">Enviar Ambos</button>
 
+  async function enviarAmbos(){
+
+const resPaciente = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
+const paciente = await resPaciente.json()
+
+if(
+  (!paciente.receitas || !paciente.receitas.length) &&
+  (!paciente.exames || !paciente.exames.length) &&
+  (!paciente.notas || !paciente.notas.length)
+){
+  alert("Nenhum documento para enviar")
+  return
+}
+
+const res = await fetch(`/api/enviarEmail?paciente_id=${paciente_id}`)
+const data = await res.json()
+
+if(data.success){
+  alert("Documentos enviados com sucesso")
+  carregarPaciente()
+}else{
+  alert("Erro ao enviar")
+}
+
+}
+
 </div>
 
 <script>
@@ -148,7 +174,11 @@ const params = new URLSearchParams(window.location.search)
 const paciente_id = params.get("paciente_id")
 
 async function carregarPaciente(){
-
+if(data.ultimo_envio){
+  document.getElementById("status_envio").innerText =
+    "Último envio: " + new Date(data.ultimo_envio).toLocaleString()
+}
+ 
 const response = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
 const data = await response.json()
 
@@ -388,13 +418,26 @@ alert("Receitas enviadas")
 }
 
 async function enviarNota(){
-await fetch(`/api/enviarEmail?paciente_id=${paciente_id}&tipo=nota`)
-alert("Notas enviadas")
+
+const resPaciente = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
+const paciente = await resPaciente.json()
+
+if(!paciente.notas || !paciente.notas.length){
+  alert("Nenhuma nota para enviar")
+  return
 }
 
-async function enviarAmbos(){
-await fetch(`/api/enviarEmail?paciente_id=${paciente_id}`)
-alert("Todos documentos enviados")
+const res = await fetch(`/api/enviarEmail?paciente_id=${paciente_id}`)
+const data = await res.json()
+
+if(data.success){
+  alert("Notas enviadas com sucesso")
+  carregarPaciente()
+}else{
+  alert("Erro ao enviar")
+}
+
+}
 }
 
 carregarPaciente()
