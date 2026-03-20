@@ -42,15 +42,9 @@ console.log("ERRO FEEGOW:", e.message)
 
 try{
 
-try{
-
 const hoje = new Date()
 
-// 🔥 busca últimos 30 dias
-const dataInicio = new Date()
-dataInicio.setDate(hoje.getDate() - 30)
-
-// 🔥 função para formato BR
+// 🔥 função data BR
 function formatarDataBR(date){
   const d = String(date.getDate()).padStart(2,'0')
   const m = String(date.getMonth()+1).padStart(2,'0')
@@ -58,28 +52,38 @@ function formatarDataBR(date){
   return `${d}-${m}-${y}`
 }
 
-const data_start = formatarDataBR(dataInicio)
-const data_end = formatarDataBR(hoje)
+let encontrou = false
 
-const agendaResponse = await fetch(
-`https://api.feegow.com/v1/api/appoints/search?data_start=${data_start}&data_end=${data_end}&paciente_id=${paciente_id}`,
-{
-headers:{
-"Content-Type":"application/json",
-"x-access-token":token
-}
-}
-)
+// 🔥 busca últimos 7 dias (compatível com Feegow)
+for(let i = 0; i < 7; i++){
 
-const agendaData = await agendaResponse.json()
+  const dataBusca = new Date()
+  dataBusca.setDate(hoje.getDate() - i)
 
-if(agendaData.content?.length){
+  const data = formatarDataBR(dataBusca)
 
-  // 🔥 pega o primeiro que tem retorno válido
-  const agendamentoValido = agendaData.content.find(a => a.dias_limite_retorno)
+  const agendaResponse = await fetch(
+  `https://api.feegow.com/v1/api/appoints/search?data_start=${data}&data_end=${data}&paciente_id=${paciente_id}`,
+  {
+    headers:{
+      "Content-Type":"application/json",
+      "x-access-token":token
+    }
+  }
+  )
 
-  if(agendamentoValido){
-    dias_limite_retorno = agendamentoValido.dias_limite_retorno
+  const agendaData = await agendaResponse.json()
+
+  if(agendaData.content?.length){
+
+    const agendamentoValido = agendaData.content.find(a => a.dias_limite_retorno)
+
+    if(agendamentoValido){
+      dias_limite_retorno = agendamentoValido.dias_limite_retorno
+      encontrou = true
+      break
+    }
+
   }
 
 }
@@ -87,7 +91,6 @@ if(agendaData.content?.length){
 }catch(e){
 console.log("ERRO AGENDA:", e.message)
 }
-
 /* ===================== */
 /* KV */
 /* ===================== */
