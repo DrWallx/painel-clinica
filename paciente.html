@@ -5,7 +5,7 @@ const paciente_id = params.get("paciente_id")
 
 async function carregarPaciente(){
 
-const response = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
+const response = await fetch(/api/paciente?paciente_id=${paciente_id})
 const data = await response.json()
 
 document.getElementById("nome").innerText = data.nome
