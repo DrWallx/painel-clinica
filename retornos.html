@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Retornos</title>
+
+<style>
+body{
+font-family:Arial;
+background:#f4f6f8;
+padding:30px;
+}
+
+h2{
+margin-top:30px;
+}
+
+.card{
+background:white;
+padding:15px;
+border-radius:10px;
+margin-bottom:10px;
+box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+.urgente{
+border-left:5px solid #dc2626;
+}
+
+.proximo{
+border-left:5px solid #f59e0b;
+}
+
+.ok{
+border-left:5px solid #10b981;
+}
+
+.nome{
+font-weight:bold;
+font-size:16px;
+}
+
+.data{
+font-size:14px;
+color:#555;
+}
+
+.btn{
+display:inline-block;
+margin-top:10px;
+padding:6px 10px;
+background:#3b82f6;
+color:white;
+border-radius:5px;
+text-decoration:none;
+font-size:13px;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>Retornos de Pacientes</h1>
+
+<h2>🔴 Urgentes</h2>
+<div id="urgente"></div>
+
+<h2>🟡 Próximos dias</h2>
+<div id="proximo"></div>
+
+<h2>🟢 Dentro do prazo</h2>
+<div id="ok"></div>
+
+<script>
+
+async function carregar(){
+
+const res = await fetch("/api/retornos")
+const lista = await res.json()
+
+const urgenteDiv = document.getElementById("urgente")
+const proximoDiv = document.getElementById("proximo")
+const okDiv = document.getElementById("ok")
+
+urgenteDiv.innerHTML = ""
+proximoDiv.innerHTML = ""
+okDiv.innerHTML = ""
+
+const hoje = new Date()
+
+lista.forEach(p => {
+
+const limite = new Date(p.data_limite_retorno)
+const diff = Math.ceil((limite - hoje) / (1000*60*60*24))
+
+let classe = ""
+let destino = null
+let texto = ""
+
+if(diff <= 0){
+classe = "urgente"
+destino = urgenteDiv
+texto = "Vencido ou vence hoje"
+}
+else if(diff <= 3){
+classe = "proximo"
+destino = proximoDiv
+texto = `Vence em ${diff} dias`
+}
+else{
+classe = "ok"
+destino = okDiv
+texto = `Vence em ${diff} dias`
+}
+
+destino.innerHTML += `
+<div class="card ${classe}">
+<div class="nome">${p.nome}</div>
+<div class="data">Até: ${limite.toLocaleDateString()}</div>
+<div class="data">${texto}</div>
+
+<a class="btn" href="/paciente.html?paciente_id=${p.id}">
+Abrir paciente
+</a>
+
+</div>
+`
+
+})
+
+}
+
+carregar()
+
+</script>
+
+</body>
+
+</html>
