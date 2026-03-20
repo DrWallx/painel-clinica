@@ -168,23 +168,8 @@ if(data.dias_limite_retorno){
 document.getElementById("data_retorno").innerText = data.dias_limite_retorno
 }
 
-// render listas
 renderReceitas(data.receitas || [])
 renderExames(data.exames || [])
-
-}
-
-async function salvarRetorno(){
-
-const retorno_valido = document.getElementById("retorno_valido").checked
-
-await fetch("/api/salvarPaciente",{
-method:"POST",
-headers:{ "Content-Type":"application/json" },
-body:JSON.stringify({ paciente_id, retorno_valido })
-})
-
-alert("Informação salva")
 
 }
 
@@ -194,7 +179,8 @@ alert("Informação salva")
 
 async function adicionarReceita(){
 
-const link = document.getElementById("receita_link").value
+const input = document.getElementById("receita_link")
+const link = input.value.trim()
 
 if(!link) return alert("Cole o link")
 
@@ -202,6 +188,11 @@ const res = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
 const paciente = await res.json()
 
 let receitas = paciente.receitas || []
+
+if(receitas.includes(link)){
+  alert("Link já adicionado")
+  return
+}
 
 receitas.push(link)
 
@@ -212,7 +203,10 @@ body:JSON.stringify({ paciente_id, receitas })
 })
 
 renderReceitas(receitas)
-document.getElementById("receita_link").value = ""
+
+// 🔥 UX
+input.value = ""
+input.focus()
 
 }
 
@@ -256,7 +250,8 @@ renderReceitas(receitas)
 
 async function adicionarExame(){
 
-const link = document.getElementById("exame_link").value
+const input = document.getElementById("exame_link")
+const link = input.value.trim()
 
 if(!link) return alert("Cole o link")
 
@@ -264,6 +259,11 @@ const res = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
 const paciente = await res.json()
 
 let exames = paciente.exames || []
+
+if(exames.includes(link)){
+  alert("Link já adicionado")
+  return
+}
 
 exames.push(link)
 
@@ -274,7 +274,10 @@ body:JSON.stringify({ paciente_id, exames })
 })
 
 renderExames(exames)
-document.getElementById("exame_link").value = ""
+
+// 🔥 UX
+input.value = ""
+input.focus()
 
 }
 
@@ -318,7 +321,8 @@ renderExames(exames)
 
 async function uploadNota(){
 
-const files = document.getElementById("nota").files
+const input = document.getElementById("nota")
+const files = input.files
 
 if(!files.length) return alert("Selecione arquivos")
 
@@ -336,9 +340,30 @@ body:form
 
 }
 
+// limpa input
+input.value = ""
+
 alert("Notas enviadas")
 
 }
+
+/* ===================== */
+/* ENTER = ADICIONAR */
+/* ===================== */
+
+document.getElementById("receita_link").addEventListener("keypress", function(e){
+if(e.key === "Enter"){
+e.preventDefault()
+adicionarReceita()
+}
+})
+
+document.getElementById("exame_link").addEventListener("keypress", function(e){
+if(e.key === "Enter"){
+e.preventDefault()
+adicionarExame()
+}
+})
 
 /* ===================== */
 /* ENVIO */
