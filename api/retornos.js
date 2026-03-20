@@ -17,7 +17,8 @@ export default async function handler(req, res){
 
       if(!p) continue
 
-      if(p.retorno_valido != true) continue
+      const retornoAtivo = p.retorno_valido === true || p.retorno_valido === "true"
+if(!retornoAtivo) continue
 
       if(!p.data_limite_retorno) continue
 
