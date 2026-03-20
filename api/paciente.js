@@ -44,7 +44,6 @@ try{
 
 const hoje = new Date()
 
-// 🔥 função data BR
 function formatarDataBR(date){
   const d = String(date.getDate()).padStart(2,'0')
   const m = String(date.getMonth()+1).padStart(2,'0')
@@ -52,10 +51,10 @@ function formatarDataBR(date){
   return `${d}-${m}-${y}`
 }
 
-let encontrou = false
+let melhorRetorno = null
 
-// 🔥 busca últimos 7 dias (compatível com Feegow)
-for(let i = 0; i < 7; i++){
+// 🔥 busca últimos 15 dias (equilíbrio ideal)
+for(let i = 0; i < 15; i++){
 
   const dataBusca = new Date()
   dataBusca.setDate(hoje.getDate() - i)
@@ -76,11 +75,19 @@ for(let i = 0; i < 7; i++){
 
   if(agendaData.content?.length){
 
-    const agendamentoValido = agendaData.content.find(a => a.dias_limite_retorno)
+    // pega todos com retorno válido
+    const comRetorno = agendaData.content.filter(a => a.dias_limite_retorno)
 
-    if(agendamentoValido){
-      dias_limite_retorno = agendamentoValido.dias_limite_retorno
-      encontrou = true
+    if(comRetorno.length){
+
+      // ordena pelo mais recente
+      comRetorno.sort((a,b)=>{
+        const da = new Date(a.data.split("-").reverse().join("-"))
+        const db = new Date(b.data.split("-").reverse().join("-"))
+        return db - da
+      })
+
+      melhorRetorno = comRetorno[0]
       break
     }
 
@@ -88,10 +95,15 @@ for(let i = 0; i < 7; i++){
 
 }
 
+if(melhorRetorno){
+  dias_limite_retorno = melhorRetorno.dias_limite_retorno
+}
+
 }catch(e){
 console.log("ERRO AGENDA:", e.message)
+ 
 }
-/* ===================== */
+  /* ===================== */
 /* KV */
 /* ===================== */
 
