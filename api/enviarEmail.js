@@ -10,8 +10,11 @@ export default async function handler(req, res) {
 
     const baseUrl = "https://project-dvdik.vercel.app"
 
+    // 🔥 SEMPRE BUSCA DADO ATUALIZADO
     const pacienteResponse = await fetch(`${baseUrl}/api/paciente?paciente_id=${paciente_id}`)
     const paciente = await pacienteResponse.json()
+
+    console.log("PACIENTE EMAIL DATA:", paciente)
 
     const emailPaciente = paciente.email
 
@@ -19,6 +22,8 @@ export default async function handler(req, res) {
     const receitas = paciente.receitas || (paciente.receita_url ? [paciente.receita_url] : [])
     const exames = paciente.exames || []
     const notas = paciente.notas || (paciente.nota_url ? [paciente.nota_url] : [])
+
+    console.log("NOTAS ENCONTRADAS:", notas)
 
     /* ===================== */
     /* HTML */
@@ -34,7 +39,7 @@ export default async function handler(req, res) {
     <p>Seus documentos:</p>
     `
 
-    /* RECEITAS */
+    // RECEITAS
     if ((tipo === "receita" || !tipo) && receitas.length) {
       html += `<h3>Receitas</h3>`
       receitas.forEach(url => {
@@ -42,7 +47,7 @@ export default async function handler(req, res) {
       })
     }
 
-    /* EXAMES */
+    // EXAMES
     if (!tipo && exames.length) {
       html += `<h3>Exames</h3>`
       exames.forEach(url => {
@@ -53,7 +58,7 @@ export default async function handler(req, res) {
     html += `</div>`
 
     /* ===================== */
-    /* NOTAS (ANEXOS) */
+    /* ANEXOS (NOTAS) */
     /* ===================== */
 
     let attachments = []
@@ -66,11 +71,19 @@ export default async function handler(req, res) {
 
         try {
 
+          console.log("BAIXANDO NOTA:", url)
+
           const response = await fetch(url)
+
+          if (!response.ok) {
+            console.log("ERRO FETCH NOTA:", response.status)
+            continue
+          }
+
           const buffer = await response.arrayBuffer()
 
           attachments.push({
-            filename: `nota_${i + 1}.pdf`, // 🔥 nome único
+            filename: `nota_${i + 1}.pdf`,
             content: Buffer.from(buffer)
           })
 
@@ -81,6 +94,8 @@ export default async function handler(req, res) {
       }
 
     }
+
+    console.log("TOTAL ANEXOS:", attachments.length)
 
     /* ===================== */
     /* ENVIO */
