@@ -201,11 +201,11 @@ async function adicionarReceita(){
 
 function renderReceitas(lista){
   document.getElementById("lista_receitas").innerHTML =
-    lista.map((l,i)=>
+    lista.map((l,i)=>`
       <p>
         <a href="${l}" target="_blank">📄 Receita ${i+1}</a>
       </p>
-    ).join("")
+    `).join("")
 }
 
 /* EXAMES */
@@ -241,11 +241,11 @@ async function adicionarExame(){
 
 function renderExames(lista){
   document.getElementById("lista_exames").innerHTML =
-    lista.map((l,i)=>
+    lista.map((l,i)=>`
       <p>
         <a href="${l}" target="_blank">🧪 Exame ${i+1}</a>
       </p>
-    ).join("")
+    `).join("")
 }
 
 /* NOTAS */
@@ -296,29 +296,30 @@ async function adicionarNota(){
 
 function renderNotas(lista){
   document.getElementById("lista_notas").innerHTML =
-    lista.map((l,i)=>
+    lista.map((l,i)=>`
       <p>
         <a href="${l}" target="_blank">🧾 Nota ${i+1}</a>
       </p>
-    ).join("")
+    `).join("")
 }
 
 /* ENVIO */
 
 async function enviarReceita(){
-  await fetch(/api/enviarEmail?paciente_id=${paciente_id})
+  await fetch(`/api/enviarEmail?paciente_id=${paciente_id}`)
   alert("Receitas enviadas")
 }
 
 async function enviarNota(){
-  await fetch(/api/enviarEmail?paciente_id=${paciente_id})
+  await fetch(`/api/enviarEmail?paciente_id=${paciente_id}`)
   alert("Notas enviadas")
 }
 
 async function enviarAmbos(){
-  await fetch(/api/enviarEmail?paciente_id=${paciente_id})
+  await fetch(`/api/enviarEmail?paciente_id=${paciente_id}`)
   alert("Documentos enviados")
 }
+
 async function salvarRetorno(){
 
 const retorno_valido = document.getElementById("retorno_valido").checked
@@ -338,6 +339,7 @@ retorno_valido
 alert("Retorno salvo")
 
 }
+
 carregarPaciente()
 
 </script>
