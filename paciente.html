@@ -323,10 +323,7 @@ async function enviarAmbos(){
 async function salvarRetorno(){
 
 const retorno_valido = document.getElementById("retorno_valido").checked
-
-const hoje = new Date()
-const limite = new Date()
-limite.setDate(hoje.getDate() + 30)
+const nome = document.getElementById("nome").innerText
 
 await fetch("/api/salvarPaciente",{
 
@@ -335,15 +332,15 @@ headers:{ "Content-Type":"application/json" },
 
 body:JSON.stringify({
 paciente_id,
-retorno_valido,
-data_limite_retorno: limite.toISOString()
+nome,
+retorno_valido
 })
 
 })
-
-document.getElementById("data_retorno").innerText = limite.toLocaleDateString()
 
 alert("Retorno salvo")
+
+}
 
 }
 
