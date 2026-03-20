@@ -42,16 +42,27 @@ console.log("ERRO FEEGOW:", e.message)
 
 try{
 
+try{
+
 const hoje = new Date()
 
-const dia = String(hoje.getDate()).padStart(2,'0')
-const mes = String(hoje.getMonth()+1).padStart(2,'0')
-const ano = hoje.getFullYear()
+// 🔥 busca últimos 30 dias
+const dataInicio = new Date()
+dataInicio.setDate(hoje.getDate() - 30)
 
-const data = `${dia}-${mes}-${ano}`
+// 🔥 função para formato BR
+function formatarDataBR(date){
+  const d = String(date.getDate()).padStart(2,'0')
+  const m = String(date.getMonth()+1).padStart(2,'0')
+  const y = date.getFullYear()
+  return `${d}-${m}-${y}`
+}
+
+const data_start = formatarDataBR(dataInicio)
+const data_end = formatarDataBR(hoje)
 
 const agendaResponse = await fetch(
-`https://api.feegow.com/v1/api/appoints/search?data_start=${data}&data_end=${data}&paciente_id=${paciente_id}`,
+`https://api.feegow.com/v1/api/appoints/search?data_start=${data_start}&data_end=${data_end}&paciente_id=${paciente_id}`,
 {
 headers:{
 "Content-Type":"application/json",
@@ -63,7 +74,14 @@ headers:{
 const agendaData = await agendaResponse.json()
 
 if(agendaData.content?.length){
-dias_limite_retorno = agendaData.content[0].dias_limite_retorno
+
+  // 🔥 pega o primeiro que tem retorno válido
+  const agendamentoValido = agendaData.content.find(a => a.dias_limite_retorno)
+
+  if(agendamentoValido){
+    dias_limite_retorno = agendamentoValido.dias_limite_retorno
+  }
+
 }
 
 }catch(e){
