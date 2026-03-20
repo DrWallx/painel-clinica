@@ -1,36 +1,46 @@
-import fs from "fs"
-import path from "path"
+import { kv } from "@vercel/kv"
 
-export default function handler(req, res){
+export default async function handler(req, res){
 
-  const filePath = path.join(process.cwd(), "database", "pacientes.json")
+  try{
 
-  if(!fs.existsSync(filePath)){
-    return res.status(200).json([])
-  }
+    const hoje = new Date()
 
-  const data = JSON.parse(fs.readFileSync(filePath, "utf-8"))
+    // 🔥 pega todos os pacientes do KV
+    const keys = await kv.keys("paciente:*")
 
-  const hoje = new Date()
+    const listaFinal = []
 
-  const listaFinal = data
-    .filter(p => p.retorno_valido == true)
-    .map(p => {
+    for(const key of keys){
 
-      if(!p.data_limite_retorno) return null
+      const p = await kv.get(key)
+
+      if(!p) continue
+
+      if(p.retorno_valido != true) continue
+
+      if(!p.data_limite_retorno) continue
 
       const limite = new Date(p.data_limite_retorno)
 
-      if(limite < hoje) return null
+      if(limite < hoje) continue
 
-      return {
-        id: p.id || p.paciente_id,
-        nome: p.nome,
+      listaFinal.push({
+        id: key.replace("paciente:",""),
+        nome: p.nome || "Sem nome",
         data_limite_retorno: limite
-      }
+      })
 
-    })
-    .filter(p => p !== null)
+    }
 
-  return res.status(200).json(listaFinal)
+    return res.status(200).json(listaFinal)
+
+  }catch(e){
+
+    console.log("ERRO RETORNOS:", e)
+
+    return res.status(500).json({ erro: "erro interno" })
+
+  }
+
 }
