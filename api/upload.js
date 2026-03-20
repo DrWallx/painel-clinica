@@ -45,6 +45,10 @@ export default async function handler(req, res) {
 
     const nomeArquivo = `${paciente_id}_${Date.now()}.${ext}`
 
+    /* ===================== */
+    /* UPLOAD BLOB */
+    /* ===================== */
+
     const blob = await put(
       nomeArquivo,
       fs.createReadStream(file.filepath),
@@ -57,26 +61,28 @@ export default async function handler(req, res) {
     console.log("UPLOAD OK:", blob.url)
 
     /* ===================== */
-    /* KV MULTIPLO */
+    /* KV */
     /* ===================== */
 
     const key = `paciente:${paciente_id}`
 
     let data = await kv.get(key) || {}
 
-    if (!data.receitas) data.receitas = []
-    if (!data.notas) data.notas = []
-    if (!data.exames) data.exames = []
+    // 🔥 garante estrutura segura
+    data.receitas = Array.isArray(data.receitas) ? data.receitas : []
+    data.notas = Array.isArray(data.notas) ? data.notas : []
+    data.exames = Array.isArray(data.exames) ? data.exames : []
 
-    if (tipo === "receita") {
+    // 🔥 salva conforme tipo (sem duplicar)
+    if (tipo === "receita" && !data.receitas.includes(blob.url)) {
       data.receitas.push(blob.url)
     }
 
-    if (tipo === "nota") {
+    if (tipo === "nota" && !data.notas.includes(blob.url)) {
       data.notas.push(blob.url)
     }
 
-    if (tipo === "exame") {
+    if (tipo === "exame" && !data.exames.includes(blob.url)) {
       data.exames.push(blob.url)
     }
 
@@ -90,10 +96,18 @@ export default async function handler(req, res) {
 
     try {
       const baseUrl = "https://project-dvdik.vercel.app"
+
       await fetch(`${baseUrl}/api/enviarEmail?paciente_id=${paciente_id}`)
+
+      console.log("EMAIL ENVIADO")
+
     } catch (e) {
       console.log("ERRO EMAIL:", e.message)
     }
+
+    /* ===================== */
+    /* RESPONSE */
+    /* ===================== */
 
     return res.status(200).json({
       success: true,
