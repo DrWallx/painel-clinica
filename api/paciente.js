@@ -29,9 +29,14 @@ headers:{
 const pacienteData = await pacienteResponse.json()
 
 // 🔥 CORREÇÃO AQUI (array → objeto)
-if(pacienteData.success && pacienteData.content?.length){
-  p = pacienteData.content[0]
-}
+if(pacienteData.success && pacienteData.content){
+
+  if(Array.isArray(pacienteData.content)){
+    p = pacienteData.content[0]
+  }else{
+    p = pacienteData.content
+  }
+
 
 }catch(e){
 console.log("ERRO FEEGOW:", e.message)
