@@ -90,7 +90,7 @@ Paciente possui <b>direito de retorno</b>
 
 </div>
 
-<!-- 🔥 RECEITAS -->
+<!-- RECEITAS -->
 <div class="card">
 
 <h3>Receitas (links)</h3>
@@ -103,7 +103,7 @@ Paciente possui <b>direito de retorno</b>
 
 </div>
 
-<!-- 🔥 EXAMES -->
+<!-- EXAMES -->
 <div class="card">
 
 <h3>Exames (links)</h3>
@@ -116,7 +116,7 @@ Paciente possui <b>direito de retorno</b>
 
 </div>
 
-<!-- 🧾 NOTAS -->
+<!-- NOTAS -->
 <div class="card">
 
 <h3>Notas fiscais (PDF)</h3>
@@ -127,9 +127,11 @@ Paciente possui <b>direito de retorno</b>
 
 <button onclick="uploadNota()">Enviar notas</button>
 
+<div id="lista_notas"></div>
+
 </div>
 
-<!-- 🔥 ENVIO -->
+<!-- ENVIO -->
 <div class="card">
 
 <h3>Enviar documentos</h3>
@@ -170,12 +172,11 @@ document.getElementById("data_retorno").innerText = data.dias_limite_retorno
 
 renderReceitas(data.receitas || [])
 renderExames(data.exames || [])
+renderNotas(data.notas || [])
 
 }
 
-/* ===================== */
 /* RECEITAS */
-/* ===================== */
 
 async function adicionarReceita(){
 
@@ -204,7 +205,6 @@ body:JSON.stringify({ paciente_id, receitas })
 
 renderReceitas(receitas)
 
-// 🔥 UX
 input.value = ""
 input.focus()
 
@@ -244,9 +244,7 @@ renderReceitas(receitas)
 
 }
 
-/* ===================== */
 /* EXAMES */
-/* ===================== */
 
 async function adicionarExame(){
 
@@ -275,7 +273,6 @@ body:JSON.stringify({ paciente_id, exames })
 
 renderExames(exames)
 
-// 🔥 UX
 input.value = ""
 input.focus()
 
@@ -315,9 +312,41 @@ renderExames(exames)
 
 }
 
-/* ===================== */
 /* NOTAS */
-/* ===================== */
+
+function renderNotas(lista){
+
+const div = document.getElementById("lista_notas")
+div.innerHTML = ""
+
+lista.forEach((link, i)=>{
+div.innerHTML += `
+<p>
+<a href="${link}" target="_blank">🧾 Nota ${i+1}</a>
+<button onclick="removerNota(${i})">❌</button>
+</p>`
+})
+
+}
+
+async function removerNota(index){
+
+const res = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
+const paciente = await res.json()
+
+let notas = paciente.notas || []
+
+notas.splice(index,1)
+
+await fetch("/api/salvarPaciente",{
+method:"POST",
+headers:{ "Content-Type":"application/json" },
+body:JSON.stringify({ paciente_id, notas })
+})
+
+renderNotas(notas)
+
+}
 
 async function uploadNota(){
 
@@ -340,34 +369,18 @@ body:form
 
 }
 
-// limpa input
+const res = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
+const paciente = await res.json()
+
+renderNotas(paciente.notas || [])
+
 input.value = ""
 
 alert("Notas enviadas")
 
 }
 
-/* ===================== */
-/* ENTER = ADICIONAR */
-/* ===================== */
-
-document.getElementById("receita_link").addEventListener("keypress", function(e){
-if(e.key === "Enter"){
-e.preventDefault()
-adicionarReceita()
-}
-})
-
-document.getElementById("exame_link").addEventListener("keypress", function(e){
-if(e.key === "Enter"){
-e.preventDefault()
-adicionarExame()
-}
-})
-
-/* ===================== */
 /* ENVIO */
-/* ===================== */
 
 async function enviarReceita(){
 await fetch(`/api/enviarEmail?paciente_id=${paciente_id}&tipo=receita`)
