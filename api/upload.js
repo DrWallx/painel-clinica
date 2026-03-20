@@ -68,12 +68,11 @@ export default async function handler(req, res) {
 
     let data = await kv.get(key) || {}
 
-    // 🔥 garante estrutura segura
+    // estrutura segura
     data.receitas = Array.isArray(data.receitas) ? data.receitas : []
     data.notas = Array.isArray(data.notas) ? data.notas : []
     data.exames = Array.isArray(data.exames) ? data.exames : []
 
-    // 🔥 salva conforme tipo (sem duplicar)
     if (tipo === "receita" && !data.receitas.includes(blob.url)) {
       data.receitas.push(blob.url)
     }
@@ -91,23 +90,10 @@ export default async function handler(req, res) {
     console.log("SALVO NO KV:", data)
 
     /* ===================== */
-    /* EMAIL AUTOMATICO */
+    /* ⚠️ REMOVIDO EMAIL AUTOMÁTICO */
     /* ===================== */
-
-    try {
-      const baseUrl = "https://project-dvdik.vercel.app"
-
-      await fetch(`${baseUrl}/api/enviarEmail?paciente_id=${paciente_id}`)
-
-      console.log("EMAIL ENVIADO")
-
-    } catch (e) {
-      console.log("ERRO EMAIL:", e.message)
-    }
-
-    /* ===================== */
-    /* RESPONSE */
-    /* ===================== */
+    // 🔥 aqui estava o problema
+    // agora o envio só acontece via botão
 
     return res.status(200).json({
       success: true,
