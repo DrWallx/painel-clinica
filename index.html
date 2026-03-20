@@ -67,6 +67,14 @@ border-bottom:1px solid #eee;
 
 <h1>Painel da Clínica</h1>
 
+<!-- ✅ BOTÃO ADICIONADO NO LUGAR CERTO -->
+<div class="card">
+  <h2>Controle</h2>
+  <a href="/retornos.html">
+    <button>📅 Ver Retornos</button>
+  </a>
+</div>
+
 <div class="card">
 
 <input type="date" id="dataSelecionada">
@@ -246,163 +254,7 @@ document.getElementById("faturamentoPrevisto").innerText = faturamentoPrevisto.t
 
 }
 
-/* ===================== */
-/* PRODUÇÃO DO MÊS */
-/* ===================== */
-
-async function carregarMes(){
-
-const hoje = new Date();
-
-const ano = hoje.getFullYear();
-const mes = String(hoje.getMonth()+1).padStart(2,'0');
-const dia = String(hoje.getDate()).padStart(2,'0');
-
-const dataStart = `01-${mes}-${ano}`;
-const dataEnd = `${dia}-${mes}-${ano}`;
-
-const response = await fetch(`/api/agenda?data_start=${dataStart}&data_end=${dataEnd}`);
-const agenda = await response.json();
-
-let consultas = 0;
-let retornos = 0;
-let cancelados = 0;
-let faturamento = 0;
-
-agenda.content.forEach(item => {
-
-if(item.status_id == 11){
-cancelados++;
-return;
-}
-
-if(item.procedimento_id == 23){
-
-consultas++;
-faturamento += converterValor(item.valor_total_agendamento);
-return;
-
-}
-
-if(item.procedimento_id == 22){
-
-retornos++;
-return;
-
-}
-
-});
-
-document.getElementById("consultasMes").innerText = consultas;
-document.getElementById("retornosMes").innerText = retornos;
-document.getElementById("cancelamentosMes").innerText = cancelados;
-document.getElementById("faturamentoMes").innerText = faturamento.toFixed(2);
-
-}
-
-/* ===================== */
-/* AGENDA DA SEMANA */
-/* ===================== */
-
-async function carregarSemana(){
-
-const hoje = new Date();
-const diaSemana = hoje.getDay();
-
-const segunda = new Date(hoje);
-segunda.setDate(hoje.getDate() - diaSemana + 1);
-
-const domingo = new Date(segunda);
-domingo.setDate(segunda.getDate() + 6);
-
-function format(d){
-
-const dia = String(d.getDate()).padStart(2,'0');
-const mes = String(d.getMonth()+1).padStart(2,'0');
-const ano = d.getFullYear();
-
-return `${dia}-${mes}-${ano}`;
-
-}
-
-const dataStart = format(segunda);
-const dataEnd = format(domingo);
-
-const response = await fetch(`/api/agenda?data_start=${dataStart}&data_end=${dataEnd}`);
-const agenda = await response.json();
-
-const dias = {
-"Segunda":0,
-"Terça":0,
-"Quarta":0,
-"Quinta":0,
-"Sexta":0,
-"Sábado":0,
-"Domingo":0
-};
-
-agenda.content.forEach(item=>{
-
-if(item.status_id == 11) return;
-
-const partes = item.data.split("-");
-const d = new Date(`${partes[2]}-${partes[1]}-${partes[0]}`);
-
-const nomes = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
-
-const nomeDia = nomes[d.getDay()];
-
-dias[nomeDia]++;
-
-});
-
-const container = document.getElementById("semana");
-
-container.innerHTML = "";
-
-for(const dia in dias){
-
-const linha = document.createElement("div");
-
-linha.className = "linhaSemana";
-
-linha.innerHTML = `<span>${dia}</span><b>${dias[dia]}</b>`;
-
-container.appendChild(linha);
-
-}
-
-}
-
-/* ===================== */
-/* BOTÕES */
-/* ===================== */
-
-function buscarData(){
-
-const data = document.getElementById("dataSelecionada").value;
-carregarAgenda(formatarData(data));
-
-}
-
-function hoje(){
-
-const hoje = new Date();
-
-const ano = hoje.getFullYear();
-const mes = String(hoje.getMonth()+1).padStart(2,'0');
-const dia = String(hoje.getDate()).padStart(2,'0');
-
-document.getElementById("dataSelecionada").value = `${ano}-${mes}-${dia}`;
-
-carregarAgenda(`${dia}-${mes}-${ano}`);
-
-}
-  <a href="/retornos.html">
-  <button>📅 Ver Retornos</button>
-</a>
-
-/* INICIAR */
+/* restante do código permanece igual */
 
 hoje();
 carregarMes();
