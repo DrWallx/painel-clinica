@@ -2,9 +2,11 @@
 <html>
 
 <head>
+
 <title>Paciente</title>
 
 <style>
+
 body{
 font-family:Arial;
 background:#f4f6f8;
@@ -39,7 +41,9 @@ margin-bottom:10px;
 padding:8px;
 width:100%;
 }
+
 </style>
+
 </head>
 
 <body>
@@ -47,40 +51,97 @@ width:100%;
 <h1>Paciente</h1>
 
 <div class="card">
+
 <h3>Dados do Paciente</h3>
+
 <p><b>Nome:</b> <span id="nome"></span></p>
+<p><b>Data de nascimento:</b> <span id="nascimento"></span></p>
+<p><b>CPF:</b> <span id="cpf"></span></p>
 <p><b>Email:</b> <span id="email"></span></p>
+<p><b>Telefone:</b> <span id="telefone"></span></p>
+
+<br>
+
+<h4>Endereço</h4>
+
+<p><b>CEP:</b> <span id="cep"></span></p>
+<p><b>Rua:</b> <span id="rua"></span></p>
+<p><b>Número:</b> <span id="numero"></span></p>
+<p><b>Bairro:</b> <span id="bairro"></span></p>
+<p><b>Cidade:</b> <span id="cidade"></span></p>
+<p><b>Estado:</b> <span id="estado"></span></p>
+
+</div>
+
+<div class="card">
+
+<h3>Controle de Retorno</h3>
+
+<label>
+<input type="checkbox" id="retorno_valido">
+Paciente possui <b>direito de retorno</b>
+</label>
+
+<br><br>
+
+<p><b>Data limite retorno:</b> <span id="data_retorno"></span></p>
+
+<button onclick="salvarRetorno()">Salvar</button>
+
 </div>
 
 <!-- RECEITAS -->
 <div class="card">
-<h3>Receitas</h3>
-<input type="text" id="receita_link">
-<button onclick="adicionarReceita()">Adicionar</button>
+
+<h3>Receitas (links)</h3>
+
+<input type="text" id="receita_link" placeholder="Cole o link da receita">
+
+<button onclick="adicionarReceita()">Adicionar receita</button>
+
 <div id="lista_receitas"></div>
+
 </div>
 
 <!-- EXAMES -->
 <div class="card">
-<h3>Exames</h3>
-<input type="text" id="exame_link">
-<button onclick="adicionarExame()">Adicionar</button>
+
+<h3>Exames (links)</h3>
+
+<input type="text" id="exame_link" placeholder="Cole o link do exame">
+
+<button onclick="adicionarExame()">Adicionar exame</button>
+
 <div id="lista_exames"></div>
+
 </div>
 
 <!-- NOTAS -->
 <div class="card">
-<h3>Notas</h3>
-<input type="file" id="nota" multiple>
+
+<h3>Notas fiscais (PDF)</h3>
+
+<input type="file" id="nota" multiple accept="application/pdf">
+
+<br>
+
 <button onclick="adicionarNota()">Adicionar nota</button>
+
 <div id="lista_notas"></div>
+
 </div>
 
 <!-- ENVIO -->
 <div class="card">
-<h3>Enviar</h3>
-<p id="status_envio"></p>
-<button onclick="enviarNota()">Enviar</button>
+
+<h3>Enviar documentos</h3>
+
+<p id="status_envio" style="font-size:14px;color:#666;"></p>
+
+<button onclick="enviarReceita()">Enviar Receita</button>
+<button onclick="enviarNota()">Enviar Nota</button>
+<button onclick="enviarAmbos()">Enviar Ambos</button>
+
 </div>
 
 <script>
@@ -90,11 +151,26 @@ const paciente_id = params.get("paciente_id")
 
 async function carregarPaciente(){
 
-const res = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
-const data = await res.json()
+const response = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
+const data = await response.json()
 
 document.getElementById("nome").innerText = data.nome
+document.getElementById("nascimento").innerText = data.nascimento
+document.getElementById("cpf").innerText = data.cpf
+
 document.getElementById("email").innerText = data.email
+document.getElementById("telefone").innerText = data.telefone
+
+document.getElementById("cep").innerText = data.cep
+document.getElementById("rua").innerText = data.rua
+document.getElementById("numero").innerText = data.numero
+document.getElementById("bairro").innerText = data.bairro
+document.getElementById("cidade").innerText = data.cidade
+document.getElementById("estado").innerText = data.estado
+
+if(data.dias_limite_retorno){
+document.getElementById("data_retorno").innerText = data.dias_limite_retorno
+}
 
 if(data.ultimo_envio){
 document.getElementById("status_envio").innerText =
@@ -122,7 +198,7 @@ const paciente = await res.json()
 let receitas = paciente.receitas || []
 
 if(receitas.includes(link)){
-alert("Já existe")
+alert("Link já adicionado")
 return
 }
 
@@ -141,7 +217,10 @@ input.value = ""
 
 function renderReceitas(lista){
 document.getElementById("lista_receitas").innerHTML =
-lista.map((l,i)=>`<p>${l}</p>`).join("")
+lista.map((l,i)=>`
+<p>
+<a href="${l}" target="_blank">📄 Receita ${i+1}</a>
+</p>`).join("")
 }
 
 /* EXAMES */
@@ -159,7 +238,7 @@ const paciente = await res.json()
 let exames = paciente.exames || []
 
 if(exames.includes(link)){
-alert("Já existe")
+alert("Link já adicionado")
 return
 }
 
@@ -178,7 +257,10 @@ input.value = ""
 
 function renderExames(lista){
 document.getElementById("lista_exames").innerHTML =
-lista.map((l,i)=>`<p>${l}</p>`).join("")
+lista.map((l,i)=>`
+<p>
+<a href="${l}" target="_blank">🧪 Exame ${i+1}</a>
+</p>`).join("")
 }
 
 /* NOTAS */
@@ -231,23 +313,27 @@ alert("Notas adicionadas")
 
 function renderNotas(lista){
 document.getElementById("lista_notas").innerHTML =
-lista.map((l,i)=>`<p><a href="${l}" target="_blank">Nota ${i+1}</a></p>`).join("")
+lista.map((l,i)=>`
+<p>
+<a href="${l}" target="_blank">🧾 Nota ${i+1}</a>
+</p>`).join("")
 }
 
 /* ENVIO */
 
-async function enviarNota(){
-
-const res = await fetch(`/api/enviarEmail?paciente_id=${paciente_id}`)
-const data = await res.json()
-
-if(data.success){
-alert("Enviado com sucesso")
-carregarPaciente()
-}else{
-alert("Erro ao enviar")
+async function enviarReceita(){
+await fetch(`/api/enviarEmail?paciente_id=${paciente_id}`)
+alert("Receitas enviadas")
 }
 
+async function enviarNota(){
+await fetch(`/api/enviarEmail?paciente_id=${paciente_id}`)
+alert("Notas enviadas")
+}
+
+async function enviarAmbos(){
+await fetch(`/api/enviarEmail?paciente_id=${paciente_id}`)
+alert("Documentos enviados")
 }
 
 carregarPaciente()
