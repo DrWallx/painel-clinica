@@ -28,8 +28,9 @@ headers:{
 
 const pacienteData = await pacienteResponse.json()
 
-if(pacienteData.success){
-p = pacienteData.content
+// 🔥 CORREÇÃO AQUI (array → objeto)
+if(pacienteData.success && pacienteData.content?.length){
+  p = pacienteData.content[0]
 }
 
 }catch(e){
@@ -53,7 +54,7 @@ function formatarDataBR(date){
 
 let melhorRetorno = null
 
-// 🔥 busca últimos 15 dias (equilíbrio ideal)
+// 🔥 busca últimos 15 dias
 for(let i = 0; i < 15; i++){
 
   const dataBusca = new Date()
@@ -75,12 +76,10 @@ for(let i = 0; i < 15; i++){
 
   if(agendaData.content?.length){
 
-    // pega todos com retorno válido
     const comRetorno = agendaData.content.filter(a => a.dias_limite_retorno)
 
     if(comRetorno.length){
 
-      // ordena pelo mais recente
       comRetorno.sort((a,b)=>{
         const da = new Date(a.data.split("-").reverse().join("-"))
         const db = new Date(b.data.split("-").reverse().join("-"))
@@ -103,7 +102,8 @@ if(melhorRetorno){
 console.log("ERRO AGENDA:", e.message)
  
 }
-  /* ===================== */
+
+/* ===================== */
 /* KV */
 /* ===================== */
 
@@ -117,10 +117,9 @@ try {
 }
 
 /* ===================== */
-/* NORMALIZAÇÃO (NOVO) */
+/* NORMALIZAÇÃO */
 /* ===================== */
 
-// 🔥 suporte antigo + novo
 const receitas = local.receitas || (local.receita_url ? [local.receita_url] : [])
 const exames = local.exames || []
 const notas = local.notas || (local.nota_url ? [local.nota_url] : [])
@@ -133,7 +132,9 @@ return res.status(200).json({
 
 nome: p?.nome || "",
 nascimento: p?.nascimento || "",
-cpf: p?.documentos?.cpf || "",
+
+// 🔥 CORREÇÃO AQUI (fallback)
+cpf: p?.documentos?.cpf || p?.cpf || "",
 
 email: p?.email?.[0] || "",
 telefone: p?.celulares?.[0] || "",
@@ -147,12 +148,10 @@ estado: p?.estado || "",
 
 dias_limite_retorno,
 
-// 🔥 NOVO FORMATO
 receitas,
 exames,
 notas,
 
-// 🔥 COMPATIBILIDADE ANTIGA
 receita_url: receitas[0] || null,
 nota_url: notas[0] || null
 
@@ -168,4 +167,4 @@ erro:error.message
 
 }
 
-
+}
