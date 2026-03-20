@@ -1,15 +1,135 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Painel da Clínica</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f4f6f8;
+padding:40px;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:10px;
+margin-bottom:20px;
+box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+.agenda-item{
+display:flex;
+align-items:center;
+padding:10px;
+margin-bottom:8px;
+background:#f1f5f9;
+border-radius:6px;
+border-left:5px solid #3b82f6;
+}
+
+.cancelado{
+display:flex;
+align-items:center;
+padding:10px;
+margin-bottom:8px;
+background:#fff5f5;
+border-radius:6px;
+border-left:5px solid #dc2626;
+color:#dc2626;
+font-weight:bold;
+}
+
+.hora{
+font-weight:bold;
+width:90px;
+}
+
+.paciente{
+flex:1;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Painel da Clínica</h1>
+
+<div class="card">
+
+<input type="date" id="dataSelecionada">
+
+<button onclick="buscarData()">Buscar</button>
+<button onclick="hoje()">Hoje</button>
+<button onclick="ontem()">Ontem</button>
+<button onclick="amanha()">Amanhã</button>
+
+</div>
+
+<div class="card">
+
+<h2>Agenda</h2>
+<div id="agenda"></div>
+
+</div>
+
+<div class="card">
+
+<h2>Consultas Canceladas</h2>
+<div id="canceladas"></div>
+
+</div>
+
+<div class="card">
+
+<h2>Resumo do Dia</h2>
+
+<p>Consultas: <span id="consultas">0</span></p>
+<p>Retornos: <span id="retornos">0</span></p>
+<p>Cancelamentos: <span id="cancelamentos">0</span></p>
+
+<p><b>Receita prevista do dia: R$ <span id="faturamentoPrevisto">0</span></b></p>
+
+</div>
+
+<div class="card">
+
+<h2>Produção do Mês</h2>
+
+<p>Consultas realizadas: <span id="consultasMes">0</span></p>
+<p>Retornos realizados: <span id="retornosMes">0</span></p>
+<p>Cancelamentos: <span id="cancelamentosMes">0</span></p>
+
+<p><b>Receita do mês: R$ <span id="faturamentoMes">0</span></b></p>
+
+</div>
+
 <script>
 
 function converterValor(valor){
+
 if(!valor) return 0
+
 return parseFloat(
-valor.replace("R$","").replace(/\./g,"").replace(",",".").trim()
+valor
+.replace("R$","")
+.replace(/\./g,"")
+.replace(",",".")
+.trim()
 )
+
 }
 
 function formatarData(data){
+
 const partes = data.split("-");
 return `${partes[2]}-${partes[1]}-${partes[0]}`;
+
 }
 
 /* ===================== */
@@ -32,7 +152,7 @@ let retornos = 0;
 let cancelados = 0;
 let faturamentoPrevisto = 0;
 
-const agendaDoDia = agenda.content || [];
+const agendaDoDia = agenda.content;
 
 agendaDoDia.sort((a,b)=>a.horario.localeCompare(b.horario));
 
@@ -41,10 +161,14 @@ agendaDoDia.forEach(item=>{
 const horario = item.horario.substring(0,5);
 const nome = item.paciente_nome;
 
+/* CANCELADOS */
+
 if(item.status_id == 11){
+
 cancelados++;
 
 const bloco = document.createElement("div");
+
 bloco.className = "cancelado";
 
 bloco.innerHTML = `
@@ -53,12 +177,18 @@ bloco.innerHTML = `
 `;
 
 listaCancelados.appendChild(bloco);
+
 return;
+
 }
+
+/* STATUS VISÍVEIS */
 
 if(item.status_id != 1 && item.status_id != 7 && item.status_id != 2 && item.status_id != 3){
 return;
 }
+
+/* TIPO */
 
 let tipo = "Consulta";
 
@@ -69,6 +199,8 @@ retornos++;
 consultas++;
 }
 
+/* STATUS */
+
 let statusIcon = "";
 
 if(item.status_id == 1) statusIcon = "🟡 Agendada";
@@ -77,22 +209,22 @@ if(item.status_id == 2) statusIcon = "🟢 Confirmada";
 if(item.status_id == 3) statusIcon = "✅ Realizada";
 
 const bloco = document.createElement("div");
+
 bloco.className = "agenda-item";
 
 bloco.innerHTML = `
 <div class="hora">${horario}</div>
-<div class="paciente">
-<a href="/paciente.html?paciente_id=${item.paciente_id}" 
-style="text-decoration:none;color:inherit;font-weight:bold">
-${tipo} - ${nome} ${statusIcon}
-</a>
-</div>
+<div class="paciente">${tipo} - ${nome} ${statusIcon}</div>
 `;
 
 lista.appendChild(bloco);
 
+/* RECEITA PREVISTA */
+
 if(item.procedimento_id != 22){
+
 faturamentoPrevisto += converterValor(item.valor_total_agendamento);
+
 }
 
 });
@@ -101,6 +233,7 @@ document.getElementById("consultas").innerText = consultas;
 document.getElementById("retornos").innerText = retornos;
 document.getElementById("cancelamentos").innerText = cancelados;
 document.getElementById("faturamentoPrevisto").innerText = faturamentoPrevisto.toFixed(2);
+
 }
 
 /* ===================== */
@@ -126,22 +259,32 @@ let retornos = 0;
 let cancelados = 0;
 let faturamento = 0;
 
-(agenda.content || []).forEach(item => {
+agenda.content.forEach(item => {
+
+/* CANCELADO */
 
 if(item.status_id == 11){
 cancelados++;
 return;
 }
 
+/* CONSULTA */
+
 if(item.procedimento_id == 23){
+
 consultas++;
 faturamento += converterValor(item.valor_total_agendamento);
 return;
+
 }
 
+/* RETORNO */
+
 if(item.procedimento_id == 22){
+
 retornos++;
 return;
+
 }
 
 });
@@ -150,62 +293,7 @@ document.getElementById("consultasMes").innerText = consultas;
 document.getElementById("retornosMes").innerText = retornos;
 document.getElementById("cancelamentosMes").innerText = cancelados;
 document.getElementById("faturamentoMes").innerText = faturamento.toFixed(2);
-}
 
-/* ===================== */
-/* AGENDA DA SEMANA */
-/* ===================== */
-
-async function carregarSemana(){
-
-const hoje = new Date();
-const diaSemana = hoje.getDay();
-
-const segunda = new Date(hoje);
-segunda.setDate(hoje.getDate() - diaSemana + 1);
-
-const domingo = new Date(segunda);
-domingo.setDate(segunda.getDate() + 6);
-
-function format(d){
-const dia = String(d.getDate()).padStart(2,'0');
-const mes = String(d.getMonth()+1).padStart(2,'0');
-const ano = d.getFullYear();
-return `${dia}-${mes}-${ano}`;
-}
-
-const dataStart = format(segunda);
-const dataEnd = format(domingo);
-
-const response = await fetch(`/api/agenda?data_start=${dataStart}&data_end=${dataEnd}`);
-const agenda = await response.json();
-
-const dias = {
-"Segunda":0,"Terça":0,"Quarta":0,"Quinta":0,"Sexta":0,"Sábado":0,"Domingo":0
-};
-
-(agenda.content || []).forEach(item=>{
-
-if(item.status_id == 11) return;
-
-const partes = item.data.split("-");
-const d = new Date(`${partes[2]}-${partes[1]}-${partes[0]}`);
-
-const nomes = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
-
-dias[nomes[d.getDay()]]++;
-
-});
-
-const container = document.getElementById("semana");
-container.innerHTML = "";
-
-for(const dia in dias){
-const linha = document.createElement("div");
-linha.className = "linhaSemana";
-linha.innerHTML = `<span>${dia}</span><b>${dias[dia]}</b>`;
-container.appendChild(linha);
-}
 }
 
 /* ===================== */
@@ -213,42 +301,61 @@ container.appendChild(linha);
 /* ===================== */
 
 function buscarData(){
+
 const data = document.getElementById("dataSelecionada").value;
 carregarAgenda(formatarData(data));
+
 }
 
 function hoje(){
+
 const hoje = new Date();
+
 const ano = hoje.getFullYear();
 const mes = String(hoje.getMonth()+1).padStart(2,'0');
 const dia = String(hoje.getDate()).padStart(2,'0');
 
 document.getElementById("dataSelecionada").value = `${ano}-${mes}-${dia}`;
+
 carregarAgenda(`${dia}-${mes}-${ano}`);
+
 }
 
 function ontem(){
+
 const d = new Date();
 d.setDate(d.getDate()-1);
-const dia = String(d.getDate()).padStart(2,'0');
-const mes = String(d.getMonth()+1).padStart(2,'0');
+
 const ano = d.getFullYear();
+const mes = String(d.getMonth()+1).padStart(2,'0');
+const dia = String(d.getDate()).padStart(2,'0');
+
+document.getElementById("dataSelecionada").value = `${ano}-${mes}-${dia}`;
+
 carregarAgenda(`${dia}-${mes}-${ano}`);
+
 }
 
 function amanha(){
+
 const d = new Date();
 d.setDate(d.getDate()+1);
-const dia = String(d.getDate()).padStart(2,'0');
-const mes = String(d.getMonth()+1).padStart(2,'0');
-const ano = d.getFullYear();
-carregarAgenda(`${dia}-${mes}-${ano}`);
-}
 
-/* INICIAR */
+const ano = d.getFullYear();
+const mes = String(d.getMonth()+1).padStart(2,'0');
+const dia = String(d.getDate()).padStart(2,'0');
+
+document.getElementById("dataSelecionada").value = `${ano}-${mes}-${dia}`;
+
+carregarAgenda(`${dia}-${mes}-${ano}`);
+
+}
 
 hoje();
 carregarMes();
-carregarSemana();
 
 </script>
+
+</body>
+
+</html>
