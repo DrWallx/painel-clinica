@@ -1,4 +1,5 @@
 import { Resend } from 'resend'
+import { kv } from '@vercel/kv'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -6,24 +7,31 @@ export default async function handler(req, res) {
 
   try {
 
-    const { paciente_id, tipo } = req.query
+    const { paciente_id } = req.query
+
+    /* ===================== */
+    /* KV DIRETO (BLINDADO) */
+    /* ===================== */
+
+    const key = `paciente:${paciente_id}`
+    const local = await kv.get(key) || {}
+
+    console.log("KV DIRETO:", local)
+
+    const receitas = local.receitas || []
+    const exames = local.exames || []
+    const notas = local.notas || []
+
+    /* ===================== */
+    /* PACIENTE (FEEGOW) */
+    /* ===================== */
 
     const baseUrl = "https://project-dvdik.vercel.app"
 
-    // 🔥 SEMPRE BUSCA DADO ATUALIZADO
     const pacienteResponse = await fetch(`${baseUrl}/api/paciente?paciente_id=${paciente_id}`)
     const paciente = await pacienteResponse.json()
 
-    console.log("PACIENTE EMAIL DATA:", paciente)
-
     const emailPaciente = paciente.email
-
-    // 🔥 SUPORTE ANTIGO + NOVO
-    const receitas = paciente.receitas || (paciente.receita_url ? [paciente.receita_url] : [])
-    const exames = paciente.exames || []
-    const notas = paciente.notas || (paciente.nota_url ? [paciente.nota_url] : [])
-
-    console.log("NOTAS ENCONTRADAS:", notas)
 
     /* ===================== */
     /* HTML */
@@ -40,7 +48,7 @@ export default async function handler(req, res) {
     `
 
     // RECEITAS
-    if ((tipo === "receita" || !tipo) && receitas.length) {
+    if (receitas.length) {
       html += `<h3>Receitas</h3>`
       receitas.forEach(url => {
         html += `<p><a href="${url}">📄 Abrir Receita</a></p>`
@@ -48,7 +56,7 @@ export default async function handler(req, res) {
     }
 
     // EXAMES
-    if (!tipo && exames.length) {
+    if (exames.length) {
       html += `<h3>Exames</h3>`
       exames.forEach(url => {
         html += `<p><a href="${url}">🧪 Ver Exame</a></p>`
@@ -63,34 +71,30 @@ export default async function handler(req, res) {
 
     let attachments = []
 
-    if ((tipo === "nota" || !tipo) && notas.length) {
+    for (let i = 0; i < notas.length; i++) {
 
-      for (let i = 0; i < notas.length; i++) {
+      const url = notas[i]
 
-        const url = notas[i]
+      try {
 
-        try {
+        console.log("BAIXANDO NOTA:", url)
 
-          console.log("BAIXANDO NOTA:", url)
+        const response = await fetch(url, { cache: "no-store" })
 
-          const response = await fetch(url)
-
-          if (!response.ok) {
-            console.log("ERRO FETCH NOTA:", response.status)
-            continue
-          }
-
-          const buffer = await response.arrayBuffer()
-
-          attachments.push({
-            filename: `nota_${i + 1}.pdf`,
-            content: Buffer.from(buffer)
-          })
-
-        } catch (e) {
-          console.log("ERRO AO BAIXAR NOTA:", e.message)
+        if (!response.ok) {
+          console.log("ERRO DOWNLOAD:", response.status)
+          continue
         }
 
+        const buffer = await response.arrayBuffer()
+
+        attachments.push({
+          filename: `nota_${i + 1}.pdf`,
+          content: Buffer.from(buffer)
+        })
+
+      } catch (e) {
+        console.log("ERRO NOTA:", e.message)
       }
 
     }
