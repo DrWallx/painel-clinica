@@ -47,7 +47,7 @@ export default async function handler(req, res){
 
       listaFinal.push({
         id: key.replace("paciente:",""),
-        nome: p.nome || "Sem nome",
+        nome: (p.nome && p.nome.trim()) ? p.nome : `Paciente ${key.replace("paciente:","")}`,
         data_limite_retorno: limite
       })
 
