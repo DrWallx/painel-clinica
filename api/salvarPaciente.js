@@ -27,7 +27,7 @@ export default async function handler(req, res) {
     let data = await kv.get(key) || {}
 
     /* ===================== */
-    /* 🔥 NOME (CORREÇÃO) */
+    /* NOME */
     /* ===================== */
 
     if (nome !== undefined && nome !== "") {
@@ -69,6 +69,32 @@ export default async function handler(req, res) {
     if (!data.receitas) data.receitas = []
     if (!data.exames) data.exames = []
     if (!data.notas) data.notas = []
+
+    /* ===================== */
+    /* 🔥 HISTÓRICO (NOVO) */
+    /* ===================== */
+
+    if (!data.historico) data.historico = []
+
+    const temEnvio =
+      (receitas && receitas.length) ||
+      (exames && exames.length) ||
+      (notas && notas.length)
+
+    if (temEnvio) {
+
+      data.historico.push({
+        data: new Date().toISOString(),
+        receitas: receitas || [],
+        exames: exames || [],
+        notas: notas || []
+      })
+
+    }
+
+    /* ===================== */
+    /* SALVAR */
+    /* ===================== */
 
     await kv.set(key, data)
 
