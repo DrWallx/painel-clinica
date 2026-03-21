@@ -168,7 +168,7 @@ export default async function handler(req, res) {
 
     await resend.emails.send({
       from: 'Clínica Haux <hauxlife@hauxlife.com.br>',
-      to: emailPaciente,
+      to: [emailPaciente],
       subject: 'Seus documentos',
       html,
       attachments
