@@ -346,7 +346,158 @@ function verHistorico(){
 }
 
 carregarPaciente()
+/* ===================== */
+/* RECEITAS */
+/* ===================== */
 
+async function adicionarReceita(){
+
+  const input = document.getElementById("receita_link")
+  const link = input.value.trim()
+
+  if(!link) return alert("Cole o link")
+
+  const res = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
+  const paciente = await res.json()
+
+  let receitas = paciente.receitas || []
+
+  if(receitas.includes(link)){
+    alert("Link já adicionado")
+    return
+  }
+
+  receitas.push(link)
+
+  await fetch("/api/salvarPaciente",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ paciente_id, receitas })
+  })
+
+  renderReceitas(receitas)
+  input.value = ""
+}
+
+function renderReceitas(lista){
+  document.getElementById("lista_receitas").innerHTML =
+    lista.map((l,i)=>`
+      <p><a href="${l}" target="_blank">📄 Receita ${i+1}</a></p>
+    `).join("")
+}
+
+/* ===================== */
+/* EXAMES */
+/* ===================== */
+
+async function adicionarExame(){
+
+  const input = document.getElementById("exame_link")
+  const link = input.value.trim()
+
+  if(!link) return alert("Cole o link")
+
+  const res = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
+  const paciente = await res.json()
+
+  let exames = paciente.exames || []
+
+  if(exames.includes(link)){
+    alert("Link já adicionado")
+    return
+  }
+
+  exames.push(link)
+
+  await fetch("/api/salvarPaciente",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ paciente_id, exames })
+  })
+
+  renderExames(exames)
+  input.value = ""
+}
+
+function renderExames(lista){
+  document.getElementById("lista_exames").innerHTML =
+    lista.map((l,i)=>`
+      <p><a href="${l}" target="_blank">🧪 Exame ${i+1}</a></p>
+    `).join("")
+}
+
+/* ===================== */
+/* NOTAS */
+/* ===================== */
+
+async function adicionarNota(){
+
+  const input = document.getElementById("nota")
+  const files = input.files
+
+  if(!files.length) return alert("Selecione arquivos")
+
+  const resPaciente = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
+  const paciente = await resPaciente.json()
+
+  let notas = paciente.notas || []
+
+  for(let file of files){
+
+    const form = new FormData()
+    form.append("file", file)
+    form.append("paciente_id", paciente_id)
+    form.append("tipo","nota")
+
+    const response = await fetch("/api/upload",{
+      method:"POST",
+      body:form
+    })
+
+    const data = await response.json()
+
+    if(data.url && !notas.includes(data.url)){
+      notas.push(data.url)
+    }
+  }
+
+  await fetch("/api/salvarPaciente",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ paciente_id, notas })
+  })
+
+  renderNotas(notas)
+  input.value = ""
+
+  alert("Notas adicionadas")
+}
+
+function renderNotas(lista){
+  document.getElementById("lista_notas").innerHTML =
+    lista.map((l,i)=>`
+      <p><a href="${l}" target="_blank">🧾 Nota ${i+1}</a></p>
+    `).join("")
+}
+
+/* ===================== */
+/* ENVIO */
+/* ===================== */
+
+async function enviarReceita(){
+  await fetch(`/api/enviarEmail?paciente_id=${paciente_id}`)
+  alert("Receitas enviadas")
+}
+
+async function enviarNota(){
+  await fetch(`/api/enviarEmail?paciente_id=${paciente_id}`)
+  alert("Notas enviadas")
+}
+
+async function enviarAmbos(){
+  await fetch(`/api/enviarEmail?paciente_id=${paciente_id}`)
+  alert("Documentos enviados")
+}
 </script>
 
 </body>
