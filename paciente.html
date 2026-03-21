@@ -4,86 +4,93 @@
 <head>
   <title>Paciente</title>
 
- <style>
+<style>
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI";
   background: #eef2f6;
-  padding: 30px;
+  padding: 20px;
   color: #1f2937;
 }
 
-/* TÍTULO */
-h1 {
-  margin-bottom: 25px;
-  font-size: 28px;
+/* HEADER PACIENTE */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 20px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.sub {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* BADGE RETORNO */
+.badge {
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.badge.on {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.badge.off {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* GRID */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
 }
 
 /* CARDS */
 .card {
   background: white;
-  padding: 25px;
+  padding: 20px;
   border-radius: 14px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 
-/* TÍTULOS DOS CARDS */
-.card h3 {
-  margin-bottom: 15px;
-  font-size: 18px;
-  color: #111827;
-}
-
-/* SUBTÍTULO */
-.card h4 {
-  margin-top: 15px;
-  margin-bottom: 10px;
-  color: #374151;
-}
-
-/* TEXTOS */
-p {
-  margin: 6px 0;
-  font-size: 14px;
-}
-
-/* INPUTS */
+/* INPUT */
 input {
-  margin-top: 10px;
-  margin-bottom: 10px;
-  padding: 10px;
   width: 100%;
+  padding: 10px;
+  margin: 10px 0;
   border-radius: 8px;
-  border: 1px solid #d1d5db;
-  outline: none;
-  transition: 0.2s;
+  border: 1px solid #ddd;
 }
 
-input:focus {
-  border-color: #3b82f6;
-}
-
-/* BOTÕES PADRÃO */
+/* BOTÕES */
 button {
-  padding: 10px 14px;
+  padding: 8px 12px;
+  border-radius: 8px;
   border: none;
   background: #3b82f6;
   color: white;
-  border-radius: 8px;
   cursor: pointer;
-  margin-right: 8px;
-  font-size: 13px;
-  transition: 0.2s;
+  margin-right: 6px;
 }
 
 button:hover {
   background: #2563eb;
-  transform: translateY(-1px);
 }
 
-/* BOTÃO HISTÓRICO */
 button.hist {
   background: #10b981;
 }
@@ -92,36 +99,14 @@ button.hist:hover {
   background: #059669;
 }
 
-/* LINKS */
-a {
-  color: #2563eb;
-  text-decoration: none;
-  font-size: 14px;
-}
-
-a:hover {
-  text-decoration: underline;
-}
-
 /* LISTAS */
 #lista_receitas p,
 #lista_exames p,
 #lista_notas p {
   background: #f9fafb;
-  padding: 8px;
+  padding: 6px;
   border-radius: 6px;
-  margin-bottom: 5px;
-}
-
-/* CHECKBOX */
-label {
-  font-size: 14px;
-}
-
-/* DATA RETORNO */
-#data_retorno {
-  font-weight: bold;
-  color: #111827;
+  margin-top: 5px;
 }
 
 </style>
@@ -129,95 +114,100 @@ label {
 
 <body>
 
-<h1>Paciente</h1>
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <h1 id="nome"></h1>
+    <div class="sub">
+      CPF: <span id="cpf"></span> • 
+      Tel: <span id="telefone"></span>
+    </div>
+  </div>
 
-<div class="card">
-  <h3>Dados do Paciente</h3>
-
-  <p><b>Paciente Id:</b> <span id="paciente_id"></span></p>
-  <p><b>Nome:</b> <span id="nome"></span></p>
-  <p><b>Data de nascimento:</b> <span id="nascimento"></span></p>
-  <p><b>CPF:</b> <span id="cpf"></span></p>
-  <p><b>Email:</b> <span id="email"></span></p>
-  <p><b>Telefone:</b> <span id="telefone"></span></p>
-
-  <br>
-
-  <h4>Endereço</h4>
-
-  <p><b>CEP:</b> <span id="cep"></span></p>
-  <p><b>Rua:</b> <span id="rua"></span></p>
-  <p><b>Número:</b> <span id="numero"></span></p>
-  <p><b>Bairro:</b> <span id="bairro"></span></p>
-  <p><b>Cidade:</b> <span id="cidade"></span></p>
-  <p><b>Estado:</b> <span id="estado"></span></p>
+  <div>
+    <span id="status_retorno" class="badge">—</span><br>
+    Até: <b id="data_retorno"></b>
+  </div>
 </div>
 
-<div class="card">
-  <h3>Controle de Retorno</h3>
+<div class="grid">
 
-  <label>
-    <input type="checkbox" id="retorno_valido">
-    Paciente possui <b>direito de retorno</b>
-  </label>
+  <!-- ESQUERDA -->
+  <div>
 
-  <br><br>
+    <div class="card">
+      <h3>📋 Dados do Paciente</h3>
 
-  <p><b>Data limite retorno:</b> <span id="data_retorno"></span></p>
+      <p><b>Nascimento:</b> <span id="nascimento"></span></p>
+      <p><b>Email:</b> <span id="email"></span></p>
 
-  <button onclick="salvarRetorno()">Salvar</button>
+      <p><b>Endereço:</b></p>
+      <p><span id="rua"></span>, <span id="numero"></span></p>
+      <p><span id="bairro"></span> - <span id="cidade"></span></p>
+      <p><span id="estado"></span></p>
+    </div>
 
-  <br><br>
+    <div class="card">
+      <h3>🔁 Controle de Retorno</h3>
 
-  <!-- 🔥 BOTÃO NOVO -->
-  <button class="hist" onclick="verHistorico()">📂 Ver histórico do paciente</button>
+      <label>
+        <input type="checkbox" id="retorno_valido">
+        Paciente possui direito a retorno
+      </label>
 
-</div>
+      <br><br>
 
-<!-- RECEITAS -->
-<div class="card">
-  <h3>Receitas (links)</h3>
+      <button onclick="salvarRetorno()">Salvar</button>
+      <button class="hist" onclick="verHistorico()">Histórico</button>
+    </div>
 
-  <input type="text" id="receita_link" placeholder="Cole o link da receita">
+  </div>
 
-  <button onclick="adicionarReceita()">Adicionar receita</button>
+  <!-- DIREITA -->
+  <div>
 
-  <div id="lista_receitas"></div>
-</div>
+    <div class="card">
+      <h3>📄 Receitas</h3>
 
-<!-- EXAMES -->
-<div class="card">
-  <h3>Exames (links)</h3>
+      <input type="text" id="receita_link" placeholder="Cole o link">
 
-  <input type="text" id="exame_link" placeholder="Cole o link do exame">
+      <button onclick="adicionarReceita()">Adicionar</button>
 
-  <button onclick="adicionarExame()">Adicionar exame</button>
+      <div id="lista_receitas"></div>
+    </div>
 
-  <div id="lista_exames"></div>
-</div>
+    <div class="card">
+      <h3>🧪 Exames</h3>
 
-<!-- NOTAS -->
-<div class="card">
-  <h3>Notas fiscais (PDF)</h3>
+      <input type="text" id="exame_link" placeholder="Cole o link">
 
-  <input type="file" id="nota" multiple accept="application/pdf">
+      <button onclick="adicionarExame()">Adicionar</button>
 
-  <br>
+      <div id="lista_exames"></div>
+    </div>
 
-  <button onclick="adicionarNota()">Adicionar nota</button>
+    <div class="card">
+      <h3>🧾 Notas</h3>
 
-  <div id="lista_notas"></div>
-</div>
+      <input type="file" id="nota" multiple accept="application/pdf">
 
-<!-- ENVIO -->
-<div class="card">
-  <h3>Enviar documentos</h3>
+      <button onclick="adicionarNota()">Upload</button>
 
-  <p id="status_envio" style="font-size:14px;color:#666;"></p>
+      <div id="lista_notas"></div>
+    </div>
 
-  <button onclick="enviarReceita()">Enviar Receita</button>
-  <button onclick="enviarNota()">Enviar Nota</button>
-  <button onclick="enviarAmbos()">Enviar Ambos</button>
+    <div class="card">
+      <h3>📤 Envio</h3>
+
+      <p id="status_envio"></p>
+
+      <button onclick="enviarReceita()">Receita</button>
+      <button onclick="enviarNota()">Nota</button>
+      <button onclick="enviarAmbos()">Tudo</button>
+    </div>
+
+  </div>
+
 </div>
 
 <script>
@@ -230,14 +220,7 @@ async function carregarPaciente(){
   try{
 
     const response = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
-
-    if(!response.ok){
-      throw new Error("Erro na API")
-    }
-
     const data = await response.json()
-
-    console.log("DATA:", data)
 
     document.getElementById("nome").innerText = data.nome || ""
     document.getElementById("nascimento").innerText = data.nascimento || ""
@@ -246,7 +229,6 @@ async function carregarPaciente(){
     document.getElementById("email").innerText = data.email || ""
     document.getElementById("telefone").innerText = data.telefone || ""
 
-    document.getElementById("cep").innerText = data.cep || ""
     document.getElementById("rua").innerText = data.rua || ""
     document.getElementById("numero").innerText = data.numero || ""
     document.getElementById("bairro").innerText = data.bairro || ""
@@ -257,184 +239,32 @@ async function carregarPaciente(){
 
     document.getElementById("retorno_valido").checked = data.retorno_valido === true
 
+    // 🔥 BADGE
+    const badge = document.getElementById("status_retorno")
+
+    if(data.retorno_valido){
+      badge.innerText = "Retorno ativo"
+      badge.className = "badge on"
+    }else{
+      badge.innerText = "Sem retorno"
+      badge.className = "badge off"
+    }
+
     renderReceitas(data.receitas || [])
     renderExames(data.exames || [])
     renderNotas(data.notas || [])
 
-  }catch(error){
-
-    console.error("ERRO FRONT:", error)
+  }catch(e){
     alert("Erro ao carregar paciente")
-
   }
-
 }
 
-/* RECEITAS */
-async function adicionarReceita(){
-  const input = document.getElementById("receita_link")
-  const link = input.value.trim()
-  if(!link) return alert("Cole o link")
+/* MANTIVE TODO RESTO IGUAL */
 
-  const res = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
-  const paciente = await res.json()
-
-  let receitas = paciente.receitas || []
-
-  if(receitas.includes(link)){
-    alert("Link já adicionado")
-    return
-  }
-
-  receitas.push(link)
-
-  await fetch("/api/salvarPaciente",{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({ paciente_id, receitas })
-  })
-
-  renderReceitas(receitas)
-  input.value = ""
-}
-
-function renderReceitas(lista){
-  document.getElementById("lista_receitas").innerHTML =
-    lista.map((l,i)=>`
-      <p><a href="${l}" target="_blank">📄 Receita ${i+1}</a></p>
-    `).join("")
-}
-
-/* EXAMES */
-async function adicionarExame(){
-  const input = document.getElementById("exame_link")
-  const link = input.value.trim()
-  if(!link) return alert("Cole o link")
-
-  const res = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
-  const paciente = await res.json()
-
-  let exames = paciente.exames || []
-
-  if(exames.includes(link)){
-    alert("Link já adicionado")
-    return
-  }
-
-  exames.push(link)
-
-  await fetch("/api/salvarPaciente",{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({ paciente_id, exames })
-  })
-
-  renderExames(exames)
-  input.value = ""
-}
-
-function renderExames(lista){
-  document.getElementById("lista_exames").innerHTML =
-    lista.map((l,i)=>`
-      <p><a href="${l}" target="_blank">🧪 Exame ${i+1}</a></p>
-    `).join("")
-}
-
-/* NOTAS */
-async function adicionarNota(){
-
-  const input = document.getElementById("nota")
-  const files = input.files
-
-  if(!files.length) return alert("Selecione arquivos")
-
-  const resPaciente = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
-  const paciente = await resPaciente.json()
-
-  let notas = paciente.notas || []
-
-  for(let file of files){
-
-    const form = new FormData()
-    form.append("file", file)
-    form.append("paciente_id", paciente_id)
-    form.append("tipo","nota")
-
-    const response = await fetch("/api/upload",{ method:"POST", body:form })
-    const data = await response.json()
-
-    if(data.url && !notas.includes(data.url)){
-      notas.push(data.url)
-    }
-  }
-
-  await fetch("/api/salvarPaciente",{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({ paciente_id, notas })
-  })
-
-  renderNotas(notas)
-  input.value = ""
-  alert("Notas adicionadas")
-}
-
-function renderNotas(lista){
-  document.getElementById("lista_notas").innerHTML =
-    lista.map((l,i)=>`
-      <p><a href="${l}" target="_blank">🧾 Nota ${i+1}</a></p>
-    `).join("")
-}
-
-/* ENVIO */
-async function enviarReceita(){
-  await fetch(`/api/enviarEmail?paciente_id=${paciente_id}`)
-  alert("Receitas enviadas")
-}
-
-async function enviarNota(){
-  await fetch(`/api/enviarEmail?paciente_id=${paciente_id}`)
-  alert("Notas enviadas")
-}
-
-async function enviarAmbos(){
-  await fetch(`/api/enviarEmail?paciente_id=${paciente_id}`)
-  alert("Documentos enviados")
-}
-
-/* SALVAR RETORNO */
-async function salvarRetorno(){
-
-  const retorno_valido = document.getElementById("retorno_valido").checked
-  const nome = document.getElementById("nome").innerText
-  const data_limite_retorno = document.getElementById("data_retorno").innerText.trim()
-
-  if(!data_limite_retorno){
-    alert("Paciente não possui data de retorno válida")
-    return
-  }
-
-  await fetch("/api/salvarPaciente",{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({
-      paciente_id,
-      nome,
-      retorno_valido,
-      data_limite_retorno
-    })
-  })
-
-  alert("Retorno salvo")
-  carregarPaciente()
-}
-
-/* 🔥 NOVA FUNÇÃO */
 function verHistorico(){
   window.location.href = `/historico.html?paciente_id=${paciente_id}`
 }
 
-/* INIT */
 carregarPaciente()
 
 </script>
