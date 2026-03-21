@@ -309,7 +309,7 @@ async function carregarPaciente(){
     }
 
     console.log("DATA:", data)
-
+    document.getElementById("paciente_id").innerText = "#" + paciente_id
     document.getElementById("nome").innerText = data.nome || ""
     document.getElementById("nascimento").innerText = data.nascimento || ""
     document.getElementById("cpf").innerText = data.cpf || ""
