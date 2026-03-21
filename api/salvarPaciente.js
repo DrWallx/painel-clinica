@@ -8,14 +8,15 @@ export default async function handler(req, res) {
 
   try {
 
-   const {
-  paciente_id,
-  retorno_valido,
-  data_limite_retorno,
-  receitas,
-  exames,
-  notas
-} = req.body
+    const {
+      nome,
+      paciente_id,
+      retorno_valido,
+      data_limite_retorno,
+      receitas,
+      exames,
+      notas
+    } = req.body
 
     if (!paciente_id) {
       return res.status(400).json({ error: "paciente_id obrigatório" })
@@ -23,23 +24,30 @@ export default async function handler(req, res) {
 
     const key = `paciente:${paciente_id}`
 
-    // 🔥 pega dados atuais
     let data = await kv.get(key) || {}
 
-  /* ===================== */
- /* RETORNO */
- /* ===================== */
+    /* ===================== */
+    /* 🔥 NOME (CORREÇÃO) */
+    /* ===================== */
 
-if (retorno_valido !== undefined) {
-  data.retorno_valido = retorno_valido
-}
-
-if (data_limite_retorno !== undefined) {
-  data.data_limite_retorno = data_limite_retorno
-}
+    if (nome !== undefined && nome !== "") {
+      data.nome = nome
+    }
 
     /* ===================== */
-    /* LISTAS (SEM PERDER DADOS) */
+    /* RETORNO */
+    /* ===================== */
+
+    if (retorno_valido !== undefined) {
+      data.retorno_valido = retorno_valido
+    }
+
+    if (data_limite_retorno !== undefined) {
+      data.data_limite_retorno = data_limite_retorno
+    }
+
+    /* ===================== */
+    /* LISTAS */
     /* ===================== */
 
     if (receitas !== undefined) {
