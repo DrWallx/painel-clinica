@@ -18,7 +18,6 @@ h1 {
   font-size: 26px;
 }
 
-/* CARDS */
 .card {
   background: white;
   padding: 22px;
@@ -28,7 +27,6 @@ h1 {
   border: 1px solid #e5e7eb;
 }
 
-/* TITULOS */
 .card h3 {
   margin-bottom: 12px;
   font-size: 18px;
@@ -39,13 +37,11 @@ h1 {
   margin-bottom: 10px;
 }
 
-/* TEXTOS */
 p {
   margin: 6px 0;
   font-size: 14px;
 }
 
-/* INPUT */
 input {
   margin-top: 10px;
   margin-bottom: 10px;
@@ -55,7 +51,6 @@ input {
   border: 1px solid #d1d5db;
 }
 
-/* BOTÕES */
 button {
   padding: 10px 14px;
   border: none;
@@ -71,7 +66,6 @@ button:hover {
   background: #2563eb;
 }
 
-/* HISTÓRICO */
 button.hist {
   background: #10b981;
 }
@@ -80,7 +74,6 @@ button.hist:hover {
   background: #059669;
 }
 
-/* LISTAS */
 #lista_receitas p,
 #lista_exames p,
 #lista_notas p {
@@ -90,7 +83,6 @@ button.hist:hover {
   margin-bottom: 5px;
 }
 
-/* GRID */
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -103,7 +95,6 @@ button.hist:hover {
   }
 }
 
-/* CORES */
 .historico-card {
   border-left: 4px solid #10b981;
 }
@@ -120,12 +111,11 @@ button.hist:hover {
 
 <h1>👤 Prontuário do Paciente</h1>
 
-  <div class="grid">
-  <div>
+<div class="grid">
+
   <!-- ESQUERDA -->
   <div>
 
-    <!-- DADOS -->
     <div class="card">
       <h3>Dados do Paciente</h3>
 
@@ -148,7 +138,6 @@ button.hist:hover {
       <p><b>Estado:</b> <span id="estado"></span></p>
     </div>
 
-    <!-- RETORNO -->
     <div class="card card-retorno">
       <h3>Controle de Retorno</h3>
 
@@ -164,7 +153,6 @@ button.hist:hover {
       <button onclick="salvarRetorno()">Salvar</button>
     </div>
 
-    <!-- HISTÓRICO -->
     <div class="card historico-card">
       <h3>📂 Histórico do Paciente</h3>
 
@@ -183,8 +171,7 @@ button.hist:hover {
 
   <!-- DIREITA -->
   <div>
-  </div>
-  <div>
+
     <div class="card">
       <h3>Receitas (links)</h3>
       <input type="text" id="receita_link" placeholder="Cole o link da receita">
@@ -221,7 +208,7 @@ button.hist:hover {
 
 <script>
 
-// 🔥 SEU JS ORIGINAL (NÃO ALTERADO)
+// 🔥 JS ORIGINAL (INALTERADO)
 
 const params = new URLSearchParams(window.location.search)
 const paciente_id = params.get("paciente_id")
@@ -256,9 +243,8 @@ async function carregarPaciente(){
   }
 }
 
-// restante JS permanece igual
-  </div>
-</div>
+// resto do JS permanece igual
+
 </script>
 
 </body>
