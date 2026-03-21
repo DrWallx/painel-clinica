@@ -89,7 +89,19 @@ button.hist:hover {
   border-radius: 6px;
   margin-bottom: 5px;
 }
+/* 🔥 GRID PREMIUM */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
 
+/* RESPONSIVO */
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
 </style>
 
   
@@ -98,6 +110,7 @@ button.hist:hover {
 <body>
 
 <h1>👤 Prontuário do Paciente</h1>
+  <div class="grid">
 
 <div class="card">
   <h3>Dados do Paciente</h3>
@@ -139,6 +152,8 @@ button.hist:hover {
 
   <!-- 🔥 BOTÃO NOVO -->
   <button class="hist" onclick="verHistorico()">
+  📂 Ver histórico do paciente
+</button>
 
 </div>
 
@@ -186,6 +201,7 @@ button.hist:hover {
   <button onclick="enviarReceita()">Enviar Receita</button>
   <button onclick="enviarNota()">Enviar Nota</button>
   <button onclick="enviarAmbos()">Enviar Ambos</button>
+  
 </div>
 
 <script>
