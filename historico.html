@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Histórico do Paciente</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #f4f6f8;
+      padding: 30px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    .mes {
+      margin-top: 30px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .card {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .data {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    a {
+      display: block;
+      margin: 4px 0;
+      text-decoration: none;
+      color: #2563eb;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 8px 12px;
+      border: none;
+      background: #3b82f6;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #2563eb;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+<h1>📂 Histórico do Paciente</h1>
+
+<div id="historico"></div>
+
+<script>
+
+const params = new URLSearchParams(window.location.search)
+const paciente_id = params.get("paciente_id")
+
+async function carregar(){
+
+  const res = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
+  const data = await res.json()
+
+  const historico = data.historico || []
+  const container = document.getElementById("historico")
+
+  if(!historico.length){
+    container.innerHTML = "<p>Sem histórico disponível</p>"
+    return
+  }
+
+  // 🔥 agrupar por mês
+  const agrupado = {}
+
+  historico.forEach(item => {
+
+    const d = new Date(item.data)
+    const chave = d.toLocaleString('pt-BR', { month: 'long', year: 'numeric' })
+
+    if(!agrupado[chave]) agrupado[chave] = []
+    agrupado[chave].push(item)
+  })
+
+  Object.keys(agrupado).forEach(mes => {
+
+    container.innerHTML += `<div class="mes">📅 ${mes}</div>`
+
+    agrupado[mes].forEach(item => {
+
+      let html = `
+        <div class="card">
+          <div class="data">
+            ${new Date(item.data).toLocaleString()}
+          </div>
+      `
+
+      if(item.receitas?.length){
+        html += "<b>Receitas:</b>"
+        item.receitas.forEach((r,i)=>{
+          html += `<a href="${r}" target="_blank">📄 Receita ${i+1}</a>`
+        })
+      }
+
+      if(item.exames?.length){
+        html += "<b>Exames:</b>"
+        item.exames.forEach((e,i)=>{
+          html += `<a href="${e}" target="_blank">🧪 Exame ${i+1}</a>`
+        })
+      }
+
+      if(item.notas?.length){
+        html += "<b>Notas:</b>"
+        item.notas.forEach((n,i)=>{
+          html += `<a href="${n}" target="_blank">🧾 Nota ${i+1}</a>`
+        })
+      }
+
+      html += `
+        <button onclick='reenviar(${JSON.stringify(item)})'>
+          📤 Reenviar documentos
+        </button>
+      </div>
+      `
+
+      container.innerHTML += html
+    })
+
+  })
+
+}
+
+async function reenviar(item){
+
+  await fetch(`/api/enviarEmail?paciente_id=${paciente_id}`,{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify(item)
+  })
+
+  alert("Reenvio realizado com sucesso")
+
+}
+
+carregar()
+
+</script>
+
+</body>
+</html>
