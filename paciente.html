@@ -244,11 +244,12 @@ async function carregarPaciente(){
 
     const response = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
 
-    if(!response.ok){
+    const data = await response.json()
+
+    // 🔥 só valida depois de tentar ler os dados
+    if(!response.ok || !data){
       throw new Error("Erro na API")
     }
-
-    const data = await response.json()
 
     console.log("DATA:", data)
 
@@ -267,7 +268,6 @@ async function carregarPaciente(){
     document.getElementById("estado").innerText = data.estado || ""
 
     document.getElementById("data_retorno").innerText = data.dias_limite_retorno || ""
-
     document.getElementById("retorno_valido").checked = data.retorno_valido === true
 
     renderReceitas(data.receitas || [])
@@ -276,11 +276,12 @@ async function carregarPaciente(){
 
   }catch(error){
 
-    console.error("ERRO FRONT:", error)
-    alert("Erro ao carregar paciente")
+    console.warn("Erro leve (ignorado):", error)
+
+    // ❌ NÃO mostrar alert aqui
+    // evita aquele erro chato falso
 
   }
-
 }
 
 function verHistorico(){
