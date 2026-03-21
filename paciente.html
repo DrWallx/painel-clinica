@@ -334,7 +334,12 @@ async function salvarRetorno(){
 
  const retorno_valido = document.getElementById("retorno_valido").checked
 const nome = document.getElementById("nome").innerText
-const data_limite_retorno = document.getElementById("data_retorno").innerText
+const data_limite_retorno = document.getElementById("data_retorno").innerText.trim()
+
+if(!data_limite_retorno){
+  alert("Paciente não possui data de retorno válida")
+  return
+}
 
 await fetch("/api/salvarPaciente",{
   method:"POST",
