@@ -81,6 +81,12 @@
   <p><b>Data limite retorno:</b> <span id="data_retorno"></span></p>
 
   <button onclick="salvarRetorno()">Salvar</button>
+
+  <br><br>
+
+  <!-- 🔥 BOTÃO NOVO -->
+  <button onclick="verHistorico()">📂 Ver histórico do paciente</button>
+
 </div>
 
 <!-- RECEITAS -->
@@ -180,12 +186,9 @@ async function carregarPaciente(){
 }
 
 /* RECEITAS */
-
 async function adicionarReceita(){
-
   const input = document.getElementById("receita_link")
   const link = input.value.trim()
-
   if(!link) return alert("Cole o link")
 
   const res = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
@@ -213,19 +216,14 @@ async function adicionarReceita(){
 function renderReceitas(lista){
   document.getElementById("lista_receitas").innerHTML =
     lista.map((l,i)=>`
-      <p>
-        <a href="${l}" target="_blank">📄 Receita ${i+1}</a>
-      </p>
+      <p><a href="${l}" target="_blank">📄 Receita ${i+1}</a></p>
     `).join("")
 }
 
 /* EXAMES */
-
 async function adicionarExame(){
-
   const input = document.getElementById("exame_link")
   const link = input.value.trim()
-
   if(!link) return alert("Cole o link")
 
   const res = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
@@ -253,14 +251,11 @@ async function adicionarExame(){
 function renderExames(lista){
   document.getElementById("lista_exames").innerHTML =
     lista.map((l,i)=>`
-      <p>
-        <a href="${l}" target="_blank">🧪 Exame ${i+1}</a>
-      </p>
+      <p><a href="${l}" target="_blank">🧪 Exame ${i+1}</a></p>
     `).join("")
 }
 
 /* NOTAS */
-
 async function adicionarNota(){
 
   const input = document.getElementById("nota")
@@ -280,11 +275,7 @@ async function adicionarNota(){
     form.append("paciente_id", paciente_id)
     form.append("tipo","nota")
 
-    const response = await fetch("/api/upload",{
-      method:"POST",
-      body:form
-    })
-
+    const response = await fetch("/api/upload",{ method:"POST", body:form })
     const data = await response.json()
 
     if(data.url && !notas.includes(data.url)){
@@ -299,7 +290,6 @@ async function adicionarNota(){
   })
 
   renderNotas(notas)
-
   input.value = ""
   alert("Notas adicionadas")
 }
@@ -307,14 +297,11 @@ async function adicionarNota(){
 function renderNotas(lista){
   document.getElementById("lista_notas").innerHTML =
     lista.map((l,i)=>`
-      <p>
-        <a href="${l}" target="_blank">🧾 Nota ${i+1}</a>
-      </p>
+      <p><a href="${l}" target="_blank">🧾 Nota ${i+1}</a></p>
     `).join("")
 }
 
 /* ENVIO */
-
 async function enviarReceita(){
   await fetch(`/api/enviarEmail?paciente_id=${paciente_id}`)
   alert("Receitas enviadas")
@@ -330,34 +317,39 @@ async function enviarAmbos(){
   alert("Documentos enviados")
 }
 
+/* SALVAR RETORNO */
 async function salvarRetorno(){
 
- const retorno_valido = document.getElementById("retorno_valido").checked
-const nome = document.getElementById("nome").innerText
-const data_limite_retorno = document.getElementById("data_retorno").innerText.trim()
+  const retorno_valido = document.getElementById("retorno_valido").checked
+  const nome = document.getElementById("nome").innerText
+  const data_limite_retorno = document.getElementById("data_retorno").innerText.trim()
 
-if(!data_limite_retorno){
-  alert("Paciente não possui data de retorno válida")
-  return
-}
+  if(!data_limite_retorno){
+    alert("Paciente não possui data de retorno válida")
+    return
+  }
 
-await fetch("/api/salvarPaciente",{
-  method:"POST",
-  headers:{ "Content-Type":"application/json" },
-  body:JSON.stringify({
-    paciente_id,
-    nome,
-    retorno_valido,
-    data_limite_retorno // 🔥 ESSA LINHA RESOLVE TUDO
+  await fetch("/api/salvarPaciente",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({
+      paciente_id,
+      nome,
+      retorno_valido,
+      data_limite_retorno
+    })
   })
-})
 
   alert("Retorno salvo")
-
   carregarPaciente()
 }
 
-/* 🔥 INICIALIZAÇÃO */
+/* 🔥 NOVA FUNÇÃO */
+function verHistorico(){
+  window.location.href = `/historico.html?paciente_id=${paciente_id}`
+}
+
+/* INIT */
 carregarPaciente()
 
 </script>
