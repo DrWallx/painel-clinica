@@ -102,6 +102,23 @@ button.hist:hover {
     grid-template-columns: 1fr;
   }
 }
+
+/* HISTÓRICO */
+.historico-card {
+  border-left: 4px solid #10b981;
+}
+
+.historico-card h3 {
+  color: #065f46;
+}
+
+/* RETORNO */
+.card-retorno {
+  border-left: 4px solid #3b82f6;
+}
+}
+  }
+}
 </style>
 
   
@@ -110,7 +127,40 @@ button.hist:hover {
 <body>
 
 <h1>👤 Prontuário do Paciente</h1>
-  <div class="grid">
+ <div class="grid">
+
+  <!-- ESQUERDA -->
+  <div>
+
+    <!-- Dados -->
+    ... (card dados)
+
+    <!-- Retorno -->
+    ... (card retorno)
+
+    <!-- Histórico -->
+    ... (card histórico)
+
+  </div>
+
+  <!-- DIREITA -->
+  <div>
+
+    <!-- Receitas -->
+    ... (card receitas)
+
+    <!-- Exames -->
+    ... (card exames)
+
+    <!-- Notas -->
+    ... (card notas)
+
+    <!-- Envio -->
+    ... (card envio)
+
+  </div>
+
+</div>
 
 <div class="card">
   <h3>Dados do Paciente</h3>
@@ -134,7 +184,7 @@ button.hist:hover {
   <p><b>Estado:</b> <span id="estado"></span></p>
 </div>
 
-<div class="card">
+<div class="card card-retorno">
   <h3>Controle de Retorno</h3>
 
   <label>
@@ -150,13 +200,23 @@ button.hist:hover {
 
   <br><br>
 
-  <!-- 🔥 BOTÃO NOVO -->
+ </div>
+
+     <!-- 🔥 BOTÃO NOVO -->
+<div class="card historico-card">
+  <h3>📂 Histórico do Paciente</h3>
+
+  <p style="color:#6b7280; font-size:13px;">
+    Acesse todos os envios realizados (receitas, exames e notas fiscais)
+  </p>
+
+  <br>
+
   <button class="hist" onclick="verHistorico()">
-  📂 Ver histórico do paciente
-</button>
-
+    Ver histórico completo
+  </button>
 </div>
-
+    
 <!-- RECEITAS -->
 <div class="card">
   <h3>Receitas (links)</h3>
