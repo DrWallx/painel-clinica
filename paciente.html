@@ -332,18 +332,20 @@ async function enviarAmbos(){
 
 async function salvarRetorno(){
 
-  const retorno_valido = document.getElementById("retorno_valido").checked
-  const nome = document.getElementById("nome").innerText
+ const retorno_valido = document.getElementById("retorno_valido").checked
+const nome = document.getElementById("nome").innerText
+const data_limite_retorno = document.getElementById("data_retorno").innerText
 
-  await fetch("/api/salvarPaciente",{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({
-      paciente_id,
-      nome,
-      retorno_valido
-    })
+await fetch("/api/salvarPaciente",{
+  method:"POST",
+  headers:{ "Content-Type":"application/json" },
+  body:JSON.stringify({
+    paciente_id,
+    nome,
+    retorno_valido,
+    data_limite_retorno // 🔥 ESSA LINHA RESOLVE TUDO
   })
+})
 
   alert("Retorno salvo")
 
