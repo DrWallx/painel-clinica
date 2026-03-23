@@ -76,7 +76,7 @@ async function carregar(){
   const res = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
   const data = await res.json()
 
-  const historico = data.historico || []
+  const historico = data.historico_envios || []
   const container = document.getElementById("historico")
 
   if(!historico.length){
