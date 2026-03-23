@@ -55,7 +55,6 @@
     button:hover {
       background: #2563eb;
     }
-
   </style>
 
 </head>
@@ -74,9 +73,12 @@ const paciente_id = params.get("paciente_id")
 async function carregar(){
 
   const res = await fetch(`/api/paciente?paciente_id=${paciente_id}&t=${Date.now()}`, {
-  cache: "no-store"
-})
+    cache: "no-store"
+  })
+
   const data = await res.json()
+
+  console.log("DADOS RECEBIDOS:", data) // 🔥 DEBUG
 
   const historico = data.historico_envios || []
   const container = document.getElementById("historico")
@@ -86,7 +88,6 @@ async function carregar(){
     return
   }
 
-  // 🔥 agrupar por mês
   const agrupado = {}
 
   historico.forEach(item => {
@@ -111,24 +112,30 @@ async function carregar(){
           </div>
       `
 
+      // ✅ RECEITAS (CORRIGIDO)
       if(item.receitas?.length){
         html += "<b>Receitas:</b>"
         item.receitas.forEach((r,i)=>{
-          html += `<a href="${r}" target="_blank">📄 Receita ${i+1}</a>`
+          const url = typeof r === "string" ? r : r.url
+          html += `<a href="${url}" target="_blank">📄 Receita ${i+1}</a>`
         })
       }
 
+      // ✅ EXAMES (CORRIGIDO)
       if(item.exames?.length){
         html += "<b>Exames:</b>"
         item.exames.forEach((e,i)=>{
-          html += `<a href="${e}" target="_blank">🧪 Exame ${i+1}</a>`
+          const url = typeof e === "string" ? e : e.url
+          html += `<a href="${url}" target="_blank">🧪 Exame ${i+1}</a>`
         })
       }
 
+      // ✅ NOTAS (CORRIGIDO)
       if(item.notas?.length){
         html += "<b>Notas:</b>"
         item.notas.forEach((n,i)=>{
-          html += `<a href="${n}" target="_blank">🧾 Nota ${i+1}</a>`
+          const url = typeof n === "string" ? n : n.url
+          html += `<a href="${url}" target="_blank">🧾 Nota ${i+1}</a>`
         })
       }
 
