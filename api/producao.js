@@ -62,24 +62,31 @@ export default async function handler(req, res){
         }
       }
 
-      lista.forEach(a => {
+      lista.forEach(item => {
 
-        if(a.status === "Cancelado"){
+        // 🔴 CANCELADO
+        if(item.status_id == 11){
           total.cancelamentos++
           meses[nomeMes].cancelamentos++
+          return
         }
-        else if(a.tipo === "Retorno"){
-          total.retornos++
-          meses[nomeMes].retornos++
-        }
-        else{
+
+        // 🧠 CONSULTA
+        if(item.procedimento_id == 23){
           total.consultas++
           meses[nomeMes].consultas++
+          return
+        }
+
+        // 🔁 RETORNO
+        if(item.procedimento_id == 22){
+          total.retornos++
+          meses[nomeMes].retornos++
+          return
         }
 
       })
 
-      // 🔥 avança mês
       atual.setMonth(atual.getMonth() + 1)
 
     }
