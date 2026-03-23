@@ -31,6 +31,8 @@ export default async function handler(req, res) {
     const pacienteResponse = await fetch(`${baseUrl}/api/paciente?paciente_id=${paciente_id}`)
     const paciente = await pacienteResponse.json()
 
+    const emailPaciente = paciente.email
+
     console.log("EMAIL PACIENTE:", emailPaciente)
 
     /* ===================== */
