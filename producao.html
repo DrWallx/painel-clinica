@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Produção</title>
+
+<style>
+body{
+  font-family:Arial;
+  background:#f4f6f8;
+  padding:30px;
+}
+
+.card{
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  margin-bottom:20px;
+}
+
+h2{
+  margin-top:30px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th,td{
+  padding:10px;
+  border-bottom:1px solid #ddd;
+  text-align:left;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>📊 Produção Clínica</h1>
+
+<div class="card" id="geral"></div>
+
+<h2>📅 Produção Mensal</h2>
+
+<div class="card">
+  <table id="tabela">
+    <thead>
+      <tr>
+        <th>Mês</th>
+        <th>Consultas</th>
+        <th>Retornos</th>
+        <th>Cancelamentos</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+
+async function carregar(){
+
+  const res = await fetch("/api/producao")
+  const data = await res.json()
+
+  // 🔥 geral
+  document.getElementById("geral").innerHTML = `
+    <h3>Resumo Geral (desde 01/01/2025)</h3>
+    <p><b>Consultas:</b> ${data.total.consultas}</p>
+    <p><b>Retornos:</b> ${data.total.retornos}</p>
+    <p><b>Cancelamentos:</b> ${data.total.cancelamentos}</p>
+  `
+
+  // 🔥 tabela
+  const tbody = document.querySelector("#tabela tbody")
+
+  Object.entries(data.meses).forEach(([mes, v]) => {
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${mes}</td>
+        <td>${v.consultas}</td>
+        <td>${v.retornos}</td>
+        <td>${v.cancelamentos}</td>
+      </tr>
+    `
+
+  })
+
+}
+
+carregar()
+
+</script>
+
+</body>
+</html>
