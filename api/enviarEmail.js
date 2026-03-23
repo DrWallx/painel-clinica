@@ -49,7 +49,6 @@ export default async function handler(req, res) {
     <p>Seus documentos estão disponíveis abaixo:</p>
     `
 
-    // RECEITAS
     if (receitas.length) {
       html += `<h3 style="margin-top:20px">📄 Receitas</h3>`
       receitas.forEach(url => {
@@ -70,7 +69,6 @@ export default async function handler(req, res) {
       })
     }
 
-    // EXAMES
     if (exames.length) {
       html += `<h3 style="margin-top:20px">🧪 Exames</h3>`
       exames.forEach(url => {
@@ -91,7 +89,6 @@ export default async function handler(req, res) {
       })
     }
 
-    // NOTAS (ANEXO + VISUAL VERDE)
     if (notas.length) {
       html += `
       <h3 style="margin-top:20px">🧾 Nota Fiscal</h3>
@@ -144,10 +141,7 @@ export default async function handler(req, res) {
 
         const response = await fetch(url, { cache: "no-store" })
 
-        if (!response.ok) {
-          console.log("ERRO DOWNLOAD:", response.status)
-          continue
-        }
+        if (!response.ok) continue
 
         const buffer = await response.arrayBuffer()
 
@@ -177,7 +171,22 @@ export default async function handler(req, res) {
     })
 
     /* ===================== */
-    /* HISTÓRICO (CORRIGIDO) */
+    /* HISTÓRICO (NOVO) */
+    /* ===================== */
+
+    if (!local.historico_envios) {
+      local.historico_envios = []
+    }
+
+    local.historico_envios.push({
+      data: new Date().toISOString(),
+      receitas: [...receitas],
+      exames: [...exames],
+      notas: [...notas]
+    })
+
+    /* ===================== */
+    /* CONTROLE */
     /* ===================== */
 
     local.ultimo_envio = new Date().toISOString()
@@ -185,7 +194,7 @@ export default async function handler(req, res) {
 
     await kv.set(key, local)
 
-    console.log("HISTÓRICO SALVO:", local.ultimo_envio)
+    console.log("HISTÓRICO SALVO:", local.historico_envios)
 
     return res.status(200).json({ success: true })
 
