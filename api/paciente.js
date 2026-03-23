@@ -160,6 +160,8 @@ notas,
 receita_url: receitas[0] || null,
 nota_url: notas[0] || null
 
+historico_envios: local.historico_envios || []
+
 })
 
 }catch(error){
