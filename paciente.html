@@ -290,25 +290,28 @@ button.hist:hover {
 
 <script>
 
-/* 🔥 SEU JS ORIGINAL — NÃO ALTERADO */
-
 const params = new URLSearchParams(window.location.search)
 const paciente_id = params.get("paciente_id")
+
+// 🔥 NOVO: estado global
+let dadosPacienteGlobal = null
 
 async function carregarPaciente(){
 
   try{
 
     const response = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
-
     const data = await response.json()
 
-    // 🔥 só valida depois de tentar ler os dados
     if(!response.ok || !data){
       throw new Error("Erro na API")
     }
 
     console.log("DATA:", data)
+
+    // 🔥 salva global
+    dadosPacienteGlobal = data
+
     document.getElementById("paciente_id").innerText = "#" + paciente_id
     document.getElementById("nome").innerText = data.nome || ""
     document.getElementById("nascimento").innerText = data.nascimento || ""
@@ -327,18 +330,36 @@ async function carregarPaciente(){
     document.getElementById("data_retorno").innerText = data.dias_limite_retorno || ""
     document.getElementById("retorno_valido").checked = data.retorno_valido === true
 
-    renderReceitas(data.receitas || [])
-    renderExames(data.exames || [])
-    renderNotas(data.notas || [])
+    // 🔥 render inteligente
+    renderComFiltro()
 
   }catch(error){
-
     console.warn("Erro leve (ignorado):", error)
-
-    // ❌ NÃO mostrar alert aqui
-    // evita aquele erro chato falso
-
   }
+}
+
+function renderComFiltro(){
+
+  if(!dadosPacienteGlobal) return
+
+  const historico = dadosPacienteGlobal.historico_envios || []
+
+  const receitasEnviadas = historico.flatMap(h => h.receitas || [])
+  const examesEnviados = historico.flatMap(h => h.exames || [])
+  const notasEnviadas = historico.flatMap(h => h.notas || [])
+
+  const receitasPendentes = (dadosPacienteGlobal.receitas || [])
+    .filter(r => !receitasEnviadas.includes(r))
+
+  const examesPendentes = (dadosPacienteGlobal.exames || [])
+    .filter(e => !examesEnviados.includes(e))
+
+  const notasPendentes = (dadosPacienteGlobal.notas || [])
+    .filter(n => !notasEnviadas.includes(n))
+
+  renderReceitas(receitasPendentes)
+  renderExames(examesPendentes)
+  renderNotas(notasPendentes)
 }
 
 function verHistorico(){
@@ -346,6 +367,7 @@ function verHistorico(){
 }
 
 carregarPaciente()
+
 /* ===================== */
 /* RECEITAS */
 /* ===================== */
@@ -375,15 +397,18 @@ async function adicionarReceita(){
     body:JSON.stringify({ paciente_id, receitas })
   })
 
-  renderReceitas(receitas)
+  // 🔥 atualiza global
+  dadosPacienteGlobal.receitas = receitas
+
+  renderComFiltro()
   input.value = ""
 }
 
 function renderReceitas(lista){
   document.getElementById("lista_receitas").innerHTML =
-    lista.map((l,i)=>`
-      <p><a href="${l}" target="_blank">📄 Receita ${i+1}</a></p>
-    `).join("")
+    lista.length
+    ? lista.map((l,i)=>`<p><a href="${l}" target="_blank">📄 Receita ${i+1}</a></p>`).join("")
+    : "<p style='color:#888'>Nenhuma receita pendente</p>"
 }
 
 /* ===================== */
@@ -415,15 +440,17 @@ async function adicionarExame(){
     body:JSON.stringify({ paciente_id, exames })
   })
 
-  renderExames(exames)
+  dadosPacienteGlobal.exames = exames
+
+  renderComFiltro()
   input.value = ""
 }
 
 function renderExames(lista){
   document.getElementById("lista_exames").innerHTML =
-    lista.map((l,i)=>`
-      <p><a href="${l}" target="_blank">🧪 Exame ${i+1}</a></p>
-    `).join("")
+    lista.length
+    ? lista.map((l,i)=>`<p><a href="${l}" target="_blank">🧪 Exame ${i+1}</a></p>`).join("")
+    : "<p style='color:#888'>Nenhum exame pendente</p>"
 }
 
 /* ===================== */
@@ -467,7 +494,9 @@ async function adicionarNota(){
     body:JSON.stringify({ paciente_id, notas })
   })
 
-  renderNotas(notas)
+  dadosPacienteGlobal.notas = notas
+
+  renderComFiltro()
   input.value = ""
 
   alert("Notas adicionadas")
@@ -475,9 +504,9 @@ async function adicionarNota(){
 
 function renderNotas(lista){
   document.getElementById("lista_notas").innerHTML =
-    lista.map((l,i)=>`
-      <p><a href="${l}" target="_blank">🧾 Nota ${i+1}</a></p>
-    `).join("")
+    lista.length
+    ? lista.map((l,i)=>`<p><a href="${l}" target="_blank">🧾 Nota ${i+1}</a></p>`).join("")
+    : "<p style='color:#888'>Nenhuma nota pendente</p>"
 }
 
 /* ===================== */
@@ -487,18 +516,23 @@ function renderNotas(lista){
 async function enviarReceita(){
   await fetch(`/api/enviarEmail?paciente_id=${paciente_id}`)
   alert("Receitas enviadas")
+  carregarPaciente()
 }
 
 async function enviarNota(){
   await fetch(`/api/enviarEmail?paciente_id=${paciente_id}`)
   alert("Notas enviadas")
+  carregarPaciente()
 }
 
 async function enviarAmbos(){
   await fetch(`/api/enviarEmail?paciente_id=${paciente_id}`)
   alert("Documentos enviados")
+  carregarPaciente()
 }
+
 </script>
+
 
 </body>
 </html>
