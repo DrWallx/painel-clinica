@@ -73,7 +73,9 @@ const paciente_id = params.get("paciente_id")
 
 async function carregar(){
 
-  const res = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
+  const res = await fetch(`/api/paciente?paciente_id=${paciente_id}&t=${Date.now()}`, {
+  cache: "no-store"
+})
   const data = await res.json()
 
   const historico = data.historico_envios || []
