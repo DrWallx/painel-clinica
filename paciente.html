@@ -328,7 +328,7 @@ async function carregarPaciente(){
     document.getElementById("cidade").innerText = data.cidade || ""
     document.getElementById("estado").innerText = data.estado || ""
 
-    document.getElementById("data_retorno").innerText = data.dias_limite_retorno || ""
+    document.getElementById("data_retorno").value = data.data_limite_retorno || ""
     document.getElementById("retorno_valido").checked = data.retorno_valido === true
 
     // 🔥 render inteligente
