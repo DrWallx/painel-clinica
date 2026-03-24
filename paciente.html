@@ -215,7 +215,8 @@ button.hist:hover {
 
       <br><br>
 
-      <p><b>Data limite retorno:</b> <span id="data_retorno"></span></p>
+      <p><b>Data limite retorno:</b></p>
+<input type="date" id="data_retorno">
 
       <button onclick="salvarRetorno()">Salvar</button>
     </div>
@@ -529,6 +530,29 @@ async function enviarAmbos(){
   await fetch(`/api/enviarEmail?paciente_id=${paciente_id}`)
   alert("Documentos enviados")
   carregarPaciente()
+}
+  async function salvarRetorno(){
+
+  const check = document.getElementById("retorno_valido").checked
+  const data = document.getElementById("data_retorno").value
+
+  if(!data){
+    alert("Selecione a data do retorno")
+    return
+  }
+
+  await fetch("/api/salvarPaciente",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({
+      paciente_id,
+      retorno_valido: check,
+      data_limite_retorno: data
+    })
+  })
+
+  alert("Retorno salvo com sucesso")
+
 }
 
 </script>
