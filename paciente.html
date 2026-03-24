@@ -531,6 +531,38 @@ async function enviarAmbos(){
   carregarPaciente()
 }
 
+  async function salvarRetorno(){
+
+  const check = document.getElementById("retorno_valido").checked
+
+  // pega exatamente o que já está na tela (sem mudar nada)
+  const dias = dadosPacienteGlobal?.dias_limite_retorno
+
+  if(!dias){
+    alert("Paciente não possui retorno definido")
+    return
+  }
+
+  // converte dias → data (sem alterar exibição)
+  const hoje = new Date()
+  hoje.setDate(hoje.getDate() + parseInt(dias))
+
+  const dataISO = hoje.toISOString().split("T")[0]
+
+  await fetch("/api/salvarPaciente",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({
+      paciente_id,
+      retorno_valido: check,
+      data_limite_retorno: dataISO
+    })
+  })
+
+  alert("Retorno salvo com sucesso")
+
+}
+
 </script>
 
 
