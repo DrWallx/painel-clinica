@@ -43,8 +43,9 @@ export default async function handler(req, res) {
 }
 
     if (data_limite_retorno !== undefined) {
-      data.data_limite_retorno = data_limite_retorno
-    }
+  data.data_limite_retorno = data_limite_retorno
+  data.dias_limite_retorno = data_limite_retorno // 🔥 mantém compatibilidade
+}
 
     /* ===================== */
     /* LISTAS */
