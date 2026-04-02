@@ -39,8 +39,8 @@ export default async function handler(req, res) {
     /* ===================== */
 
     if (retorno_valido !== undefined) {
-      data.retorno_valido = retorno_valido
-    }
+  data.retorno_valido = retorno_valido === true || retorno_valido === "true" || retorno_valido === "on"
+}
 
     if (data_limite_retorno !== undefined) {
       data.data_limite_retorno = data_limite_retorno
