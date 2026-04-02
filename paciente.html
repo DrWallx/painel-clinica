@@ -536,28 +536,27 @@ async function enviarAmbos(){
   const check = document.getElementById("retorno_valido").checked
 
   // pega exatamente o que já está na tela (sem mudar nada)
-  const dias = dadosPacienteGlobal?.dias_limite_retorno
+  // 🔥 pega exatamente a data que já está na tela (Feegow)
+const dataTela = document.getElementById("data_retorno").innerText
 
-  if(!dias){
-    alert("Paciente não possui retorno definido")
-    return
-  }
+if(!dataTela){
+  alert("Paciente não possui retorno definido")
+  return
+}
 
-  // converte dias → data (sem alterar exibição)
-  const hoje = new Date()
-  hoje.setDate(hoje.getDate() + parseInt(dias))
+// 🔥 garante nome salvo (corrige "Paciente 4717")
+const nome = dadosPacienteGlobal?.nome || ""
 
-  const dataISO = hoje.toISOString().split("T")[0]
-
-  await fetch("/api/salvarPaciente",{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({
-      paciente_id,
-      retorno_valido: check,
-      data_limite_retorno: dataISO
-    })
+await fetch("/api/salvarPaciente",{
+  method:"POST",
+  headers:{ "Content-Type":"application/json" },
+  body: JSON.stringify({
+    paciente_id,
+    nome,
+    retorno_valido: check,
+    data_limite_retorno: dataTela
   })
+})
 
   alert("Retorno salvo com sucesso")
 
