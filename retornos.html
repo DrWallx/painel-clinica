@@ -55,23 +55,65 @@ border-radius:5px;
 text-decoration:none;
 font-size:13px;
 }
+  .layout{
+  display:flex;
+}
+
+.sidebar{
+  width:220px;
+  height:100vh;
+  background:white;
+  padding:20px;
+  border-right:1px solid #e5e7eb;
+}
+
+.logo{
+  margin-bottom:25px;
+  font-size:20px;
+  font-weight:600;
+}
+
+.menu-item{
+  display:block;
+  padding:10px 12px;
+  border-radius:8px;
+  margin-bottom:6px;
+  text-decoration:none;
+  color:#334155;
+}
+
+.menu-item:hover{
+  background:#eef2ff;
+  color:#4f46e5;
+}
+
+.content{
+  flex:1;
+  padding:30px;
+}
 </style>
 
 </head>
 
 <body>
 
-<h1>Retornos de Pacientes</h1>
+<div class="layout">
 
-<h2>🔴 Urgentes</h2>
-<div id="urgente"></div>
+  <!-- MENU -->
+  <aside class="sidebar">
+    <h2 class="logo">Haux</h2>
 
-<h2>🟡 Próximos dias</h2>
-<div id="proximo"></div>
+    <a href="/index.html" class="menu-item">📅 Agenda</a>
+    <a href="/retornos.html" class="menu-item">🔁 Retornos</a>
+    <a href="/producao.html" class="menu-item">📊 Produção</a>
 
-<h2>🟢 Dentro do prazo</h2>
-<div id="ok"></div>
+    <hr style="margin:15px 0; border:none; border-top:1px solid #eee;">
 
+    <a href="/historico.html" class="menu-item">📂 Histórico</a>
+  </aside>
+
+  <!-- CONTEÚDO -->
+  <main class="content">
 <script>
 
 async function carregar(){
@@ -135,6 +177,8 @@ carregar()
 
 </script>
 
-</body>
+  </main>
 
-</html>
+</div>
+
+</body>
