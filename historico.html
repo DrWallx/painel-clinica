@@ -55,11 +55,74 @@
     button:hover {
       background: #2563eb;
     }
+
+    .layout{
+  display:flex;
+}
+
+.sidebar{
+  width:90px;
+  height:100vh;
+  background:white;
+  padding:20px 10px;
+  border-right:1px solid #e5e7eb;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+.logo{
+  margin-bottom:25px;
+}
+
+.menu-item{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:45px;
+  height:45px;
+  border-radius:10px;
+  margin-bottom:10px;
+  text-decoration:none;
+  font-size:20px;
+  color:#334155;
+  transition:0.2s;
+}
+
+.menu-item:hover{
+  background:#eef2ff;
+  transform:scale(1.1);
+}
+
+.content{
+  flex:1;
+  padding:30px;
+}
   </style>
 
 </head>
 
 <body>
+
+<div class="layout">
+
+  <!-- MENU -->
+  <aside class="sidebar">
+    <div class="logo">
+      <img src="/Email Signature Logo.png" style="width:120px;">
+    </div>
+
+    <a href="/index.html" class="menu-item">📅</a>
+    <a href="/retornos.html" class="menu-item">🔁</a>
+    <a href="/producao.html" class="menu-item">📊</a>
+
+    <hr style="margin:15px 0; border:none; border-top:1px solid #eee;">
+
+    <a href="/historico.html" class="menu-item">📂</a>
+  </aside>
+
+  <!-- CONTEÚDO -->
+  <main class="content">
 
 <h1>📂 Histórico do Paciente</h1>
 
@@ -169,5 +232,8 @@ carregar()
 
 </script>
 
+  </main>
+
+</div>
+
 </body>
-</html>
