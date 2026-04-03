@@ -6,10 +6,10 @@
 
   <style>
     body {
-      font-family: Arial;
-      background: #f4f6f8;
-      padding: 30px;
-    }
+  margin:0;
+  font-family: Arial;
+  background: #f4f6f8;
+}
 
     h1 {
       margin-bottom: 20px;
@@ -73,18 +73,65 @@
 }
 
 .menu-item{
-  display:block;
-  padding:10px;
-  border-radius:8px;
-  margin-bottom:6px;
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:45px;
+  height:45px;
+  border-radius:12px;
+  margin-bottom:12px;
   text-decoration:none;
+  font-size:20px;
   color:#334155;
-  transition:0.2s;
 }
 
 .menu-item:hover{
   background:#eef2ff;
   color:#4f46e5;
+  transform:scale(1.08);
+}
+
+.menu-item.active{
+  background:#6366f1;
+  color:white;
+}
+
+.menu-item::after{
+  content: attr(data-label);
+  position:absolute;
+  left:60px;
+  top:50%;
+  transform:translateY(-50%) translateX(-10px);
+  background:#1f2937;
+  color:#fff;
+  padding:6px 10px;
+  border-radius:8px;
+  font-size:12px;
+  font-weight:500;
+  white-space:nowrap;
+  opacity:0;
+  transition:all 0.2s ease;
+  box-shadow:0 6px 18px rgba(0,0,0,0.18);
+}
+
+.menu-item::before{
+  content:"";
+  position:absolute;
+  left:52px;
+  top:50%;
+  transform:translateY(-50%) translateX(-10px);
+  border-top:6px solid transparent;
+  border-bottom:6px solid transparent;
+  border-right:6px solid #1f2937;
+  opacity:0;
+  transition:all 0.2s ease;
+}
+
+.menu-item:hover::after,
+.menu-item:hover::before{
+  opacity:1;
+  transform:translateY(-50%) translateX(0);
 }
 
 .content{
@@ -105,10 +152,11 @@
       <img src="/Email Signature Logo.png" style="width:120px;">
     </div>
 
-   <a href="/index.html" class="menu-item">📅 Agenda</a>
-<a href="/retornos.html" class="menu-item">🔁 Retornos</a>
-<a href="/producao.html" class="menu-item">📊 Produção</a>
-    <hr style="margin:15px 0; border:none; border-top:1px solid #eee;">
+  <a href="/index.html" class="menu-item" data-label="Agenda">📅</a>
+
+<a href="/retornos.html" class="menu-item" data-label="Retornos">🔁</a>
+
+<a href="/producao.html" class="menu-item" data-label="Produção">📊</a>
 
     <a href="/historico.html" class="menu-item">📂</a>
   </aside>
