@@ -40,7 +40,7 @@ th,td{
 .sidebar{
   width:220px;
   height:100vh;
-  background:white;
+  background:linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
   padding:20px;
   border-right:1px solid #e5e7eb;
 }
@@ -52,17 +52,26 @@ th,td{
 }
 
 .menu-item{
-  display:block;
+  display:flex;
+  align-items:center;
+  gap:10px;
   padding:10px 12px;
-  border-radius:8px;
-  margin-bottom:6px;
+  border-radius:10px;
+  margin-bottom:8px;
   text-decoration:none;
   color:#334155;
+  font-weight:500;
+  transition:all 0.2s ease;
 }
 
 .menu-item:hover{
   background:#eef2ff;
   color:#4f46e5;
+  transform:translateX(3px);
+}
+  .menu-item.active{
+  background:#6366f1;
+  color:white;
 }
 
 .content{
@@ -80,7 +89,7 @@ th,td{
   <!-- MENU -->
   <aside class="sidebar">
     <div class="logo">
-  <img src="/Email Signature Logo.png" style="width:120px;">
+  <img src="/Email Signature Logo.png" style="width:130px; margin-bottom:10px;">
 </div>
 
     <a href="/index.html" class="menu-item">📅 Agenda</a>
