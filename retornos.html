@@ -91,6 +91,39 @@ font-size:13px;
   flex:1;
   padding:30px;
 }
+
+  .grupo-titulo{
+  font-size:14px;
+  font-weight:600;
+  margin-top:25px;
+  margin-bottom:10px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:#334155;
+}
+
+/* bolinha */
+.grupo-titulo::before{
+  content:"";
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  display:inline-block;
+}
+
+/* cores suaves */
+.urgente-titulo::before{
+  background:#ef4444;
+}
+
+.proximo-titulo::before{
+  background:#f59e0b;
+}
+
+.ok-titulo::before{
+  background:#10b981;
+}
 </style>
 
 </head>
@@ -117,13 +150,13 @@ font-size:13px;
 
     <h1>Retornos de Pacientes</h1>
 
-<h2>🔴 Urgentes</h2>
+<div class="grupo-titulo urgente-titulo">Urgentes</div>
 <div id="urgente"></div>
 
-<h2>🟡 Próximos dias</h2>
+<div class="grupo-titulo proximo-titulo">Próximos dias</div>
 <div id="proximo"></div>
 
-<h2>🟢 Dentro do prazo</h2>
+<div class="grupo-titulo ok-titulo">Dentro do prazo</div>
 <div id="ok"></div>
 <script>
 
