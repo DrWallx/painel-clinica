@@ -32,11 +32,66 @@ th,td{
   border-bottom:1px solid #ddd;
   text-align:left;
 }
+
+  .layout{
+  display:flex;
+}
+
+.sidebar{
+  width:220px;
+  height:100vh;
+  background:white;
+  padding:20px;
+  border-right:1px solid #e5e7eb;
+}
+
+.logo{
+  margin-bottom:25px;
+  font-size:20px;
+  font-weight:600;
+}
+
+.menu-item{
+  display:block;
+  padding:10px 12px;
+  border-radius:8px;
+  margin-bottom:6px;
+  text-decoration:none;
+  color:#334155;
+}
+
+.menu-item:hover{
+  background:#eef2ff;
+  color:#4f46e5;
+}
+
+.content{
+  flex:1;
+  padding:30px;
+}
 </style>
 
 </head>
 
 <body>
+
+<div class="layout">
+
+  <!-- MENU -->
+  <aside class="sidebar">
+    <h2 class="logo">Haux</h2>
+
+    <a href="/index.html" class="menu-item">📅 Agenda</a>
+    <a href="/retornos.html" class="menu-item">🔁 Retornos</a>
+    <a href="/producao.html" class="menu-item">📊 Produção</a>
+
+    <hr style="margin:15px 0; border:none; border-top:1px solid #eee;">
+
+    <a href="/historico.html" class="menu-item">📂 Histórico</a>
+  </aside>
+
+  <!-- CONTEÚDO -->
+  <main class="content">
 
 <h1>📊 Produção Clínica</h1>
 
@@ -95,5 +150,8 @@ carregar()
 
 </script>
 
+  </main>
+
+</div>
+
 </body>
-</html>
