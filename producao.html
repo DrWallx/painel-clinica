@@ -38,13 +38,15 @@ th,td{
 }
 
 .sidebar{
-  width:220px;
+  width:80px;
   height:100vh;
   background:linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-  padding:20px;
+  padding:20px 10px;
   border-right:1px solid #e5e7eb;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
 }
-
 .logo{
   margin-bottom:25px;
   font-size:20px;
@@ -52,26 +54,49 @@ th,td{
 }
 
 .menu-item{
+  position:relative;
   display:flex;
   align-items:center;
-  gap:10px;
-  padding:10px 12px;
-  border-radius:10px;
-  margin-bottom:8px;
+  justify-content:center;
+  width:45px;
+  height:45px;
+  border-radius:12px;
+  margin-bottom:12px;
   text-decoration:none;
+  font-size:20px;
   color:#334155;
-  font-weight:500;
   transition:all 0.2s ease;
 }
 
 .menu-item:hover{
   background:#eef2ff;
   color:#4f46e5;
-  transform:translateX(3px);
+  transform:scale(1.08);
 }
   .menu-item.active{
   background:#6366f1;
   color:white;
+}
+
+  .menu-item::after{
+  content: attr(data-label);
+  position:absolute;
+  left:60px;
+  background:#111827;
+  color:white;
+  padding:6px 10px;
+  border-radius:6px;
+  font-size:12px;
+  white-space:nowrap;
+  opacity:0;
+  transform:translateX(-5px);
+  transition:0.2s;
+  pointer-events:none;
+}
+
+.menu-item:hover::after{
+  opacity:1;
+  transform:translateX(0);
 }
 
 .content{
@@ -89,12 +114,14 @@ th,td{
   <!-- MENU -->
   <aside class="sidebar">
     <div class="logo">
-  <img src="/Email Signature Logo.png" style="width:130px; margin-bottom:10px;">
+  <img src="/Email Signature Logo.png" style="width:50px; margin-bottom:20px;">
 </div>
 
-    <a href="/index.html" class="menu-item">📅 </a>
-    <a href="/retornos.html" class="menu-item">🔁 </a>
-    <a href="/producao.html" class="menu-item"">📊 </a>
+    <a href="/index.html" class="menu-item" data-label="Agenda">📅</a>
+
+<a href="/retornos.html" class="menu-item" data-label="Retornos">🔁</a>
+
+<a href="/producao.html" class="menu-item" data-label="Produção">📊</a>
 
     <hr style="margin:15px 0; border:none; border-top:1px solid #eee;">
 
