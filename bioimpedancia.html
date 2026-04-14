@@ -3,7 +3,11 @@
 <head>
 <title>Bioimpedância</title>
 
+<!-- OCR -->
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+
+<!-- DICOM -->
+<script src="https://unpkg.com/dicom-parser/dist/dicomParser.min.js"></script>
 
 <style>
 body{
@@ -150,6 +154,13 @@ button:hover{
   <button onclick="lerImagem()">Importar imagem</button>
 </div>
 
+<!-- DICOM -->
+<div class="card">
+  <h3>Importar DICOM (.dcm)</h3>
+  <input type="file" id="dicom">
+  <button onclick="lerDicom()">Importar DICOM</button>
+</div>
+
 <!-- DADOS -->
 <div class="card">
   <h3>Dados do exame</h3>
@@ -220,10 +231,6 @@ button:hover{
 
 <script>
 
-function safe(v){
-  return v ? v.replace(" ", ".") : ""
-}
-
 /* ================= TXT ================= */
 function lerArquivo(){
 
@@ -238,10 +245,10 @@ function lerArquivo(){
 
     document.getElementById("data").value = dados[2] || ""
     document.getElementById("hora").value = dados[3] || ""
-    document.getElementById("altura").value = safe(dados[4])
-    document.getElementById("peso").value = safe(dados[5])
+    document.getElementById("altura").value = dados[4] || ""
+    document.getElementById("peso").value = dados[5] || ""
 
-    if(dados[25]) document.getElementById("pgc").value = safe(dados[25])
+    if(dados[25]) document.getElementById("pgc").value = dados[25]
     if(dados[30]) document.getElementById("tmb").value = dados[30]
 
   }
@@ -259,12 +266,9 @@ async function lerImagem(){
 
   const { data: { text } } = await Tesseract.recognize(file, 'por')
 
-  console.log("OCR TEXTO:", text)
-
   extrairDados(text)
 }
 
-/* ================= EXTRAÇÃO ================= */
 function extrairDados(texto){
 
   const limpar = (v) => v ? v.replace(",", ".") : ""
@@ -275,21 +279,36 @@ function extrairDados(texto){
     return match ? limpar(match[1]) : ""
   }
 
-  const peso = pegar("Peso")
-  const gordura = pegar("Gordura")
-  const agua = pegar("Água")
-  const imc = pegar("IMC")
-  const pgc = pegar("PGC|%")
-  const tmb = pegar("basal|TMB")
+  document.getElementById("peso").value = pegar("Peso")
+  document.getElementById("gordura").value = pegar("Gordura")
+  document.getElementById("agua").value = pegar("Água")
+  document.getElementById("imc").value = pegar("IMC")
+  document.getElementById("pgc").value = pegar("PGC|%")
+  document.getElementById("tmb").value = pegar("basal|TMB")
+}
 
-  console.log({ peso, gordura, agua, imc, pgc, tmb })
+/* ================= DICOM ================= */
+function lerDicom(){
 
-  if(peso) document.getElementById("peso").value = peso
-  if(gordura) document.getElementById("gordura").value = gordura
-  if(agua) document.getElementById("agua").value = agua
-  if(imc) document.getElementById("imc").value = imc
-  if(pgc) document.getElementById("pgc").value = pgc
-  if(tmb) document.getElementById("tmb").value = tmb
+  const file = document.getElementById("dicom").files[0]
+  if(!file) return alert("Selecione um .dcm")
+
+  const reader = new FileReader()
+
+  reader.onload = function(e){
+
+    const byteArray = new Uint8Array(e.target.result)
+    const dataSet = dicomParser.parseDicom(byteArray)
+
+    console.log("DICOM:", dataSet)
+
+    const nome = dataSet.string('x00100010')
+    const sexo = dataSet.string('x00100040')
+
+    alert("DICOM carregado — veja console")
+  }
+
+  reader.readAsArrayBuffer(file)
 }
 
 /* ================= SALVAR ================= */
@@ -305,7 +324,7 @@ function salvar(){
 
   console.log("SALVAR:", dados)
 
-  alert("Perfeito! Próximo passo: salvar no banco 🔥")
+  alert("Próximo passo: salvar no banco 🔥")
 }
 
 </script>
