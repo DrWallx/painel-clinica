@@ -383,7 +383,12 @@ button.hist:hover {
 
       <button class="hist" onclick="verHistorico()">Ver histórico completo</button>
     </div>
-
+<button onclick="abrirBio()" style="
+  margin-top:10px;
+  background:linear-gradient(135deg,#6366f1,#4f46e5);
+">
+📊 Bioimpedância
+</button>
   </div>
 
   <!-- DIREITA -->
@@ -438,7 +443,9 @@ button.hist:hover {
   </div>
 
 </div>
-
+function abrirBio(){
+  window.location.href = `/bioimpedancia.html?paciente_id=${paciente_id}`
+}
 <script>
 
 const params = new URLSearchParams(window.location.search)
