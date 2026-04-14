@@ -3,6 +3,8 @@
 <head>
 <title>Bioimpedância</title>
 
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+
 <style>
 body{
   margin:0;
@@ -14,7 +16,6 @@ body{
   display:flex;
 }
 
-/* SIDEBAR */
 .sidebar{
   width:220px;
   height:100vh;
@@ -67,7 +68,6 @@ body{
   opacity:1;
 }
 
-/* CONTEÚDO */
 .content{
   flex:1;
   padding:30px;
@@ -120,7 +120,6 @@ button:hover{
 
 <div class="layout">
 
-<!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="logo">
     <img src="/Email Signature Logo.png" style="width:120px;">
@@ -131,69 +130,51 @@ button:hover{
   <a href="/producao.html" class="menu-item" data-label="Produção">📊</a>
 </aside>
 
-<!-- CONTEÚDO -->
 <main class="content">
 
 <h1>📊 Bioimpedância</h1>
 
 <div class="grid">
 
-<!-- IMPORTAÇÃO -->
+<!-- TXT -->
 <div class="card">
   <h3>Importar TXT</h3>
   <input type="file" id="arquivo">
-  <button onclick="lerArquivo()">Importar</button>
+  <button onclick="lerArquivo()">Importar TXT</button>
+</div>
+
+<!-- OCR -->
+<div class="card">
+  <h3>Importar Imagem (OCR)</h3>
+  <input type="file" id="imagem">
+  <button onclick="lerImagem()">Importar imagem</button>
 </div>
 
 <!-- DADOS -->
 <div class="card">
   <h3>Dados do exame</h3>
-
   <label>Data</label>
   <input id="data">
 
   <label>Hora</label>
   <input id="hora">
 
-  <label>Altura (cm)</label>
+  <label>Altura</label>
   <input id="altura">
-
-  <label>Idade</label>
-  <input id="idade">
 </div>
 
 <!-- COMPOSIÇÃO -->
 <div class="card">
   <h3>Composição corporal</h3>
 
-  <label>Peso (kg)</label>
+  <label>Peso</label>
   <input id="peso">
 
-  <label>Água corporal (L)</label>
+  <label>Água corporal</label>
   <input id="agua">
 
-  <label>Proteína (kg)</label>
-  <input id="proteina">
-
-  <label>Minerais (kg)</label>
-  <input id="minerais">
-
-  <label>Gordura corporal (kg)</label>
+  <label>Gordura corporal</label>
   <input id="gordura">
-</div>
-
-<!-- MASSA -->
-<div class="card">
-  <h3>Massa corporal</h3>
-
-  <label>Massa muscular (kg)</label>
-  <input id="musculo">
-
-  <label>Massa magra (kg)</label>
-  <input id="massa_magra">
-
-  <label>Massa gorda (kg)</label>
-  <input id="massa_gorda">
 </div>
 
 <!-- OBESIDADE -->
@@ -203,50 +184,30 @@ button:hover{
   <label>IMC</label>
   <input id="imc">
 
-  <label>% Gordura corporal</label>
+  <label>% Gordura</label>
   <input id="pgc">
-
-  <label>RCQ</label>
-  <input id="rcq">
 </div>
 
 <!-- METABOLISMO -->
 <div class="card">
   <h3>Metabolismo</h3>
 
-  <label>TMB (kcal)</label>
+  <label>TMB</label>
   <input id="tmb">
-
-  <label>Idade biológica</label>
-  <input id="idade_bio">
-
-  <label>Pontuação corporal</label>
-  <input id="score">
 </div>
 
-<!-- MEDIDAS -->
+<!-- MANUAL -->
 <div class="card">
-  <h3>Medidas clínicas (manual)</h3>
+  <h3>Medidas clínicas</h3>
 
   <label>Gordura visceral</label>
   <input id="visceral">
 
   <label>Abdômen</label>
   <input id="abdomen">
-
-  <label>Cintura</label>
-  <input id="cintura">
-
-  <label>Braço direito</label>
-  <input id="braco_dir">
-
-  <label>Braço esquerdo</label>
-  <input id="braco_esq">
 </div>
 
-<!-- AÇÕES -->
 <div class="card">
-  <h3>Ações</h3>
   <button onclick="salvar()">Salvar exame</button>
 </div>
 
@@ -258,21 +219,15 @@ button:hover{
 
 <script>
 
-const params = new URLSearchParams(window.location.search)
-const paciente_id = params.get("paciente_id")
-
-function num(v){
-  return v.replace(" ", ".")
+function safe(v){
+  return v ? v.replace(" ", ".") : ""
 }
 
+/* TXT */
 function lerArquivo(){
 
   const file = document.getElementById("arquivo").files[0]
-
-  if(!file){
-    alert("Selecione o arquivo")
-    return
-  }
+  if(!file) return alert("Selecione o arquivo")
 
   const reader = new FileReader()
 
@@ -280,42 +235,55 @@ function lerArquivo(){
 
     const dados = e.target.result.split(",")
 
-    // 🔥 DADOS PRINCIPAIS
-    document.getElementById("data").value = dados[2]
-    document.getElementById("hora").value = dados[3]
-    document.getElementById("altura").value = num(dados[4])
-    document.getElementById("peso").value = num(dados[5])
+    document.getElementById("data").value = dados[2] || ""
+    document.getElementById("hora").value = dados[3] || ""
+    document.getElementById("altura").value = safe(dados[4])
+    document.getElementById("peso").value = safe(dados[5])
 
-    // 🔥 COMPOSIÇÃO
-    document.getElementById("agua").value = num(dados[6])
-    document.getElementById("proteina").value = num(dados[7])
-    document.getElementById("minerais").value = num(dados[8])
-    document.getElementById("gordura").value = num(dados[9])
-
-    // 🔥 OBESIDADE
-    document.getElementById("imc").value = num(dados[24])
-    document.getElementById("pgc").value = num(dados[25])
-
-    // 🔥 METABOLISMO
-    document.getElementById("tmb").value = dados[30]
+    if(dados[25]) document.getElementById("pgc").value = safe(dados[25])
+    if(dados[30]) document.getElementById("tmb").value = dados[30]
 
   }
 
   reader.readAsText(file)
 }
 
+/* OCR */
+async function lerImagem(){
+
+  const file = document.getElementById("imagem").files[0]
+  if(!file) return alert("Selecione uma imagem")
+
+  alert("Lendo exame... aguarde ⏳")
+
+  const { data: { text } } = await Tesseract.recognize(file, 'por')
+
+  console.log(text)
+
+  const extrair = (regex) => {
+    const match = text.match(regex)
+    return match ? match[1] : ""
+  }
+
+  document.getElementById("peso").value = extrair(/Peso\s+(\d+,\d+)/i)
+  document.getElementById("gordura").value = extrair(/Gordura corporal\s+(\d+,\d+)/i)
+  document.getElementById("agua").value = extrair(/Água corporal\s+(\d+,\d+)/i)
+  document.getElementById("imc").value = extrair(/IMC.*?(\d+,\d+)/i)
+  document.getElementById("pgc").value = extrair(/%.*?(\d+,\d+)/i)
+  document.getElementById("tmb").value = extrair(/basal.*?(\d+)/i)
+
+}
+
+/* SALVAR */
 function salvar(){
 
   const dados = {
-    paciente_id,
-    data: document.getElementById("data").value,
     peso: document.getElementById("peso").value,
     gordura: document.getElementById("gordura").value
   }
 
-  console.log("SALVANDO:", dados)
-
-  alert("Próximo passo: salvar no banco 🔥")
+  console.log(dados)
+  alert("Pronto! Próximo passo: salvar no banco 🔥")
 }
 
 </script>
