@@ -443,9 +443,6 @@ button.hist:hover {
   </div>
 
 </div>
-function abrirBio(){
-  window.location.href = `/bioimpedancia.html?paciente_id=${paciente_id}`
-}
 <script>
 
 const params = new URLSearchParams(window.location.search)
@@ -523,7 +520,9 @@ function renderComFiltro(){
 function verHistorico(){
   window.location.href = `/historico.html?paciente_id=${paciente_id}`
 }
-
+function abrirBio(){
+  window.location.href = `/bioimpedancia.html?paciente_id=${paciente_id}`
+}
 carregarPaciente()
 
 /* ===================== */
