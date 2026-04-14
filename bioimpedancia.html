@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Bioimpedância</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f4f6f8;
+}
+
+.layout{
+  display:flex;
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:220px;
+  height:100vh;
+  background:white;
+  padding:20px;
+  border-right:1px solid #e5e7eb;
+}
+
+.logo{
+  display:flex;
+  justify-content:center;
+  margin-bottom:30px;
+}
+
+.menu-item{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:45px;
+  height:45px;
+  border-radius:12px;
+  margin-bottom:12px;
+  text-decoration:none;
+  font-size:20px;
+  color:#334155;
+}
+
+.menu-item:hover{
+  background:#eef2ff;
+  transform:scale(1.08);
+}
+
+.menu-item::after{
+  content: attr(data-label);
+  position:absolute;
+  left:60px;
+  top:50%;
+  transform:translateY(-50%);
+  background:#1f2937;
+  color:white;
+  padding:6px 10px;
+  border-radius:8px;
+  font-size:12px;
+  opacity:0;
+  transition:0.2s;
+}
+
+.menu-item:hover::after{
+  opacity:1;
+}
+
+/* CONTEÚDO */
+.content{
+  flex:1;
+  padding:30px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+}
+
+.card{
+  background:white;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.05);
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin-top:5px;
+  margin-bottom:10px;
+  border-radius:8px;
+  border:1px solid #ddd;
+}
+
+button{
+  padding:10px 15px;
+  border:none;
+  background:#6366f1;
+  color:white;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+button:hover{
+  background:#4f46e5;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <img src="/Email Signature Logo.png" style="width:120px;">
+  </div>
+
+  <a href="/index.html" class="menu-item" data-label="Agenda">📅</a>
+  <a href="/retornos.html" class="menu-item" data-label="Retornos">🔁</a>
+  <a href="/producao.html" class="menu-item" data-label="Produção">📊</a>
+</aside>
+
+<!-- CONTEÚDO -->
+<main class="content">
+
+<h1>📊 Bioimpedância</h1>
+
+<div class="grid">
+
+<!-- IMPORTAÇÃO -->
+<div class="card">
+  <h3>Importar TXT</h3>
+  <input type="file" id="arquivo">
+  <button onclick="lerArquivo()">Importar</button>
+</div>
+
+<!-- DADOS DO EXAME -->
+<div class="card">
+  <h3>Dados do exame</h3>
+  <input id="data" placeholder="Data">
+  <input id="hora" placeholder="Hora">
+  <input id="altura" placeholder="Altura">
+</div>
+
+<!-- COMPOSIÇÃO -->
+<div class="card">
+  <h3>Composição corporal</h3>
+  <input id="peso" placeholder="Peso">
+  <input id="gordura" placeholder="Gordura corporal (%)">
+  <input id="musculo" placeholder="Massa muscular">
+</div>
+
+<!-- ÍNDICES -->
+<div class="card">
+  <h3>Índices</h3>
+  <input id="imc" placeholder="IMC">
+  <input id="pgc" placeholder="% Gordura">
+  <input id="tmb" placeholder="TMB">
+</div>
+
+<!-- MANUAL -->
+<div class="card">
+  <h3>Medidas clínicas</h3>
+  <input id="visceral" placeholder="Gordura visceral (manual)">
+  <input id="abdomen" placeholder="Abdômen">
+  <input id="cintura" placeholder="Cintura">
+  <input id="braco_dir" placeholder="Braço direito">
+  <input id="braco_esq" placeholder="Braço esquerdo">
+</div>
+
+<!-- AÇÕES -->
+<div class="card">
+  <h3>Ações</h3>
+  <button onclick="salvar()">Salvar exame</button>
+</div>
+
+</div>
+
+</main>
+
+</div>
+
+<script>
+
+const params = new URLSearchParams(window.location.search)
+const paciente_id = params.get("paciente_id")
+
+function lerArquivo(){
+
+  const file = document.getElementById("arquivo").files[0]
+
+  if(!file){
+    alert("Selecione o arquivo")
+    return
+  }
+
+  const reader = new FileReader()
+
+  reader.onload = function(e){
+
+    const texto = e.target.result
+    const dados = texto.split(",")
+
+    function num(v){
+      return v.replace(" ", ".")
+    }
+
+    // 🔥 EXTRAÇÃO REAL DO SEU TXT
+    const data = dados[2]
+    const hora = dados[3]
+    const altura = num(dados[4])
+    const peso = num(dados[5])
+    const gordura = num(dados[25])
+    const tmb = dados[30]
+
+    // 🔥 PREENCHER CAMPOS
+    document.getElementById("data").value = data
+    document.getElementById("hora").value = hora
+    document.getElementById("altura").value = altura
+    document.getElementById("peso").value = peso
+    document.getElementById("gordura").value = gordura
+    document.getElementById("tmb").value = tmb
+
+  }
+
+  reader.readAsText(file)
+}
+
+function salvar(){
+
+  const dados = {
+    paciente_id,
+    data: document.getElementById("data").value,
+    hora: document.getElementById("hora").value,
+    altura: document.getElementById("altura").value,
+    peso: document.getElementById("peso").value,
+    gordura: document.getElementById("gordura").value,
+    tmb: document.getElementById("tmb").value,
+    visceral: document.getElementById("visceral").value,
+    abdomen: document.getElementById("abdomen").value
+  }
+
+  console.log("SALVAR:", dados)
+
+  alert("Pronto! Próximo passo vamos salvar no banco 🔥")
+}
+
+</script>
+
+</body>
+</html>
