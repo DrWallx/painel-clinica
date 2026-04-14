@@ -86,10 +86,15 @@ body{
   box-shadow:0 4px 10px rgba(0,0,0,0.05);
 }
 
+label{
+  font-size:13px;
+  color:#555;
+}
+
 input{
   width:100%;
   padding:10px;
-  margin-top:5px;
+  margin-top:4px;
   margin-bottom:10px;
   border-radius:8px;
   border:1px solid #ddd;
@@ -140,38 +145,103 @@ button:hover{
   <button onclick="lerArquivo()">Importar</button>
 </div>
 
-<!-- DADOS DO EXAME -->
+<!-- DADOS -->
 <div class="card">
   <h3>Dados do exame</h3>
-  <input id="data" placeholder="Data">
-  <input id="hora" placeholder="Hora">
-  <input id="altura" placeholder="Altura">
+
+  <label>Data</label>
+  <input id="data">
+
+  <label>Hora</label>
+  <input id="hora">
+
+  <label>Altura (cm)</label>
+  <input id="altura">
+
+  <label>Idade</label>
+  <input id="idade">
 </div>
 
 <!-- COMPOSIÇÃO -->
 <div class="card">
   <h3>Composição corporal</h3>
-  <input id="peso" placeholder="Peso">
-  <input id="gordura" placeholder="Gordura corporal (%)">
-  <input id="musculo" placeholder="Massa muscular">
+
+  <label>Peso (kg)</label>
+  <input id="peso">
+
+  <label>Água corporal (L)</label>
+  <input id="agua">
+
+  <label>Proteína (kg)</label>
+  <input id="proteina">
+
+  <label>Minerais (kg)</label>
+  <input id="minerais">
+
+  <label>Gordura corporal (kg)</label>
+  <input id="gordura">
 </div>
 
-<!-- ÍNDICES -->
+<!-- MASSA -->
 <div class="card">
-  <h3>Índices</h3>
-  <input id="imc" placeholder="IMC">
-  <input id="pgc" placeholder="% Gordura">
-  <input id="tmb" placeholder="TMB">
+  <h3>Massa corporal</h3>
+
+  <label>Massa muscular (kg)</label>
+  <input id="musculo">
+
+  <label>Massa magra (kg)</label>
+  <input id="massa_magra">
+
+  <label>Massa gorda (kg)</label>
+  <input id="massa_gorda">
 </div>
 
-<!-- MANUAL -->
+<!-- OBESIDADE -->
 <div class="card">
-  <h3>Medidas clínicas</h3>
-  <input id="visceral" placeholder="Gordura visceral (manual)">
-  <input id="abdomen" placeholder="Abdômen">
-  <input id="cintura" placeholder="Cintura">
-  <input id="braco_dir" placeholder="Braço direito">
-  <input id="braco_esq" placeholder="Braço esquerdo">
+  <h3>Obesidade</h3>
+
+  <label>IMC</label>
+  <input id="imc">
+
+  <label>% Gordura corporal</label>
+  <input id="pgc">
+
+  <label>RCQ</label>
+  <input id="rcq">
+</div>
+
+<!-- METABOLISMO -->
+<div class="card">
+  <h3>Metabolismo</h3>
+
+  <label>TMB (kcal)</label>
+  <input id="tmb">
+
+  <label>Idade biológica</label>
+  <input id="idade_bio">
+
+  <label>Pontuação corporal</label>
+  <input id="score">
+</div>
+
+<!-- MEDIDAS -->
+<div class="card">
+  <h3>Medidas clínicas (manual)</h3>
+
+  <label>Gordura visceral</label>
+  <input id="visceral">
+
+  <label>Abdômen</label>
+  <input id="abdomen">
+
+  <label>Cintura</label>
+  <input id="cintura">
+
+  <label>Braço direito</label>
+  <input id="braco_dir">
+
+  <label>Braço esquerdo</label>
+  <input id="braco_esq">
 </div>
 
 <!-- AÇÕES -->
@@ -191,6 +261,10 @@ button:hover{
 const params = new URLSearchParams(window.location.search)
 const paciente_id = params.get("paciente_id")
 
+function num(v){
+  return v.replace(" ", ".")
+}
+
 function lerArquivo(){
 
   const file = document.getElementById("arquivo").files[0]
@@ -204,28 +278,26 @@ function lerArquivo(){
 
   reader.onload = function(e){
 
-    const texto = e.target.result
-    const dados = texto.split(",")
+    const dados = e.target.result.split(",")
 
-    function num(v){
-      return v.replace(" ", ".")
-    }
+    // 🔥 DADOS PRINCIPAIS
+    document.getElementById("data").value = dados[2]
+    document.getElementById("hora").value = dados[3]
+    document.getElementById("altura").value = num(dados[4])
+    document.getElementById("peso").value = num(dados[5])
 
-    // 🔥 EXTRAÇÃO REAL DO SEU TXT
-    const data = dados[2]
-    const hora = dados[3]
-    const altura = num(dados[4])
-    const peso = num(dados[5])
-    const gordura = num(dados[25])
-    const tmb = dados[30]
+    // 🔥 COMPOSIÇÃO
+    document.getElementById("agua").value = num(dados[6])
+    document.getElementById("proteina").value = num(dados[7])
+    document.getElementById("minerais").value = num(dados[8])
+    document.getElementById("gordura").value = num(dados[9])
 
-    // 🔥 PREENCHER CAMPOS
-    document.getElementById("data").value = data
-    document.getElementById("hora").value = hora
-    document.getElementById("altura").value = altura
-    document.getElementById("peso").value = peso
-    document.getElementById("gordura").value = gordura
-    document.getElementById("tmb").value = tmb
+    // 🔥 OBESIDADE
+    document.getElementById("imc").value = num(dados[24])
+    document.getElementById("pgc").value = num(dados[25])
+
+    // 🔥 METABOLISMO
+    document.getElementById("tmb").value = dados[30]
 
   }
 
@@ -237,18 +309,13 @@ function salvar(){
   const dados = {
     paciente_id,
     data: document.getElementById("data").value,
-    hora: document.getElementById("hora").value,
-    altura: document.getElementById("altura").value,
     peso: document.getElementById("peso").value,
-    gordura: document.getElementById("gordura").value,
-    tmb: document.getElementById("tmb").value,
-    visceral: document.getElementById("visceral").value,
-    abdomen: document.getElementById("abdomen").value
+    gordura: document.getElementById("gordura").value
   }
 
-  console.log("SALVAR:", dados)
+  console.log("SALVANDO:", dados)
 
-  alert("Pronto! Próximo passo vamos salvar no banco 🔥")
+  alert("Próximo passo: salvar no banco 🔥")
 }
 
 </script>
