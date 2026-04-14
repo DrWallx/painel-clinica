@@ -153,6 +153,7 @@ button:hover{
 <!-- DADOS -->
 <div class="card">
   <h3>Dados do exame</h3>
+
   <label>Data</label>
   <input id="data">
 
@@ -196,7 +197,7 @@ button:hover{
   <input id="tmb">
 </div>
 
-<!-- MANUAL -->
+<!-- MEDIDAS -->
 <div class="card">
   <h3>Medidas clínicas</h3>
 
@@ -223,7 +224,7 @@ function safe(v){
   return v ? v.replace(" ", ".") : ""
 }
 
-/* TXT */
+/* ================= TXT ================= */
 function lerArquivo(){
 
   const file = document.getElementById("arquivo").files[0]
@@ -248,7 +249,7 @@ function lerArquivo(){
   reader.readAsText(file)
 }
 
-/* OCR */
+/* ================= OCR ================= */
 async function lerImagem(){
 
   const file = document.getElementById("imagem").files[0]
@@ -258,32 +259,53 @@ async function lerImagem(){
 
   const { data: { text } } = await Tesseract.recognize(file, 'por')
 
-  console.log(text)
+  console.log("OCR TEXTO:", text)
 
-  const extrair = (regex) => {
-    const match = text.match(regex)
-    return match ? match[1] : ""
-  }
-
-  document.getElementById("peso").value = extrair(/Peso\s+(\d+,\d+)/i)
-  document.getElementById("gordura").value = extrair(/Gordura corporal\s+(\d+,\d+)/i)
-  document.getElementById("agua").value = extrair(/Água corporal\s+(\d+,\d+)/i)
-  document.getElementById("imc").value = extrair(/IMC.*?(\d+,\d+)/i)
-  document.getElementById("pgc").value = extrair(/%.*?(\d+,\d+)/i)
-  document.getElementById("tmb").value = extrair(/basal.*?(\d+)/i)
-
+  extrairDados(text)
 }
 
-/* SALVAR */
+/* ================= EXTRAÇÃO ================= */
+function extrairDados(texto){
+
+  const limpar = (v) => v ? v.replace(",", ".") : ""
+
+  const pegar = (label) => {
+    const regex = new RegExp(label + "[^0-9]*(\\d+[\\.,]\\d+)", "i")
+    const match = texto.match(regex)
+    return match ? limpar(match[1]) : ""
+  }
+
+  const peso = pegar("Peso")
+  const gordura = pegar("Gordura")
+  const agua = pegar("Água")
+  const imc = pegar("IMC")
+  const pgc = pegar("PGC|%")
+  const tmb = pegar("basal|TMB")
+
+  console.log({ peso, gordura, agua, imc, pgc, tmb })
+
+  if(peso) document.getElementById("peso").value = peso
+  if(gordura) document.getElementById("gordura").value = gordura
+  if(agua) document.getElementById("agua").value = agua
+  if(imc) document.getElementById("imc").value = imc
+  if(pgc) document.getElementById("pgc").value = pgc
+  if(tmb) document.getElementById("tmb").value = tmb
+}
+
+/* ================= SALVAR ================= */
 function salvar(){
 
   const dados = {
     peso: document.getElementById("peso").value,
-    gordura: document.getElementById("gordura").value
+    gordura: document.getElementById("gordura").value,
+    imc: document.getElementById("imc").value,
+    pgc: document.getElementById("pgc").value,
+    tmb: document.getElementById("tmb").value
   }
 
-  console.log(dados)
-  alert("Pronto! Próximo passo: salvar no banco 🔥")
+  console.log("SALVAR:", dados)
+
+  alert("Perfeito! Próximo passo: salvar no banco 🔥")
 }
 
 </script>
