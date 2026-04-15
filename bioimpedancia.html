@@ -3,12 +3,6 @@
 <head>
 <title>Bioimpedância</title>
 
-<!-- OCR -->
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
-
-<!-- DICOM -->
-<script src="https://unpkg.com/dicom-parser/dist/dicomParser.min.js"></script>
-
 <style>
 body{
   margin:0;
@@ -35,41 +29,19 @@ body{
 }
 
 .menu-item{
-  position:relative;
   display:flex;
-  align-items:center;
   justify-content:center;
+  align-items:center;
   width:45px;
   height:45px;
   border-radius:12px;
   margin-bottom:12px;
-  text-decoration:none;
   font-size:20px;
   color:#334155;
 }
 
 .menu-item:hover{
   background:#eef2ff;
-  transform:scale(1.08);
-}
-
-.menu-item::after{
-  content: attr(data-label);
-  position:absolute;
-  left:60px;
-  top:50%;
-  transform:translateY(-50%);
-  background:#1f2937;
-  color:white;
-  padding:6px 10px;
-  border-radius:8px;
-  font-size:12px;
-  opacity:0;
-  transition:0.2s;
-}
-
-.menu-item:hover::after{
-  opacity:1;
 }
 
 .content{
@@ -77,10 +49,10 @@ body{
   padding:30px;
 }
 
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:20px;
+.top{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:20px;
 }
 
 .card{
@@ -90,34 +62,65 @@ body{
   box-shadow:0 4px 10px rgba(0,0,0,0.05);
 }
 
-label{
-  font-size:13px;
-  color:#555;
+.grid{
+  display:grid;
+  grid-template-columns:300px 1fr;
+  gap:20px;
+}
+
+.lista{
+  max-height:500px;
+  overflow:auto;
+}
+
+.item{
+  padding:10px;
+  border-radius:8px;
+  margin-bottom:6px;
+  cursor:pointer;
+}
+
+.item:hover{
+  background:#eef2ff;
+}
+
+.item.active{
+  background:#6366f1;
+  color:white;
+}
+
+.dados{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:15px;
+}
+
+.bloco{
+  background:#f9fafb;
+  padding:15px;
+  border-radius:10px;
+}
+
+.valor{
+  font-size:20px;
+  font-weight:bold;
 }
 
 input{
-  width:100%;
-  padding:10px;
-  margin-top:4px;
-  margin-bottom:10px;
+  padding:8px;
   border-radius:8px;
   border:1px solid #ddd;
 }
 
 button{
-  padding:10px 15px;
+  padding:8px 12px;
   border:none;
   background:#6366f1;
   color:white;
   border-radius:8px;
   cursor:pointer;
 }
-
-button:hover{
-  background:#4f46e5;
-}
 </style>
-
 </head>
 
 <body>
@@ -129,203 +132,149 @@ button:hover{
     <img src="/Email Signature Logo.png" style="width:120px;">
   </div>
 
-  <a href="/index.html" class="menu-item" data-label="Agenda">📅</a>
-  <a href="/retornos.html" class="menu-item" data-label="Retornos">🔁</a>
-  <a href="/producao.html" class="menu-item" data-label="Produção">📊</a>
+  <div class="menu-item">📅</div>
+  <div class="menu-item">🔁</div>
+  <div class="menu-item">📊</div>
 </aside>
 
 <main class="content">
 
 <h1>📊 Bioimpedância</h1>
 
+<!-- ID BIO -->
+<div class="card top">
+  <div>
+    <label>ID Bioimpedância</label><br>
+    <input id="id_bio">
+    <button onclick="salvarId()">Salvar</button>
+  </div>
+</div>
+
 <div class="grid">
 
-<!-- TXT -->
-<div class="card">
-  <h3>Importar TXT</h3>
-  <input type="file" id="arquivo">
-  <button onclick="lerArquivo()">Importar TXT</button>
-</div>
-
-<!-- OCR -->
-<div class="card">
-  <h3>Importar Imagem (OCR)</h3>
-  <input type="file" id="imagem">
-  <button onclick="lerImagem()">Importar imagem</button>
-</div>
-
-<!-- DICOM -->
-<div class="card">
-  <h3>Importar DICOM (.dcm)</h3>
-  <input type="file" id="dicom">
-  <button onclick="lerDicom()">Importar DICOM</button>
-</div>
+<!-- LISTA DE EXAMES -->
+<div class="card lista" id="lista"></div>
 
 <!-- DADOS -->
 <div class="card">
-  <h3>Dados do exame</h3>
 
-  <label>Data</label>
-  <input id="data">
+<div class="dados">
 
-  <label>Hora</label>
-  <input id="hora">
-
-  <label>Altura</label>
-  <input id="altura">
+<div class="bloco">
+  <div>Peso</div>
+  <div class="valor" id="peso">-</div>
 </div>
 
-<!-- COMPOSIÇÃO -->
-<div class="card">
-  <h3>Composição corporal</h3>
-
-  <label>Peso</label>
-  <input id="peso">
-
-  <label>Água corporal</label>
-  <input id="agua">
-
-  <label>Gordura corporal</label>
-  <input id="gordura">
+<div class="bloco">
+  <div>% Gordura</div>
+  <div class="valor" id="gordura">-</div>
 </div>
 
-<!-- OBESIDADE -->
-<div class="card">
-  <h3>Obesidade</h3>
-
-  <label>IMC</label>
-  <input id="imc">
-
-  <label>% Gordura</label>
-  <input id="pgc">
+<div class="bloco">
+  <div>Massa muscular</div>
+  <div class="valor" id="musculo">-</div>
 </div>
 
-<!-- METABOLISMO -->
-<div class="card">
-  <h3>Metabolismo</h3>
-
-  <label>TMB</label>
-  <input id="tmb">
+<div class="bloco">
+  <div>TMB</div>
+  <div class="valor" id="tmb">-</div>
 </div>
 
-<!-- MEDIDAS -->
-<div class="card">
-  <h3>Medidas clínicas</h3>
-
-  <label>Gordura visceral</label>
-  <input id="visceral">
-
-  <label>Abdômen</label>
-  <input id="abdomen">
+<div class="bloco">
+  <div>Gordura visceral</div>
+  <div class="valor" id="visceral">-</div>
 </div>
 
-<div class="card">
-  <button onclick="salvar()">Salvar exame</button>
+<div class="bloco">
+  <div>Idade corporal</div>
+  <div class="valor" id="idade">-</div>
+</div>
+
+</div>
+
 </div>
 
 </div>
 
 </main>
-
 </div>
 
 <script>
 
-/* ================= TXT ================= */
-function lerArquivo(){
+const params = new URLSearchParams(window.location.search)
+const paciente_id = params.get("paciente_id")
 
-  const file = document.getElementById("arquivo").files[0]
-  if(!file) return alert("Selecione o arquivo")
+let exames = []
 
-  const reader = new FileReader()
+/* ================= SALVAR ID ================= */
+async function salvarId(){
 
-  reader.onload = function(e){
+  const id_bio = document.getElementById("id_bio").value
 
-    const dados = e.target.result.split(",")
+  await fetch("/api/salvarBio", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({ paciente_id, id_bio })
+  })
 
-    document.getElementById("data").value = dados[2] || ""
-    document.getElementById("hora").value = dados[3] || ""
-    document.getElementById("altura").value = dados[4] || ""
-    document.getElementById("peso").value = dados[5] || ""
-
-    if(dados[25]) document.getElementById("pgc").value = dados[25]
-    if(dados[30]) document.getElementById("tmb").value = dados[30]
-
-  }
-
-  reader.readAsText(file)
+  alert("ID salvo")
 }
 
-/* ================= OCR ================= */
-async function lerImagem(){
+/* ================= CARREGAR ================= */
+async function carregar(){
 
-  const file = document.getElementById("imagem").files[0]
-  if(!file) return alert("Selecione uma imagem")
+  const res = await fetch(`/api/bio?paciente_id=${paciente_id}`)
+  exames = await res.json()
 
-  alert("Lendo exame... aguarde ⏳")
-
-  const { data: { text } } = await Tesseract.recognize(file, 'por')
-
-  extrairDados(text)
+  renderLista()
+  renderExame(0)
 }
 
-function extrairDados(texto){
+/* ================= LISTA ================= */
+function renderLista(){
 
-  const limpar = (v) => v ? v.replace(",", ".") : ""
+  const div = document.getElementById("lista")
+  div.innerHTML = ""
 
-  const pegar = (label) => {
-    const regex = new RegExp(label + "[^0-9]*(\\d+[\\.,]\\d+)", "i")
-    const match = texto.match(regex)
-    return match ? limpar(match[1]) : ""
-  }
+  exames.forEach((e,i)=>{
 
-  document.getElementById("peso").value = pegar("Peso")
-  document.getElementById("gordura").value = pegar("Gordura")
-  document.getElementById("agua").value = pegar("Água")
-  document.getElementById("imc").value = pegar("IMC")
-  document.getElementById("pgc").value = pegar("PGC|%")
-  document.getElementById("tmb").value = pegar("basal|TMB")
+    div.innerHTML += `
+      <div class="item" onclick="selecionar(${i})">
+        📅 ${formatarData(e.measure_date)}
+      </div>
+    `
+  })
 }
 
-/* ================= DICOM ================= */
-function lerDicom(){
+/* ================= SELECIONAR ================= */
+function selecionar(i){
 
-  const file = document.getElementById("dicom").files[0]
-  if(!file) return alert("Selecione um .dcm")
+  document.querySelectorAll(".item").forEach(el => el.classList.remove("active"))
+  document.querySelectorAll(".item")[i].classList.add("active")
 
-  const reader = new FileReader()
-
-  reader.onload = function(e){
-
-    const byteArray = new Uint8Array(e.target.result)
-    const dataSet = dicomParser.parseDicom(byteArray)
-
-    console.log("DICOM:", dataSet)
-
-    const nome = dataSet.string('x00100010')
-    const sexo = dataSet.string('x00100040')
-
-    alert("DICOM carregado — veja console")
-  }
-
-  reader.readAsArrayBuffer(file)
+  renderExame(i)
 }
 
-/* ================= SALVAR ================= */
-function salvar(){
+/* ================= EXAME ================= */
+function renderExame(i){
 
-  const dados = {
-    peso: document.getElementById("peso").value,
-    gordura: document.getElementById("gordura").value,
-    imc: document.getElementById("imc").value,
-    pgc: document.getElementById("pgc").value,
-    tmb: document.getElementById("tmb").value
-  }
+  const e = exames[i]
 
-  console.log("SALVAR:", dados)
-
-  alert("Próximo passo: salvar no banco 🔥")
+  document.getElementById("peso").innerText = e.weight
+  document.getElementById("gordura").innerText = e.pbf_rate
+  document.getElementById("musculo").innerText = e.muscle_quantity
+  document.getElementById("tmb").innerText = e.bmr
+  document.getElementById("visceral").innerText = e.mvf_quantity
+  document.getElementById("idade").innerText = e.body_age
 }
+
+/* ================= UTIL ================= */
+function formatarData(data){
+  const d = new Date(data)
+  return d.toLocaleDateString()
+}
+
+carregar()
 
 </script>
 
