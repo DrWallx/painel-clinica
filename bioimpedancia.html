@@ -1,277 +1,201 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
+<meta charset="UTF-8">
 <title>Bioimpedância</title>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
-body{
-  margin:0;
-  font-family:Arial;
-  background:#f4f6f8;
+body {
+  font-family: Arial;
+  background: #f4f6f8;
+  padding: 20px;
 }
 
-.layout{
-  display:flex;
+.container {
+  max-width: 1200px;
+  margin: auto;
 }
 
-.sidebar{
-  width:220px;
-  height:100vh;
-  background:white;
-  padding:20px;
-  border-right:1px solid #e5e7eb;
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
-.logo{
-  display:flex;
-  justify-content:center;
-  margin-bottom:30px;
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
 }
 
-.menu-item{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  width:45px;
-  height:45px;
-  border-radius:12px;
-  margin-bottom:12px;
-  font-size:20px;
-  color:#334155;
+h2 {
+  margin-bottom: 10px;
 }
 
-.menu-item:hover{
-  background:#eef2ff;
-}
-
-.content{
-  flex:1;
-  padding:30px;
-}
-
-.top{
-  display:flex;
-  justify-content:space-between;
-  margin-bottom:20px;
-}
-
-.card{
-  background:white;
-  padding:20px;
-  border-radius:12px;
-  box-shadow:0 4px 10px rgba(0,0,0,0.05);
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:300px 1fr;
-  gap:20px;
-}
-
-.lista{
-  max-height:500px;
-  overflow:auto;
-}
-
-.item{
-  padding:10px;
-  border-radius:8px;
-  margin-bottom:6px;
-  cursor:pointer;
-}
-
-.item:hover{
-  background:#eef2ff;
-}
-
-.item.active{
-  background:#6366f1;
-  color:white;
-}
-
-.dados{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:15px;
-}
-
-.bloco{
-  background:#f9fafb;
-  padding:15px;
-  border-radius:10px;
-}
-
-.valor{
-  font-size:20px;
-  font-weight:bold;
-}
-
-input{
-  padding:8px;
-  border-radius:8px;
-  border:1px solid #ddd;
-}
-
-button{
-  padding:8px 12px;
-  border:none;
-  background:#6366f1;
-  color:white;
-  border-radius:8px;
-  cursor:pointer;
+.value {
+  font-size: 20px;
+  font-weight: bold;
 }
 </style>
 </head>
 
 <body>
 
-<div class="layout">
+<div class="container">
 
-<aside class="sidebar">
-  <div class="logo">
-    <img src="/Email Signature Logo.png" style="width:120px;">
+  <!-- PACIENTE -->
+  <div class="card">
+    <h2>Paciente</h2>
+    <p><b>Nome:</b> <span id="nome"></span></p>
+    <p><b>Altura:</b> <span id="altura"></span></p>
+    <p><b>Sexo:</b> <span id="sexo"></span></p>
+    <p><b>Data:</b> <span id="data"></span></p>
+    <p><b>Hora:</b> <span id="hora"></span></p>
   </div>
 
-  <div class="menu-item">📅</div>
-  <div class="menu-item">🔁</div>
-  <div class="menu-item">📊</div>
-</aside>
+  <div class="grid">
 
-<main class="content">
+    <!-- COMPOSIÇÃO -->
+    <div class="card">
+      <h2>Composição corporal</h2>
+      <p>Peso: <span id="peso"></span></p>
+      <p>Gordura %: <span id="gordura"></span></p>
+      <p>Massa muscular: <span id="musculo"></span></p>
+      <p>Água corporal: <span id="agua"></span></p>
+      <p>Proteína: <span id="proteina"></span></p>
+      <p>Mineral: <span id="mineral"></span></p>
+    </div>
 
-<h1>📊 Bioimpedância</h1>
+    <!-- METABOLISMO -->
+    <div class="card">
+      <h2>Metabolismo</h2>
+      <p>TMB: <span id="tmb"></span></p>
+      <p>Gasto energético: <span id="caloria"></span></p>
+      <p>Idade corporal: <span id="idade_corporal"></span></p>
+      <p>Massa celular: <span id="bcm"></span></p>
+    </div>
 
-<!-- ID BIO -->
-<div class="card top">
-  <div>
-    <label>ID Bioimpedância</label><br>
-    <input id="id_bio">
-    <button onclick="salvarId()">Salvar</button>
+    <!-- OBESIDADE -->
+    <div class="card">
+      <h2>Obesidade</h2>
+      <p>IMC: <span id="imc"></span></p>
+      <p>Gordura visceral: <span id="vfa"></span></p>
+      <p>RCQ: <span id="rcq"></span></p>
+      <p>Cintura: <span id="cintura"></span></p>
+    </div>
+
+    <!-- ÁGUA -->
+    <div class="card">
+      <h2>Água corporal</h2>
+      <p>Intracelular: <span id="agua_intra"></span></p>
+      <p>Extracelular: <span id="agua_extra"></span></p>
+      <p>Índice AEC: <span id="aec"></span></p>
+    </div>
+
+    <!-- CONTROLE -->
+    <div class="card">
+      <h2>Controle</h2>
+      <p>Peso ideal: <span id="peso_ideal"></span></p>
+      <p>Controle peso: <span id="controle_peso"></span></p>
+      <p>Controle gordura: <span id="controle_gordura"></span></p>
+      <p>Controle muscular: <span id="controle_musculo"></span></p>
+    </div>
+
+    <!-- SEGMENTAÇÃO -->
+    <div class="card">
+      <h2>Segmentação muscular</h2>
+      <p>Braço direito: <span id="braco_dir"></span></p>
+      <p>Braço esquerdo: <span id="braco_esq"></span></p>
+      <p>Coxa direita: <span id="coxa_dir"></span></p>
+      <p>Coxa esquerda: <span id="coxa_esq"></span></p>
+      <p>Tronco: <span id="tronco"></span></p>
+    </div>
+
   </div>
-</div>
 
-<div class="grid">
+  <!-- GRÁFICO -->
+  <div class="card">
+    <h2>Evolução de Peso</h2>
+    <canvas id="graficoPeso"></canvas>
+  </div>
 
-<!-- LISTA DE EXAMES -->
-<div class="card lista" id="lista"></div>
-
-<!-- DADOS -->
-<div class="card">
-
-<div class="dados">
-
-<div class="bloco">
-  <div>Peso</div>
-  <div class="valor" id="peso">-</div>
-</div>
-
-<div class="bloco">
-  <div>% Gordura</div>
-  <div class="valor" id="gordura">-</div>
-</div>
-
-<div class="bloco">
-  <div>Massa muscular</div>
-  <div class="valor" id="musculo">-</div>
-</div>
-
-<div class="bloco">
-  <div>TMB</div>
-  <div class="valor" id="tmb">-</div>
-</div>
-
-<div class="bloco">
-  <div>Gordura visceral</div>
-  <div class="valor" id="visceral">-</div>
-</div>
-
-<div class="bloco">
-  <div>Idade corporal</div>
-  <div class="valor" id="idade">-</div>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</main>
 </div>
 
 <script>
 
-const params = new URLSearchParams(window.location.search)
-const paciente_id = params.get("paciente_id")
+const urlParams = new URLSearchParams(window.location.search)
+const id = urlParams.get("id_bio")
 
-let exames = []
+async function carregar() {
 
-/* ================= SALVAR ID ================= */
-async function salvarId(){
+  const res = await fetch(`http://localhost:3001/bio?id_bio=${id}`)
+  const dados = await res.json()
 
-  const id_bio = document.getElementById("id_bio").value
+  const d = dados[0]
 
-  await fetch("/api/salvarBio", {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({ paciente_id, id_bio })
+  // básicos
+  nome.innerText = d.mname
+  altura.innerText = d.height + " cm"
+  sexo.innerText = d.sex == 1 ? "Masculino" : "Feminino"
+  data.innerText = d.measure_date
+  hora.innerText = d.measure_time
+
+  // composição
+  peso.innerText = d.weight + " kg"
+  gordura.innerText = d.pbf_rate + "%"
+  musculo.innerText = d.muscle_quantity + " kg"
+  agua.innerText = d.tbw_quantity + " L"
+  proteina.innerText = d.protein_quantity + " kg"
+  mineral.innerText = d.mineral_quantity + " kg"
+
+  // metabolismo
+  tmb.innerText = d.bmr
+  caloria.innerText = d.calory
+  idade_corporal.innerText = d.body_age
+  bcm.innerText = d.bcm
+
+  // obesidade
+  imc.innerText = d.bmi
+  vfa.innerText = d.vfa
+  rcq.innerText = d.whr_rate
+  cintura.innerText = d.waist_measurement
+
+  // água
+  agua_intra.innerText = d.bcm_in_water
+  agua_extra.innerText = d.bcm_out_water
+  aec.innerText = d.edema
+
+  // controle
+  peso_ideal.innerText = d.weight_recommend
+  controle_peso.innerText = d.weight_control_value
+  controle_gordura.innerText = d.mbf_control_value
+  controle_musculo.innerText = d.lbm_control_value
+
+  // segmentação
+  braco_dir.innerText = d.right_hand_muscle
+  braco_esq.innerText = d.left_hand_muscle
+  coxa_dir.innerText = d.right_foot_muscle
+  coxa_esq.innerText = d.left_foot_muscle
+  tronco.innerText = d.trunk_muscle
+
+  // gráfico
+  const labels = dados.map(x => x.measure_date)
+  const pesoData = dados.map(x => x.weight)
+
+  new Chart(document.getElementById("graficoPeso"), {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "Peso",
+        data: pesoData
+      }]
+    }
   })
-
-  alert("ID salvo")
-}
-
-/* ================= CARREGAR ================= */
-async function carregar(){
-
-  const res = await fetch(`/api/bio?paciente_id=${paciente_id}`)
-  exames = await res.json()
-
-  renderLista()
-  renderExame(0)
-}
-
-/* ================= LISTA ================= */
-function renderLista(){
-
-  const div = document.getElementById("lista")
-  div.innerHTML = ""
-
-  exames.forEach((e,i)=>{
-
-    div.innerHTML += `
-      <div class="item" onclick="selecionar(${i})">
-        📅 ${formatarData(e.measure_date)}
-      </div>
-    `
-  })
-}
-
-/* ================= SELECIONAR ================= */
-function selecionar(i){
-
-  document.querySelectorAll(".item").forEach(el => el.classList.remove("active"))
-  document.querySelectorAll(".item")[i].classList.add("active")
-
-  renderExame(i)
-}
-
-/* ================= EXAME ================= */
-function renderExame(i){
-
-  const e = exames[i]
-
-  document.getElementById("peso").innerText = e.weight
-  document.getElementById("gordura").innerText = e.pbf_rate
-  document.getElementById("musculo").innerText = e.muscle_quantity
-  document.getElementById("tmb").innerText = e.bmr
-  document.getElementById("visceral").innerText = e.mvf_quantity
-  document.getElementById("idade").innerText = e.body_age
-}
-
-/* ================= UTIL ================= */
-function formatarData(data){
-  const d = new Date(data)
-  return d.toLocaleDateString()
 }
 
 carregar()
