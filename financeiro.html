@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Financeiro</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f4f6f8;
+}
+
+.layout{
+  display:flex;
+}
+
+/* MENU */
+.sidebar{
+  width:220px;
+  height:100vh;
+  background:white;
+  padding:20px;
+  border-right:1px solid #e5e7eb;
+}
+
+.logo{
+  width:100%;
+  display:flex;
+  justify-content:center;
+  margin-bottom:30px;
+}
+
+.menu-item{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:45px;
+  height:45px;
+  border-radius:12px;
+  margin-bottom:12px;
+  text-decoration:none;
+  font-size:20px;
+  color:#334155;
+}
+
+.menu-item:hover{
+  background:#eef2ff;
+  color:#4f46e5;
+  transform:scale(1.08);
+}
+
+.menu-item.active{
+  background:#6366f1;
+  color:white;
+}
+
+.content{
+  flex:1;
+  padding:30px;
+}
+
+/* CARDS */
+.card{
+  background:white;
+  padding:20px;
+  border-radius:14px;
+  margin-bottom:20px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* TOP NAV */
+.top-nav{
+  display:flex;
+  gap:10px;
+  margin-bottom:20px;
+}
+
+.top-nav button{
+  padding:10px 15px;
+  border:none;
+  border-radius:10px;
+  background:#e5e7eb;
+  cursor:pointer;
+}
+
+.top-nav button.active{
+  background:#6366f1;
+  color:white;
+}
+
+/* MESES */
+.meses{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.meses button{
+  padding:8px 12px;
+  border:none;
+  border-radius:8px;
+  background:#eef2ff;
+  cursor:pointer;
+}
+
+.meses button.active{
+  background:#4f46e5;
+  color:white;
+}
+
+/* TABELA */
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th,td{
+  padding:10px;
+  border-bottom:1px solid #ddd;
+  text-align:left;
+}
+
+.status-pago{
+  color:green;
+  font-weight:bold;
+}
+
+.status-pendente{
+  color:red;
+  font-weight:bold;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="layout">
+
+  <!-- MENU -->
+  <aside class="sidebar">
+    <div class="logo">
+      <img src="/Email Signature Logo.png" style="width:120px;">
+    </div>
+
+    <a href="/index.html" class="menu-item">📅</a>
+    <a href="/retornos.html" class="menu-item">🔁</a>
+    <a href="/producao.html" class="menu-item">📊</a>
+    <a href="/bioimpedancia.html" class="menu-item">📈</a>
+
+    <hr>
+
+    <a href="/financeiro.html" class="menu-item active">💰</a>
+  </aside>
+
+  <!-- CONTEÚDO -->
+  <main class="content">
+
+    <h1>💰 Financeiro</h1>
+
+    <!-- SEMESTRE -->
+    <div class="top-nav">
+      <button class="active">2025/1</button>
+      <button>2025/2</button>
+      <button>2026/1</button>
+      <button>2026/2</button>
+    </div>
+
+    <!-- MESES -->
+    <div class="card">
+      <div class="meses">
+        <button class="active">Jan</button>
+        <button>Fev</button>
+        <button>Mar</button>
+        <button>Abr</button>
+        <button>Mai</button>
+        <button>Jun</button>
+      </div>
+    </div>
+
+    <!-- TABELA -->
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Prontuário</th>
+            <th>Nome</th>
+            <th>Data</th>
+            <th>Valor</th>
+            <th>Status</th>
+            <th>Pagamento</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <!-- MOCK -->
+          <tr>
+            <td>1234</td>
+            <td>Valdécio</td>
+            <td>15/02/2025</td>
+            <td>300</td>
+            <td class="status-pendente">Pendente</td>
+            <td><input type="date"></td>
+          </tr>
+
+          <tr>
+            <td>5678</td>
+            <td>João Silva</td>
+            <td>16/02/2025</td>
+            <td>300</td>
+            <td class="status-pago">Pago</td>
+            <td><input type="date" value="2025-02-16"></td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+
+    <!-- RESUMO -->
+    <div class="card">
+      <h3>Resumo</h3>
+      <p>Total consultas: 20</p>
+      <p>Total pagas: 10</p>
+      <p>Total pendentes: 10</p>
+    </div>
+
+    <!-- BOTÃO -->
+    <button style="
+      padding:12px 20px;
+      border:none;
+      border-radius:10px;
+      background:#6366f1;
+      color:white;
+      cursor:pointer;
+    ">
+      💾 Salvar
+    </button>
+
+  </main>
+
+</div>
+
+</body>
+</html>
