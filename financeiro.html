@@ -32,7 +32,6 @@ body{
 }
 
 .menu-item{
-  position:relative;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -70,7 +69,7 @@ body{
   box-shadow:0 4px 12px rgba(0,0,0,0.05);
 }
 
-/* TOP NAV */
+/* NAV */
 .top-nav{
   display:flex;
   gap:10px;
@@ -130,6 +129,15 @@ th,td{
 .status-pendente{
   color:red;
   font-weight:bold;
+}
+
+.btn-salvar{
+  background:#6366f1;
+  color:white;
+  border:none;
+  padding:6px 10px;
+  border-radius:8px;
+  cursor:pointer;
 }
 </style>
 
@@ -194,54 +202,92 @@ th,td{
           </tr>
         </thead>
 
-        <tbody>
+        <tbody id="tabela"></tbody>
 
-          <!-- MOCK -->
-          <tr>
-            <td>1234</td>
-            <td>Valdécio</td>
-            <td>15/02/2025</td>
-            <td>300</td>
-            <td class="status-pendente">Pendente</td>
-            <td><input type="date"></td>
-          </tr>
-
-          <tr>
-            <td>5678</td>
-            <td>João Silva</td>
-            <td>16/02/2025</td>
-            <td>300</td>
-            <td class="status-pago">Pago</td>
-            <td><input type="date" value="2025-02-16"></td>
-          </tr>
-
-        </tbody>
       </table>
     </div>
 
     <!-- RESUMO -->
     <div class="card">
       <h3>Resumo</h3>
-      <p>Total consultas: 20</p>
-      <p>Total pagas: 10</p>
-      <p>Total pendentes: 10</p>
-    </div>
 
-    <!-- BOTÃO -->
-    <button style="
-      padding:12px 20px;
-      border:none;
-      border-radius:10px;
-      background:#6366f1;
-      color:white;
-      cursor:pointer;
-    ">
-      💾 Salvar
-    </button>
+      <p>Total consultas: <b id="totalConsultas"></b></p>
+      <p>Valor total: <b id="valorTotal"></b></p>
+      <p>Valor recebido: <b id="valorPago"></b></p>
+      <p>Saldo: <b id="saldo"></b></p>
+    </div>
 
   </main>
 
 </div>
+
+<script>
+
+let dados = [
+  {id:1, prontuario:1234, nome:"Valdécio", data:"2025-02-15", valor:300, pago:false},
+  {id:2, prontuario:5678, nome:"João Silva", data:"2025-02-16", valor:300, pago:true}
+]
+
+function render(){
+
+  const tbody = document.getElementById("tabela")
+  tbody.innerHTML = ""
+
+  let total = 0
+  let pago = 0
+
+  dados.forEach(d=>{
+
+    total += d.valor
+    if(d.pago) pago += d.valor
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${d.prontuario}</td>
+        <td>${d.nome}</td>
+        <td>${formatarData(d.data)}</td>
+        <td>R$ ${d.valor}</td>
+
+        <td class="${d.pago ? 'status-pago':'status-pendente'}">
+          ${d.pago ? 'Pago ✅':'Pendente'}
+        </td>
+
+        <td>
+          <input type="date" id="data_${d.id}" value="${d.data}">
+          <button class="btn-salvar" onclick="salvar(${d.id})">💾</button>
+        </td>
+      </tr>
+    `
+  })
+
+  document.getElementById("totalConsultas").innerText = dados.length
+  document.getElementById("valorTotal").innerText = total.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})
+  document.getElementById("valorPago").innerText = pago.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})
+  document.getElementById("saldo").innerText = (total - pago).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})
+}
+
+function salvar(id){
+
+  const data = document.getElementById("data_"+id).value
+
+  const item = dados.find(x=>x.id === id)
+
+  item.pago = true
+  item.data_pagamento = data
+
+  render()
+
+  console.log("Salvar no banco:", item)
+}
+
+function formatarData(d){
+  const [ano,mes,dia] = d.split("-")
+  return `${dia}/${mes}/${ano}`
+}
+
+render()
+
+</script>
 
 </body>
 </html>
