@@ -1,5 +1,8 @@
 {
-  "functions": {
-    "api/*.js": {}
-  }
+  "builds": [
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
+    }
+  ]
 }
