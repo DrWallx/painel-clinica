@@ -15,7 +15,6 @@ body{
   display:flex;
 }
 
-/* MENU */
 .sidebar{
   width:220px;
   height:100vh;
@@ -60,7 +59,6 @@ body{
   padding:30px;
 }
 
-/* CARDS */
 .card{
   background:white;
   padding:20px;
@@ -69,7 +67,6 @@ body{
   box-shadow:0 4px 12px rgba(0,0,0,0.05);
 }
 
-/* NAV */
 .top-nav{
   display:flex;
   gap:10px;
@@ -89,7 +86,6 @@ body{
   color:white;
 }
 
-/* MESES */
 .meses{
   display:flex;
   gap:8px;
@@ -109,7 +105,6 @@ body{
   color:white;
 }
 
-/* TABELA */
 table{
   width:100%;
   border-collapse:collapse;
@@ -138,6 +133,16 @@ th,td{
   padding:6px 10px;
   border-radius:8px;
   cursor:pointer;
+}
+
+.btn-cancelar{
+  background:#ef4444;
+  color:white;
+  border:none;
+  padding:6px 10px;
+  border-radius:8px;
+  cursor:pointer;
+  margin-left:5px;
 }
 </style>
 
@@ -168,7 +173,6 @@ th,td{
 
     <h1>💰 Financeiro</h1>
 
-    <!-- SEMESTRE -->
     <div class="top-nav">
       <button class="active">2025/1</button>
       <button>2025/2</button>
@@ -176,7 +180,6 @@ th,td{
       <button>2026/2</button>
     </div>
 
-    <!-- MESES -->
     <div class="card">
       <div class="meses">
         <button class="active">Jan</button>
@@ -188,7 +191,6 @@ th,td{
       </div>
     </div>
 
-    <!-- TABELA -->
     <div class="card">
       <table>
         <thead>
@@ -207,7 +209,6 @@ th,td{
       </table>
     </div>
 
-    <!-- RESUMO -->
     <div class="card">
       <h3>Resumo</h3>
 
@@ -224,11 +225,14 @@ th,td{
 <script>
 
 let dados = [
-  {id:1, prontuario:1234, nome:"Valdécio", data:"2025-02-15", valor:300, pago:false},
-  {id:2, prontuario:5678, nome:"João Silva", data:"2025-02-16", valor:300, pago:true}
+  {id:1, prontuario:1234, nome:"Valdécio", data:"2025-02-15", valor:300, pago:false, data_pagamento:null},
+  {id:2, prontuario:5678, nome:"João Silva", data:"2025-02-16", valor:300, pago:true, data_pagamento:"2025-02-16"}
 ]
 
 function render(){
+
+  // 🔥 ordena por data
+  dados.sort((a,b)=> new Date(a.data) - new Date(b.data))
 
   const tbody = document.getElementById("tabela")
   tbody.innerHTML = ""
@@ -253,8 +257,13 @@ function render(){
         </td>
 
         <td>
-          <input type="date" id="data_${d.id}" value="${d.data}">
+          <input type="date" id="data_${d.id}" value="${d.data_pagamento || ''}">
+
           <button class="btn-salvar" onclick="salvar(${d.id})">💾</button>
+
+          ${d.pago ? `
+            <button class="btn-cancelar" onclick="desfazer(${d.id})">❌</button>
+          ` : ""}
         </td>
       </tr>
     `
@@ -270,6 +279,11 @@ function salvar(id){
 
   const data = document.getElementById("data_"+id).value
 
+  if(!data){
+    alert("Selecione uma data antes de salvar")
+    return
+  }
+
   const item = dados.find(x=>x.id === id)
 
   item.pago = true
@@ -278,6 +292,20 @@ function salvar(id){
   render()
 
   console.log("Salvar no banco:", item)
+}
+
+function desfazer(id){
+
+  if(!confirm("Deseja desfazer o pagamento?")) return
+
+  const item = dados.find(x => x.id === id)
+
+  item.pago = false
+  item.data_pagamento = null
+
+  render()
+
+  console.log("Desfeito:", item)
 }
 
 function formatarData(d){
