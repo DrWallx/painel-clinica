@@ -81,6 +81,11 @@ body{
   cursor:pointer;
 }
 
+.top-nav button.active{
+  background:#6366f1;
+  color:white;
+}
+
 .meses{
   display:flex;
   gap:8px;
@@ -93,6 +98,11 @@ body{
   border-radius:8px;
   background:#eef2ff;
   cursor:pointer;
+}
+
+.meses button.active{
+  background:#4f46e5;
+  color:white;
 }
 
 table{
@@ -115,6 +125,25 @@ th,td{
   color:red;
   font-weight:bold;
 }
+
+.btn-salvar{
+  background:#6366f1;
+  color:white;
+  border:none;
+  padding:6px 10px;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.btn-cancelar{
+  background:#ef4444;
+  color:white;
+  border:none;
+  padding:6px 10px;
+  border-radius:8px;
+  cursor:pointer;
+  margin-left:5px;
+}
 </style>
 
 </head>
@@ -131,6 +160,7 @@ th,td{
     <a href="/index.html" class="menu-item">📅</a>
     <a href="/retornos.html" class="menu-item">🔁</a>
     <a href="/producao.html" class="menu-item">📊</a>
+    <a href="/bioimpedancia.html" class="menu-item">📈</a>
 
     <hr>
 
@@ -141,6 +171,33 @@ th,td{
 
     <h1>💰 Financeiro</h1>
 
+    <!-- PERÍODO -->
+    <div class="top-nav">
+      <button onclick="selecionarPeriodo(2025,1)">2025/1</button>
+      <button onclick="selecionarPeriodo(2025,2)">2025/2</button>
+      <button onclick="selecionarPeriodo(2026,1)">2026/1</button>
+      <button onclick="selecionarPeriodo(2026,2)">2026/2</button>
+    </div>
+
+    <!-- MESES -->
+    <div class="card">
+      <div class="meses">
+        <button onclick="selecionarMes(1)">Jan</button>
+        <button onclick="selecionarMes(2)">Fev</button>
+        <button onclick="selecionarMes(3)">Mar</button>
+        <button onclick="selecionarMes(4)">Abr</button>
+        <button onclick="selecionarMes(5)">Mai</button>
+        <button onclick="selecionarMes(6)">Jun</button>
+        <button onclick="selecionarMes(7)">Jul</button>
+        <button onclick="selecionarMes(8)">Ago</button>
+        <button onclick="selecionarMes(9)">Set</button>
+        <button onclick="selecionarMes(10)">Out</button>
+        <button onclick="selecionarMes(11)">Nov</button>
+        <button onclick="selecionarMes(12)">Dez</button>
+      </div>
+    </div>
+
+    <!-- TABELA -->
     <div class="card">
       <table>
         <thead>
@@ -150,6 +207,7 @@ th,td{
             <th>Data</th>
             <th>Valor</th>
             <th>Status</th>
+            <th>Pagamento</th>
           </tr>
         </thead>
 
@@ -157,6 +215,7 @@ th,td{
       </table>
     </div>
 
+    <!-- RESUMO -->
     <div class="card">
       <h3>Resumo</h3>
 
@@ -173,35 +232,17 @@ th,td{
 <script>
 
 let dados = []
+let mesSelecionado = 1
+let anoSelecionado = 2025
 
 async function carregarDados(){
 
-  try{
+  const res = await fetch(`/api/financeiro?mes=${mesSelecionado}&ano=${anoSelecionado}`)
+  dados = await res.json()
 
-    const mes = new Date().getMonth() + 1
-    const ano = new Date().getFullYear()
+  console.log("dados:", dados)
 
-    const res = await fetch(`/api/financeiro?mes=${mes}&ano=${ano}`)
-    dados = await res.json()
-
-    console.log("DADOS:", dados)
-
-    if(!dados || dados.length === 0){
-      document.getElementById("tabela").innerHTML = `
-        <tr>
-          <td colspan="5">Nenhum dado encontrado</td>
-        </tr>
-      `
-      atualizarResumo([])
-      return
-    }
-
-    render()
-
-  }catch(err){
-    console.error("Erro:", err)
-  }
-
+  render()
 }
 
 function render(){
@@ -211,39 +252,81 @@ function render(){
   const tbody = document.getElementById("tabela")
   tbody.innerHTML = ""
 
+  let total = 0
+  let pago = 0
+
   dados.forEach(d=>{
+
+    const pagoStatus = d.status === "pago" || d.pago
+
+    total += Number(d.valor || 0)
+    if(pagoStatus) pago += Number(d.valor || 0)
 
     tbody.innerHTML += `
       <tr>
         <td>${d.prontuario || "-"}</td>
-        <td>${d.paciente || "-"}</td>
+        <td>${d.paciente || d.nome || "-"}</td>
         <td>${formatarData(d.data)}</td>
         <td>R$ ${d.valor || 0}</td>
 
-        <td class="${d.status === 'pago' ? 'status-pago':'status-pendente'}">
-          ${d.status === 'pago' ? 'Pago':'Pendente'}
+        <td class="${pagoStatus ? 'status-pago':'status-pendente'}">
+          ${pagoStatus ? 'Pago ✅':'Pendente'}
+        </td>
+
+        <td>
+          <input type="date" id="data_${d.id}" value="${d.data_pagamento || ''}">
+
+          <button class="btn-salvar" onclick="salvar(${d.id})">💾</button>
+
+          ${pagoStatus ? `
+            <button class="btn-cancelar" onclick="desfazer(${d.id})">❌</button>
+          ` : ""}
         </td>
       </tr>
     `
   })
 
-  atualizarResumo(dados)
-}
-
-function atualizarResumo(lista){
-
-  let total = 0
-  let pago = 0
-
-  lista.forEach(d=>{
-    total += Number(d.valor || 0)
-    if(d.status === "pago") pago += Number(d.valor || 0)
-  })
-
-  document.getElementById("totalConsultas").innerText = lista.length
+  document.getElementById("totalConsultas").innerText = dados.length
   document.getElementById("valorTotal").innerText = total.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})
   document.getElementById("valorPago").innerText = pago.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})
   document.getElementById("saldo").innerText = (total - pago).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})
+}
+
+function selecionarMes(mes){
+  mesSelecionado = mes
+  carregarDados()
+}
+
+function selecionarPeriodo(ano, semestre){
+
+  anoSelecionado = ano
+
+  if(semestre === 1){
+    mesSelecionado = 1
+  }else{
+    mesSelecionado = 7
+  }
+
+  carregarDados()
+}
+
+function salvar(id){
+
+  const data = document.getElementById("data_"+id).value
+
+  if(!data){
+    alert("Selecione uma data antes de salvar")
+    return
+  }
+
+  console.log("Salvar:", id, data)
+}
+
+function desfazer(id){
+
+  if(!confirm("Deseja desfazer o pagamento?")) return
+
+  console.log("Desfazer:", id)
 }
 
 function formatarData(d){
