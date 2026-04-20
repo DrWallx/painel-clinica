@@ -79,15 +79,16 @@ export default async function handler(req, res) {
       )
 
       return {
-        paciente_id: item.paciente_id,
-        nome: pacientesMap[item.paciente_id] || "Sem nome",
-        valor: valor,
-        data_consulta: dataFormatada,
-        mes: Number(mes),
-        ano: Number(ano),
-        pago: false,
-        data_pagamento: null
-      }
+  paciente_id: item.paciente_id,
+  prontuario: String(item.paciente_id), // 🔥 AQUI
+  nome: pacientesMap[item.paciente_id] || "Sem nome",
+  valor: valor,
+  data_consulta: dataFormatada,
+  mes: Number(mes),
+  ano: Number(ano),
+  pago: false,
+  data_pagamento: null
+}
 
     })
 
