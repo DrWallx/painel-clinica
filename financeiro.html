@@ -247,7 +247,7 @@ async function carregarDados(){
 
 function render(){
 
-  dados.sort((a,b)=> new Date(a.data) - new Date(b.data))
+  dados.sort((a,b)=> new Date(a.data_consulta) - new Date(b.data))
 
   const tbody = document.getElementById("tabela")
   tbody.innerHTML = ""
@@ -266,7 +266,7 @@ function render(){
       <tr>
         <td>${d.prontuario || "-"}</td>
         <td>${d.paciente || d.nome || "-"}</td>
-        <td>${formatarData(d.data)}</td>
+        <td>${formatarData(d.data_consulta)}</td>
         <td>R$ ${d.valor || 0}</td>
 
         <td class="${pagoStatus ? 'status-pago':'status-pendente'}">
