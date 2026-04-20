@@ -2,27 +2,37 @@ import { createClient } from '@supabase/supabase-js'
 
 export default async function handler(req, res) {
 
-  const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_KEY
-  )
+  try {
 
-  const { data, error } = await supabase
-    .from("financeiro_consultas")
-    .insert([
-      {
-        paciente: "Teste Sistema",
-        valor: 150,
-        data: "2026-04-19",
-        mes: 4,
-        ano: 2026,
-        status: "pago"
-      }
-    ])
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_KEY
+    )
 
-  if (error) {
-    return res.status(500).json(error)
+    const { data, error } = await supabase
+      .from("financeiro_consultas")
+      .insert([
+        {
+          paciente: "Valdésio Xavier",
+          prontuario: 9999,
+          valor: 300,
+          data: "2025-02-15",
+          status: "pago",
+          data_pagamento: "2025-02-15"
+        }
+      ])
+
+    if (error) {
+      console.error(error)
+      return res.status(500).json(error)
+    }
+
+    return res.json({
+      sucesso: true,
+      data
+    })
+
+  } catch (err) {
+    return res.status(500).json(err.message)
   }
-
-  return res.json(data)
 }
