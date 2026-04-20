@@ -12,8 +12,8 @@ export default async function handler(req, res) {
     const token = process.env.FEEGOW_TOKEN
 
     // 🔥 TESTE: 1 dia só
-    const dataInicio = "01-02-2025"
-    const dataFim = "28-02-2025"
+    const dataInicio = "01-03-2025"
+    const dataFim = "31-03-2025"
 
     const url = `https://api.feegow.com/v1/api/appoints/search?data_start=${dataInicio}&data_end=${dataFim}`
 
