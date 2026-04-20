@@ -61,7 +61,7 @@ export default async function handler(req, res) {
 
       const jsonPaciente = await resp.json()
 
-      pacientesMap[id] = jsonPaciente?.content?.[0]?.nome || "Sem nome"
+      pacientesMap[id] = jsonPaciente?.content?.nome || "Sem nome"
     }
 
     // 🔥 CONVERSÃO
