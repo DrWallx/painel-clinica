@@ -310,7 +310,7 @@ function selecionarPeriodo(ano, semestre){
   carregarDados()
 }
 
-function salvar(id){
+async function salvar(id){
 
   const data = document.getElementById("data_"+id).value
 
@@ -319,14 +319,38 @@ function salvar(id){
     return
   }
 
-  console.log("Salvar:", id, data)
+  await fetch("/api/updatePagamento", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      id,
+      pago: true,
+      data_pagamento: data
+    })
+  })
+
+  carregarDados()
 }
 
-function desfazer(id){
+async function desfazer(id){
 
   if(!confirm("Deseja desfazer o pagamento?")) return
 
-  console.log("Desfazer:", id)
+  await fetch("/api/updatePagamento", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      id,
+      pago: false,
+      data_pagamento: null
+    })
+  })
+
+  carregarDados() // 🔥 atualiza tela
 }
 
 function formatarData(d){
