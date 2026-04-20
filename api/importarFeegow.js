@@ -50,7 +50,7 @@ export default async function handler(req, res) {
     for (let id of idsUnicos) {
 
       const resp = await fetch(
-        `https://api.feegow.com/v1/api/patient/search?patient_id=${id}`,
+        `https://api.feegow.com/v1/api/patient/search?paciente_id=${id}`
         {
           headers: {
             "Content-Type": "application/json",
