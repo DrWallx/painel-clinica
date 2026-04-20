@@ -81,11 +81,6 @@ body{
   cursor:pointer;
 }
 
-.top-nav button.active{
-  background:#6366f1;
-  color:white;
-}
-
 .meses{
   display:flex;
   gap:8px;
@@ -98,11 +93,6 @@ body{
   border-radius:8px;
   background:#eef2ff;
   cursor:pointer;
-}
-
-.meses button.active{
-  background:#4f46e5;
-  color:white;
 }
 
 table{
@@ -125,25 +115,6 @@ th,td{
   color:red;
   font-weight:bold;
 }
-
-.btn-salvar{
-  background:#6366f1;
-  color:white;
-  border:none;
-  padding:6px 10px;
-  border-radius:8px;
-  cursor:pointer;
-}
-
-.btn-cancelar{
-  background:#ef4444;
-  color:white;
-  border:none;
-  padding:6px 10px;
-  border-radius:8px;
-  cursor:pointer;
-  margin-left:5px;
-}
 </style>
 
 </head>
@@ -152,7 +123,6 @@ th,td{
 
 <div class="layout">
 
-  <!-- MENU -->
   <aside class="sidebar">
     <div class="logo">
       <img src="/Email Signature Logo.png" style="width:120px;">
@@ -161,35 +131,15 @@ th,td{
     <a href="/index.html" class="menu-item">📅</a>
     <a href="/retornos.html" class="menu-item">🔁</a>
     <a href="/producao.html" class="menu-item">📊</a>
-    <a href="/bioimpedancia.html" class="menu-item">📈</a>
 
     <hr>
 
     <a href="/financeiro.html" class="menu-item active">💰</a>
   </aside>
 
-  <!-- CONTEÚDO -->
   <main class="content">
 
     <h1>💰 Financeiro</h1>
-
-    <div class="top-nav">
-      <button class="active">2025/1</button>
-      <button>2025/2</button>
-      <button>2026/1</button>
-      <button>2026/2</button>
-    </div>
-
-    <div class="card">
-      <div class="meses">
-        <button class="active">Jan</button>
-        <button>Fev</button>
-        <button>Mar</button>
-        <button>Abr</button>
-        <button>Mai</button>
-        <button>Jun</button>
-      </div>
-    </div>
 
     <div class="card">
       <table>
@@ -200,12 +150,10 @@ th,td{
             <th>Data</th>
             <th>Valor</th>
             <th>Status</th>
-            <th>Pagamento</th>
           </tr>
         </thead>
 
         <tbody id="tabela"></tbody>
-
       </table>
     </div>
 
@@ -224,96 +172,87 @@ th,td{
 
 <script>
 
-let dados = [
-  {id:1, prontuario:1234, nome:"Valdécio", data:"2025-02-15", valor:300, pago:false, data_pagamento:null},
-  {id:2, prontuario:5678, nome:"João Silva", data:"2025-02-16", valor:300, pago:true, data_pagamento:"2025-02-16"}
-]
+let dados = []
+
+async function carregarDados(){
+
+  try{
+
+    const mes = new Date().getMonth() + 1
+    const ano = new Date().getFullYear()
+
+    const res = await fetch(`/api/financeiro?mes=${mes}&ano=${ano}`)
+    dados = await res.json()
+
+    console.log("DADOS:", dados)
+
+    if(!dados || dados.length === 0){
+      document.getElementById("tabela").innerHTML = `
+        <tr>
+          <td colspan="5">Nenhum dado encontrado</td>
+        </tr>
+      `
+      atualizarResumo([])
+      return
+    }
+
+    render()
+
+  }catch(err){
+    console.error("Erro:", err)
+  }
+
+}
 
 function render(){
 
-  // 🔥 ordena por data
   dados.sort((a,b)=> new Date(a.data) - new Date(b.data))
 
   const tbody = document.getElementById("tabela")
   tbody.innerHTML = ""
 
-  let total = 0
-  let pago = 0
-
   dados.forEach(d=>{
-
-    total += d.valor
-    if(d.pago) pago += d.valor
 
     tbody.innerHTML += `
       <tr>
-        <td>${d.prontuario}</td>
-        <td>${d.nome}</td>
+        <td>${d.prontuario || "-"}</td>
+        <td>${d.paciente || "-"}</td>
         <td>${formatarData(d.data)}</td>
-        <td>R$ ${d.valor}</td>
+        <td>R$ ${d.valor || 0}</td>
 
-        <td class="${d.pago ? 'status-pago':'status-pendente'}">
-          ${d.pago ? 'Pago ✅':'Pendente'}
-        </td>
-
-        <td>
-          <input type="date" id="data_${d.id}" value="${d.data_pagamento || ''}">
-
-          <button class="btn-salvar" onclick="salvar(${d.id})">💾</button>
-
-          ${d.pago ? `
-            <button class="btn-cancelar" onclick="desfazer(${d.id})">❌</button>
-          ` : ""}
+        <td class="${d.status === 'pago' ? 'status-pago':'status-pendente'}">
+          ${d.status === 'pago' ? 'Pago':'Pendente'}
         </td>
       </tr>
     `
   })
 
-  document.getElementById("totalConsultas").innerText = dados.length
+  atualizarResumo(dados)
+}
+
+function atualizarResumo(lista){
+
+  let total = 0
+  let pago = 0
+
+  lista.forEach(d=>{
+    total += Number(d.valor || 0)
+    if(d.status === "pago") pago += Number(d.valor || 0)
+  })
+
+  document.getElementById("totalConsultas").innerText = lista.length
   document.getElementById("valorTotal").innerText = total.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})
   document.getElementById("valorPago").innerText = pago.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})
   document.getElementById("saldo").innerText = (total - pago).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})
 }
 
-function salvar(id){
-
-  const data = document.getElementById("data_"+id).value
-
-  if(!data){
-    alert("Selecione uma data antes de salvar")
-    return
-  }
-
-  const item = dados.find(x=>x.id === id)
-
-  item.pago = true
-  item.data_pagamento = data
-
-  render()
-
-  console.log("Salvar no banco:", item)
-}
-
-function desfazer(id){
-
-  if(!confirm("Deseja desfazer o pagamento?")) return
-
-  const item = dados.find(x => x.id === id)
-
-  item.pago = false
-  item.data_pagamento = null
-
-  render()
-
-  console.log("Desfeito:", item)
-}
-
 function formatarData(d){
+  if(!d) return "-"
   const [ano,mes,dia] = d.split("-")
   return `${dia}/${mes}/${ano}`
 }
 
-render()
+carregarDados()
 
 </script>
 
