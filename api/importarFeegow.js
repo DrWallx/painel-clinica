@@ -12,8 +12,8 @@ export default async function handler(req, res) {
     const token = process.env.FEEGOW_TOKEN
 
     // 🔥 TESTE: 1 dia só
-    const dataInicio = "01-02-2025"
-    const dataFim = "28-02-2025"
+    const dataInicio = "19-02-2025"
+    const dataFim = "19-02-2025"
 
     const url = `https://api.feegow.com/v1/api/appoints/search?data_start=${dataInicio}&data_end=${dataFim}`
 
@@ -32,12 +32,37 @@ export default async function handler(req, res) {
       return res.json({ erro: "Sem dados" })
     }
 
-    // 🔥 FILTRO SIMPLES
+    // 🔥 FILTRO CORRETO
     const filtrado = json.content.filter(item => {
-      return item.status_id !== 11 // remove cancelados
+      return (
+        item.procedimento_id === 23 && // 🔥 só consulta
+        item.status_id !== 11          // ❌ remove cancelado
+      )
     })
 
     console.log("FILTRADO:", filtrado.length)
+
+    // 🔥 BUSCAR NOMES DOS PACIENTES
+    const idsUnicos = [...new Set(filtrado.map(i => i.paciente_id))]
+
+    const pacientesMap = {}
+
+    for (let id of idsUnicos) {
+
+      const resp = await fetch(
+        `https://api.feegow.com/v1/api/patient/search?patient_id=${id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "x-access-token": token
+          }
+        }
+      )
+
+      const jsonPaciente = await resp.json()
+
+      pacientesMap[id] = jsonPaciente?.content?.[0]?.nome || "Sem nome"
+    }
 
     // 🔥 CONVERSÃO
     const dados = filtrado.map(item => {
@@ -55,7 +80,7 @@ export default async function handler(req, res) {
 
       return {
         paciente_id: item.paciente_id,
-        nome: item.paciente_nome || "Sem nome",
+        nome: pacientesMap[item.paciente_id] || "Sem nome",
         valor: valor,
         data_consulta: dataFormatada,
         mes: Number(mes),
