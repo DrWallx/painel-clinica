@@ -7,7 +7,7 @@ export default async function handler(req, res) {
 
   try {
 
-    const { paciente_id } = req.query
+    const { paciente_id, tipo } = req.query
 
     /* ===================== */
     /* KV DIRETO (BLINDADO) */
@@ -18,9 +18,27 @@ export default async function handler(req, res) {
 
     console.log("KV DIRETO:", local)
 
-  const receitas = local.receitas?.slice(-1) || []
-  const exames = local.exames?.slice(-1) || []
-  const notas = local.notas?.slice(-1) || []
+  let receitas = []
+  let exames = []
+  let notas = []
+
+  if (tipo === "receita") {
+  receitas = local.receitas?.slice(-1) || []
+}
+
+  if (tipo === "exame") {
+  exames = local.exames?.slice(-1) || []
+}
+
+  if (tipo === "nota") {
+  notas = local.notas?.slice(-1) || []
+}
+
+  if (tipo === "todos") {
+  receitas = local.receitas?.slice(-1) || []
+  exames = local.exames?.slice(-1) || []
+  notas = local.notas?.slice(-1) || []
+}
 
     /* ===================== */
     /* PACIENTE */
