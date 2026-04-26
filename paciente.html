@@ -558,6 +558,19 @@ async function adicionarReceita(){
   if(data.url && !receitas.includes(data.url)){
     receitas.push(data.url)
   }
+  // 🔥 ADICIONE ISSO AQUI
+paciente.receitas = receitas
+
+await fetch("/api/salvarPaciente", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    paciente_id,
+    receitas
+  })
+})
+
+renderReceitas(receitas)
 }
 
   await fetch("/api/salvarPaciente",{
@@ -617,6 +630,16 @@ for(let file of files){
   if(data.url && !exames.includes(data.url)){
     exames.push(data.url)
   }
+  await fetch("/api/salvarPaciente", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    paciente_id,
+    exames
+  })
+})
+
+renderExames(exames)
 }
 
   await fetch("/api/salvarPaciente",{
