@@ -673,19 +673,25 @@ function renderNotas(lista){
 /* ===================== */
 
 async function enviarReceita(){
-  await fetch(`/api/enviarEmail?paciente_id=${paciente_id}`)
-  alert("Receitas enviadas")
+  await fetch(`/api/enviarEmail?paciente_id=${paciente_id}&tipo=receita`)
+  alert("Receita enviada")
   carregarPaciente()
 }
 
 async function enviarNota(){
-  await fetch(`/api/enviarEmail?paciente_id=${paciente_id}`)
-  alert("Notas enviadas")
+  await fetch(`/api/enviarEmail?paciente_id=${paciente_id}&tipo=nota`)
+  alert("Nota enviada")
+  carregarPaciente()
+}
+
+async function enviarExame(){
+  await fetch(`/api/enviarEmail?paciente_id=${paciente_id}&tipo=exame`)
+  alert("Exame enviado")
   carregarPaciente()
 }
 
 async function enviarAmbos(){
-  await fetch(`/api/enviarEmail?paciente_id=${paciente_id}`)
+  await fetch(`/api/enviarEmail?paciente_id=${paciente_id}&tipo=todos`)
   alert("Documentos enviados")
   carregarPaciente()
 }
