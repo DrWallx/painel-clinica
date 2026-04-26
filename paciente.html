@@ -574,10 +574,17 @@ async function adicionarReceita(){
 }
 
 function renderReceitas(lista){
-  document.getElementById("lista_receitas").innerHTML =
-    lista.length
-    ? lista.map((l,i)=>`<p><a href="${l}" target="_blank">📄 Receita ${i+1}</a></p>`).join("")
-    : "<p style='color:#888'>Nenhuma receita pendente</p>"
+
+  const div = document.getElementById("lista_receitas")
+
+  if(!lista.length){
+    div.innerHTML = "<p style='color:#888'>Nenhuma receita pendente</p>"
+    return
+  }
+
+  div.innerHTML = lista.map((_,i)=>`
+    <p>📄 Receita ${i+1} adicionada</p>
+  `).join("")
 }
 
 /* ===================== */
@@ -625,10 +632,17 @@ for(let file of files){
 }
 
 function renderExames(lista){
-  document.getElementById("lista_exames").innerHTML =
-    lista.length
-    ? lista.map((l,i)=>`<p><a href="${l}" target="_blank">🧪 Exame ${i+1}</a></p>`).join("")
-    : "<p style='color:#888'>Nenhum exame pendente</p>"
+
+  const div = document.getElementById("lista_exames")
+
+  if(!lista.length){
+    div.innerHTML = "<p style='color:#888'>Nenhum exame pendente</p>"
+    return
+  }
+
+  div.innerHTML = lista.map((_,i)=>`
+    <p>🧪 Exame ${i+1} adicionado</p>
+  `).join("")
 }
 
 /* ===================== */
