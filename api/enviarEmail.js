@@ -239,6 +239,15 @@ console.log("TOTAL ANEXOS:", attachments.length)
     /* ENVIO */
     /* ===================== */
 
+    // 🚨 BLOQUEIO DE SEGURANÇA
+  if (!attachments || attachments.length === 0) {
+  console.log("⚠️ Nenhum arquivo para envio")
+
+  return res.status(400).json({
+    erro: "Nenhum arquivo disponível para envio"
+  })
+}
+
     await resend.emails.send({
       from: 'Clínica Haux <hauxlife@hauxlife.com.br>',
       to: [emailPaciente],
