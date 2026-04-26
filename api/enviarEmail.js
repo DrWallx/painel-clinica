@@ -18,9 +18,9 @@ export default async function handler(req, res) {
 
     console.log("KV DIRETO:", local)
 
-    const receitas = local.receitas || []
-    const exames = local.exames || []
-    const notas = local.notas || []
+  const receitas = local.receitas?.slice(-1) || []
+  const exames = local.exames?.slice(-1) || []
+  const notas = local.notas?.slice(-1) || []
 
     /* ===================== */
     /* PACIENTE */
