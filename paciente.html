@@ -398,20 +398,20 @@ button.hist:hover {
 
     <!-- RECEITAS -->
     <div class="card">
-      <h3>Receitas (links)</h3>
+      <h3>Receitas (PDF)</h3>
 
-      <input type="text" id="receita_link" placeholder="Cole o link da receita">
+  <input type="file" id="receita" multiple accept="application/pdf">
 
-      <button onclick="adicionarReceita()">Adicionar receita</button>
+  <button onclick="adicionarReceita()">Adicionar receita</button>
 
       <div id="lista_receitas"></div>
     </div>
 
     <!-- EXAMES -->
     <div class="card">
-      <h3>Exames (links)</h3>
+      <h3>Exames (PDF)</h3>
 
-      <input type="text" id="exame_link" placeholder="Cole o link do exame">
+    <input type="file" id="exame" multiple accept="application/pdf">
 
       <button onclick="adicionarExame()">Adicionar exame</button>
 
@@ -438,8 +438,9 @@ button.hist:hover {
       <p id="status_envio" style="font-size:14px;color:#666;"></p>
 
       <button onclick="enviarReceita()">Enviar Receita</button>
+      <button onclick="enviarExame()">Enviar Exame</button>
       <button onclick="enviarNota()">Enviar Nota</button>
-      <button onclick="enviarAmbos()">Enviar Ambos</button>
+      <button onclick="enviarAmbos()">Enviar Todos</button>
     </div>
 
   </div>
@@ -533,22 +534,31 @@ carregarPaciente()
 
 async function adicionarReceita(){
 
-  const input = document.getElementById("receita_link")
-  const link = input.value.trim()
+  const input = document.getElementById("receita")
+  const files = input.files
 
-  if(!link) return alert("Cole o link")
-
-  const res = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
-  const paciente = await res.json()
+  if(!files.length) return alert("Selecione arquivos")
 
   let receitas = paciente.receitas || []
 
-  if(receitas.includes(link)){
-    alert("Link já adicionado")
-    return
-  }
+  for(let file of files){
 
-  receitas.push(link)
+  const form = new FormData()
+  form.append("file", file)
+  form.append("paciente_id", paciente_id)
+  form.append("tipo","receita")
+
+  const response = await fetch("/api/upload",{
+    method:"POST",
+    body:form
+  })
+
+  const data = await response.json()
+
+  if(data.url && !receitas.includes(data.url)){
+    receitas.push(data.url)
+  }
+}
 
   await fetch("/api/salvarPaciente",{
     method:"POST",
@@ -576,22 +586,31 @@ function renderReceitas(lista){
 
 async function adicionarExame(){
 
-  const input = document.getElementById("exame_link")
-  const link = input.value.trim()
+  const input = document.getElementById("exame")
+const files = input.files
 
-  if(!link) return alert("Cole o link")
+if(!files.length) return alert("Selecione arquivos")
 
-  const res = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
-  const paciente = await res.json()
+let exames = paciente.exames || []
 
-  let exames = paciente.exames || []
+for(let file of files){
 
-  if(exames.includes(link)){
-    alert("Link já adicionado")
-    return
+  const form = new FormData()
+  form.append("file", file)
+  form.append("paciente_id", paciente_id)
+  form.append("tipo","exame")
+
+  const response = await fetch("/api/upload",{
+    method:"POST",
+    body:form
+  })
+
+  const data = await response.json()
+
+  if(data.url && !exames.includes(data.url)){
+    exames.push(data.url)
   }
-
-  exames.push(link)
+}
 
   await fetch("/api/salvarPaciente",{
     method:"POST",
