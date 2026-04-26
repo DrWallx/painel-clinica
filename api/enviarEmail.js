@@ -149,33 +149,92 @@ export default async function handler(req, res) {
 
     let attachments = []
 
-    for (let i = 0; i < notas.length; i++) {
+// =========================
+// RECEITAS
+// =========================
+for (let i = 0; i < receitas.length; i++) {
 
-      const url = notas[i]
+  const url = receitas[i]
 
-      try {
+  try {
 
-        console.log("BAIXANDO NOTA:", url)
+    console.log("BAIXANDO RECEITA:", url)
 
-        const response = await fetch(url, { cache: "no-store" })
+    const response = await fetch(url)
 
-        if (!response.ok) continue
+    if (!response.ok) continue
 
-        const buffer = await response.arrayBuffer()
+    const buffer = await response.arrayBuffer()
 
-        attachments.push({
-          filename: `nota_${i + 1}.pdf`,
-          content: Buffer.from(buffer)
-        })
+    attachments.push({
+      filename: `receita_${i + 1}.pdf`,
+      content: Buffer.from(buffer)
+    })
 
-      } catch (e) {
-        console.log("ERRO NOTA:", e.message)
-      }
+  } catch (e) {
+    console.log("ERRO RECEITA:", e.message)
+  }
 
-    }
+}
 
-    console.log("TOTAL ANEXOS:", attachments.length)
+// =========================
+// EXAMES
+// =========================
+for (let i = 0; i < exames.length; i++) {
 
+  const url = exames[i]
+
+  try {
+
+    console.log("BAIXANDO EXAME:", url)
+
+    const response = await fetch(url)
+
+    if (!response.ok) continue
+
+    const buffer = await response.arrayBuffer()
+
+    attachments.push({
+      filename: `exame_${i + 1}.pdf`,
+      content: Buffer.from(buffer)
+    })
+
+  } catch (e) {
+    console.log("ERRO EXAME:", e.message)
+  }
+
+}
+
+// =========================
+// NOTAS (igual já estava)
+// =========================
+for (let i = 0; i < notas.length; i++) {
+
+  const url = notas[i]
+
+  try {
+
+    console.log("BAIXANDO NOTA:", url)
+
+    const response = await fetch(url, { cache: "no-store" })
+
+    if (!response.ok) continue
+
+    const buffer = await response.arrayBuffer()
+
+    attachments.push({
+      filename: `nota_${i + 1}.pdf`,
+      content: Buffer.from(buffer)
+    })
+
+  } catch (e) {
+    console.log("ERRO NOTA:", e.message)
+  }
+
+}
+
+console.log("TOTAL ANEXOS:", attachments.length)
+    
     /* ===================== */
     /* ENVIO */
     /* ===================== */
