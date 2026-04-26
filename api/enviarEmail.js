@@ -60,11 +60,15 @@ export default async function handler(req, res) {
     let html = `
     <div style="font-family:Arial;max-width:600px;margin:auto;background:#ffffff;padding:20px;border-radius:10px">
 
-    <h2 style="color:#3b82f6;margin-bottom:10px">Clínica Haux</h2>
+    <div style="text-align:center;margin-bottom:20px">
+  <img src="https://project-dvdik.vercel.app/Email%20Signature%20Logo.png"
+       alt="Clínica Haux"
+       style="max-width:180px;">
+</div>
 
     <p>Olá <b>${paciente.nome}</b>,</p>
 
-    <p>Seus documentos estão disponíveis abaixo:</p>
+    <p>Seus documentos estão disponíveis abaixo:</p> Não se preocupe é link seguro!
     `
 
     if (receitas.length) {
