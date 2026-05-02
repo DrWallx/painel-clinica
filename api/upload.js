@@ -87,6 +87,39 @@ export default async function handler(req, res) {
 
     await kv.set(key, data)
 
+    /* ===================== */
+/* 🧠 IA BIOIMPEDANCIA */
+/* ===================== */
+
+if (tipo === "bio") {
+
+  try {
+
+    console.log("PROCESSANDO BIOIMPEDANCIA IA...")
+
+    const ia = await fetch(`${process.env.BASE_URL}/api/processarBio`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        fileUrl: blob.url
+      })
+    })
+
+    const dadosBio = await ia.json()
+
+    console.log("RESULTADO IA:", dadosBio)
+
+    // 🔥 salvar junto no KV
+    data.bio = dadosBio
+
+    await kv.set(key, data)
+
+  } catch (e) {
+    console.log("ERRO IA BIO:", e.message)
+  }
+}
     console.log("SALVO NO KV:", data)
 
     /* ===================== */
