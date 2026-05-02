@@ -47,6 +47,27 @@ h2 {
 
 <div class="container">
 
+  <div class="card">
+  <h2>Upload Bioimpedância</h2>
+
+  <input type="file" id="arquivoBio" accept="application/pdf">
+
+  <br><br>
+
+  <button onclick="enviarBio()" style="
+    padding:10px;
+    background:#3b82f6;
+    color:white;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+  ">
+    Enviar e Analisar
+  </button>
+
+  <p id="statusUpload" style="margin-top:10px;color:#555"></p>
+</div>
+
   <!-- PACIENTE -->
   <div class="card">
     <h2>Paciente</h2>
@@ -132,10 +153,12 @@ const id = urlParams.get("id_bio")
 
 async function carregar() {
 
-  const res = await fetch(`http://localhost:3001/bio?id_bio=${id}`)
-  const dados = await res.json()
+  const paciente_id = urlParams.get("paciente_id")
 
-  const d = dados[0]
+const res = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
+const paciente = await res.json()
+
+const d = paciente.bio
 
   // básicos
   nome.innerText = d.mname
@@ -145,12 +168,11 @@ async function carregar() {
   hora.innerText = d.measure_time
 
   // composição
-  peso.innerText = d.weight + " kg"
-  gordura.innerText = d.pbf_rate + "%"
-  musculo.innerText = d.muscle_quantity + " kg"
-  agua.innerText = d.tbw_quantity + " L"
-  proteina.innerText = d.protein_quantity + " kg"
-  mineral.innerText = d.mineral_quantity + " kg"
+peso.innerText = d?.peso || "-"
+gordura.innerText = d?.gordura_corporal || "-"
+musculo.innerText = d?.massa_muscular || "-"
+agua.innerText = d?.agua_corporal || "-"
+idade_corporal.innerText = d?.idade_metabolica || "-"
 
   // metabolismo
   tmb.innerText = d.bmr
@@ -199,6 +221,55 @@ async function carregar() {
 }
 
 carregar()
+
+async function enviarBio() {
+
+  const input = document.getElementById("arquivoBio")
+  const status = document.getElementById("statusUpload")
+
+  if (!input.files.length) {
+    alert("Selecione um PDF")
+    return
+  }
+
+  status.innerText = "Enviando..."
+
+  const file = input.files[0]
+
+  const urlParams = new URLSearchParams(window.location.search)
+  const paciente_id = urlParams.get("paciente_id")
+
+  const form = new FormData()
+  form.append("file", file)
+  form.append("paciente_id", paciente_id)
+  form.append("tipo", "bio") // 🔥 ESSENCIAL
+
+  try {
+
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: form
+    })
+
+    const data = await res.json()
+
+    if (data.success) {
+      status.innerText = "Processando IA..."
+
+      // ⏳ espera IA rodar
+      setTimeout(() => {
+        status.innerText = "Atualizando dados..."
+        location.reload()
+      }, 3000)
+
+    } else {
+      status.innerText = "Erro no upload"
+    }
+
+  } catch (err) {
+    status.innerText = "Erro: " + err.message
+  }
+}
 
 </script>
 
