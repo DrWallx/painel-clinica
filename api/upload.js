@@ -137,9 +137,26 @@ Retorne SOMENTE JSON:
 
 const iaData = await iaResponse.json()
 
-const texto = iaData.output[0].content[0].text
+console.log("IA RAW:", iaData)
 
-const dadosBio = JSON.parse(texto)
+let texto = ""
+
+// novo formato da OpenAI
+if (iaData.output_text) {
+  texto = iaData.output_text
+} 
+// fallback antigo
+else if (iaData.output?.length) {
+  texto = iaData.output[0]?.content?.[0]?.text || ""
+}
+
+let dadosBio = {}
+
+try {
+  dadosBio = JSON.parse(texto)
+} catch (e) {
+  console.log("ERRO PARSE IA:", texto)
+}
     console.log("RESULTADO IA:", dadosBio)
 
     // 🔥 salvar junto no KV
