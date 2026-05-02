@@ -99,24 +99,24 @@ if (tipo === "bio") {
     console.log("PROCESSANDO BIOIMPEDANCIA IA...")
 
     const iaResponse = await fetch("https://api.openai.com/v1/responses", {
-  method: "POST",
-  headers: {
-    "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-  model: "gpt-4.1",
-  input: [
-    {
-      role: "user",
-      content: [
-        {
-          type: "input_file",
-          file_url: blob.url
-        },
-        {
-          type: "input_text",
-          text: `
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "gpt-4.1",
+        input: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "input_file",
+                file_url: blob.url
+              },
+              {
+                type: "input_text",
+                text: `
 Você é um especialista em bioimpedância.
 
 Leia este PDF e extraia os dados.
@@ -133,51 +133,44 @@ Retorne APENAS JSON válido:
 
 Se não encontrar algum campo, deixe vazio.
 `
-        }
-      ]
-    }
-  ]
-})
-}
-            `
-          },
-          {
-           {
-          type: "input_file",
-          file_url: blob.url
-}
+              }
+            ]
           }
         ]
-      }
-    ]
-  })
-})
+      })
+    })
 
-const iaData = await iaResponse.json()
+    const iaData = await iaResponse.json()
 
-console.log("IA RAW:", iaData)
+    console.log("IA RAW:", iaData)
 
-let texto = ""
+    // 🔥 VERIFICAR ERRO DA IA
+    if (iaData.error) {
+      console.log("ERRO IA:", iaData.error.message)
+      return res.status(500).json({
+        erro: iaData.error.message
+      })
+    }
 
-// novo formato da OpenAI
-if (iaData.output_text) {
-  texto = iaData.output_text
-} 
-// fallback antigo
-else if (iaData.output?.length) {
-  texto = iaData.output[0]?.content?.[0]?.text || ""
-}
+    let texto = ""
 
-let dadosBio = {}
+    if (iaData.output_text) {
+      texto = iaData.output_text
+    } else if (iaData.output?.length) {
+      texto = iaData.output[0]?.content?.[0]?.text || ""
+    }
 
-try {
-  dadosBio = JSON.parse(texto)
-} catch (e) {
-  console.log("ERRO PARSE IA:", texto)
-}
+    let dadosBio = {}
+
+    try {
+      dadosBio = JSON.parse(texto)
+    } catch (e) {
+      console.log("ERRO PARSE IA:", texto)
+      dadosBio = {}
+    }
+
     console.log("RESULTADO IA:", dadosBio)
 
-    // 🔥 salvar junto no KV
     data.bio = dadosBio
 
     await kv.set(key, data)
@@ -185,8 +178,7 @@ try {
   } catch (e) {
     console.log("ERRO IA BIO:", e.message)
   }
-}
-    console.log("SALVO NO KV:", data)
+}    console.log("SALVO NO KV:", data)
 
     /* ===================== */
     /* ⚠️ REMOVIDO EMAIL AUTOMÁTICO */
