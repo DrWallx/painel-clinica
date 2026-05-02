@@ -105,17 +105,24 @@ if (tipo === "bio") {
     "Content-Type": "application/json"
   },
   body: JSON.stringify({
-    model: "gpt-4.1",
-    input: [
-      {
-        role: "user",
-        content: [
-          {
-            type: "input_text",
-            text: `
-Leia este exame de bioimpedância e extraia:
+  model: "gpt-4.1",
+  input: [
+    {
+      role: "user",
+      content: [
+        {
+          type: "input_file",
+          file_url: blob.url
+        },
+        {
+          type: "input_text",
+          text: `
+Você é um especialista em bioimpedância.
 
-Retorne SOMENTE JSON:
+Leia este PDF e extraia os dados.
+
+Retorne APENAS JSON válido:
+
 {
   "peso": "",
   "gordura_corporal": "",
@@ -123,11 +130,22 @@ Retorne SOMENTE JSON:
   "agua_corporal": "",
   "idade_metabolica": ""
 }
+
+Se não encontrar algum campo, deixe vazio.
+`
+        }
+      ]
+    }
+  ]
+})
+}
             `
           },
           {
-            type: "input_image",
-            image_url: blob.url
+           {
+          type: "input_file",
+          file_url: blob.url
+}
           }
         ]
       }
