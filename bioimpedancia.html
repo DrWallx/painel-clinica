@@ -158,21 +158,20 @@ async function carregar() {
 const res = await fetch(`/api/paciente?paciente_id=${paciente_id}`)
 const paciente = await res.json()
 
-const d = paciente.bio
+const d = paciente.bio || {}
 
-  // básicos
-  nome.innerText = d.mname
-  altura.innerText = d.height + " cm"
-  sexo.innerText = d.sex == 1 ? "Masculino" : "Feminino"
-  data.innerText = d.measure_date
-  hora.innerText = d.measure_time
+nome.innerText = paciente.nome || "-"
+altura.innerText = "-"
+sexo.innerText = "-"
+data.innerText = "-"
+hora.innerText = "-"
 
   // composição
-peso.innerText = d?.peso || "-"
-gordura.innerText = d?.gordura_corporal || "-"
-musculo.innerText = d?.massa_muscular || "-"
-agua.innerText = d?.agua_corporal || "-"
-idade_corporal.innerText = d?.idade_metabolica || "-"
+peso.innerText = d.peso ? d.peso + " kg" : "-"
+gordura.innerText = d.gordura_corporal ? d.gordura_corporal + " %" : "-"
+musculo.innerText = d.massa_muscular ? d.massa_muscular + " kg" : "-"
+agua.innerText = d.agua_corporal ? d.agua_corporal + " %" : "-"
+idade_corporal.innerText = d.idade_metabolica || "-"
 
   // metabolismo
   tmb.innerText = d.bmr
@@ -204,11 +203,7 @@ idade_corporal.innerText = d?.idade_metabolica || "-"
   coxa_esq.innerText = d.left_foot_muscle
   tronco.innerText = d.trunk_muscle
 
-  // gráfico
-  const labels = dados.map(x => x.measure_date)
-  const pesoData = dados.map(x => x.weight)
-
-  new Chart(document.getElementById("graficoPeso"), {
+    new Chart(document.getElementById("graficoPeso"), {
     type: "line",
     data: {
       labels,
