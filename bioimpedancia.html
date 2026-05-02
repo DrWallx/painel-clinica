@@ -174,10 +174,9 @@ agua.innerText = d.agua_corporal || "-"
 idade_corporal.innerText = d.idade_metabolica || "-"
 
   // metabolismo
-  tmb.innerText = d.bmr
-  caloria.innerText = d.calory
-  idade_corporal.innerText = d.body_age
-  bcm.innerText = d.bcm
+  tmb.innerText = "-"
+  caloria.innerText = "-"
+  bcm.innerText = "-"
 
   // obesidade
   imc.innerText = d.bmi
@@ -203,16 +202,16 @@ idade_corporal.innerText = d.idade_metabolica || "-"
   coxa_esq.innerText = d.left_foot_muscle
   tronco.innerText = d.trunk_muscle
 
-    new Chart(document.getElementById("graficoPeso"), {
-    type: "line",
-    data: {
-      labels,
-      datasets: [{
-        label: "Peso",
-        data: pesoData
-      }]
-    }
-  })
+  //  new Chart(document.getElementById("graficoPeso"), {
+  //  type: "line",
+  //  data: {
+  //    labels,
+  //    datasets: [{
+   //     label: "Peso",
+  //      data: pesoData
+  //    }]
+  //  }
+  //})
 }
 
 carregar()
