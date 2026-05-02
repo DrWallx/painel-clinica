@@ -190,7 +190,7 @@ await kv.set(key, dataAtual)
   }
 const final = await kv.get(key)
 console.log("SALVO NO KV REAL:", final)
-
+}
     /* ===================== */
     /* ⚠️ REMOVIDO EMAIL AUTOMÁTICO */
     /* ===================== */
