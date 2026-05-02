@@ -72,6 +72,7 @@ export default async function handler(req, res) {
     data.receitas = Array.isArray(data.receitas) ? data.receitas : []
     data.notas = Array.isArray(data.notas) ? data.notas : []
     data.exames = Array.isArray(data.exames) ? data.exames : []
+    data.bio = data.bio || null
 
     if (tipo === "receita" && !data.receitas.includes(blob.url)) {
       data.receitas.push(blob.url)
@@ -97,18 +98,48 @@ if (tipo === "bio") {
 
     console.log("PROCESSANDO BIOIMPEDANCIA IA...")
 
-    const ia = await fetch(`${process.env.BASE_URL}/api/processarBio`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        fileUrl: blob.url
-      })
-    })
+    const iaResponse = await fetch("https://api.openai.com/v1/responses", {
+  method: "POST",
+  headers: {
+    "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    model: "gpt-4.1",
+    input: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "input_text",
+            text: `
+Leia este exame de bioimpedância e extraia:
 
-    const dadosBio = await ia.json()
+Retorne SOMENTE JSON:
+{
+  "peso": "",
+  "gordura_corporal": "",
+  "massa_muscular": "",
+  "agua_corporal": "",
+  "idade_metabolica": ""
+}
+            `
+          },
+          {
+            type: "input_image",
+            image_url: blob.url
+          }
+        ]
+      }
+    ]
+  })
+})
 
+const iaData = await iaResponse.json()
+
+const texto = iaData.output[0].content[0].text
+
+const dadosBio = JSON.parse(texto)
     console.log("RESULTADO IA:", dadosBio)
 
     // 🔥 salvar junto no KV
