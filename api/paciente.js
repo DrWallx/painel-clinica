@@ -160,7 +160,7 @@ notas,
 receita_url: receitas[0] || null,
 nota_url: notas[0] || null,
 
-historico_envios: local.historico_envios || []
+historico_envios: local.historico_envios || [],
 bio: local.bio || null // 🔥 ADICIONAR ESTA LINHA
 
 })
