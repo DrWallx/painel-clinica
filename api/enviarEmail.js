@@ -282,7 +282,24 @@ console.log("TOTAL ANEXOS:", attachments.length)
     local.ultimo_envio = new Date().toISOString()
     local.total_notas_enviadas = notas.length
 
-    await kv.set(key, local)
+    // 🔥 RECARREGA KV ATUALIZADO
+let atual = await kv.get(key) || {}
+
+if (!atual.historico_envios) {
+  atual.historico_envios = []
+}
+
+atual.historico_envios.push({
+  data: new Date().toISOString(),
+  receitas: [...receitas],
+  exames: [...exames],
+  notas: [...notas]
+})
+
+atual.ultimo_envio = new Date().toISOString()
+atual.total_notas_enviadas = notas.length
+
+await kv.set(key, atual)
 
     console.log("HISTÓRICO SALVO:", local.historico_envios)
 
