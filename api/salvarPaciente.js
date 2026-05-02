@@ -51,17 +51,19 @@ export default async function handler(req, res) {
     /* LISTAS */
     /* ===================== */
 
-    if (receitas !== undefined) {
-      data.receitas = Array.isArray(receitas) ? receitas : []
-    }
+   if (receitas !== undefined && receitas.length) {
+  data.receitas = Array.isArray(receitas) ? receitas : data.receitas
+}
 
-    if (exames !== undefined) {
-      data.exames = Array.isArray(exames) ? exames : []
-    }
+if (exames !== undefined && exames.length) {
+  data.exames = Array.isArray(exames) ? exames : data.exames
+}
 
-    if (notas !== undefined) {
-      data.notas = Array.isArray(notas) ? notas : []
-    }
+if (notas !== undefined && notas.length) {
+  data.notas = Array.isArray(notas) ? notas : data.notas
+}
+
+    data.bio = data.bio || null
 
     /* ===================== */
     /* GARANTE ESTRUTURA */
