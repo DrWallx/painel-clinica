@@ -86,8 +86,7 @@ export default async function handler(req, res) {
       data.exames.push(blob.url)
     }
 
-    await kv.set(key, data)
-
+    
     /* ===================== */
 /* 🧠 IA BIOIMPEDANCIA */
 /* ===================== */
@@ -171,9 +170,20 @@ Se não encontrar algum campo, deixe vazio.
 
     console.log("RESULTADO IA:", dadosBio)
 
-    data.bio = dadosBio
+   // 🔥 RECARREGA O KV ATUALIZADO
+let dataAtual = await kv.get(key) || {}
 
-    await kv.set(key, data)
+// 🔥 GARANTE ESTRUTURA
+dataAtual.receitas = Array.isArray(dataAtual.receitas) ? dataAtual.receitas : []
+dataAtual.exames = Array.isArray(dataAtual.exames) ? dataAtual.exames : []
+dataAtual.notas = Array.isArray(dataAtual.notas) ? dataAtual.notas : []
+
+// 🔥 SALVA BIO
+dataAtual.bio = dadosBio
+
+console.log("SALVANDO BIO FINAL:", dataAtual)
+
+await kv.set(key, dataAtual)
 
   } catch (e) {
     console.log("ERRO IA BIO:", e.message)
