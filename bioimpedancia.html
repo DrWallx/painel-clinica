@@ -167,10 +167,10 @@ data.innerText = "-"
 hora.innerText = "-"
 
   // composição
-peso.innerText = d.peso ? d.peso + " kg" : "-"
-gordura.innerText = d.gordura_corporal ? d.gordura_corporal + " %" : "-"
-musculo.innerText = d.massa_muscular ? d.massa_muscular + " kg" : "-"
-agua.innerText = d.agua_corporal ? d.agua_corporal + " %" : "-"
+peso.innerText = d.peso || "-"
+gordura.innerText = d.gordura_corporal || "-"
+musculo.innerText = d.massa_muscular || "-"
+agua.innerText = d.agua_corporal || "-"
 idade_corporal.innerText = d.idade_metabolica || "-"
 
   // metabolismo
