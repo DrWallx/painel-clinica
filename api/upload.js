@@ -188,7 +188,8 @@ await kv.set(key, dataAtual)
   } catch (e) {
     console.log("ERRO IA BIO:", e.message)
   }
-}    console.log("SALVO NO KV:", data)
+const final = await kv.get(key)
+console.log("SALVO NO KV REAL:", final)
 
     /* ===================== */
     /* ⚠️ REMOVIDO EMAIL AUTOMÁTICO */
