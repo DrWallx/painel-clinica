@@ -128,9 +128,9 @@ Retorne JSON estruturado assim:
   "altura": "",
   "sexo": "",
   "data_exame": "",
-  "hora_exame": ""
+  "hora_exame": "",
   "peso": "",
-  
+
   "gordura_corporal": "",
   "massa_muscular": "",
   "agua_corporal": "",
