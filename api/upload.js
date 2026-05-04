@@ -72,7 +72,7 @@ export default async function handler(req, res) {
     data.receitas = Array.isArray(data.receitas) ? data.receitas : []
     data.notas = Array.isArray(data.notas) ? data.notas : []
     data.exames = Array.isArray(data.exames) ? data.exames : []
-    data.bio = data.bio || null
+    data.bio = data.bio || {}
 
     if (tipo === "receita" && !data.receitas.includes(blob.url)) {
       data.receitas.push(blob.url)
@@ -91,7 +91,7 @@ export default async function handler(req, res) {
 /* 🧠 IA BIOIMPEDANCIA */
 /* ===================== */
 
-if (tipo === "bio") {
+if (tipo === "bio" || tipo === "bio1" || tipo === "bio2") {
 
   try {
 
@@ -206,14 +206,6 @@ try {
   console.log("ERRO PARSE IA:", texto)
   dadosBio = {}
 }
-
-    try {
-      dadosBio = JSON.parse(texto)
-    } catch (e) {
-      console.log("ERRO PARSE IA:", texto)
-      dadosBio = {}
-    }
-
     console.log("RESULTADO IA:", dadosBio)
 
    // 🔥 RECARREGA O KV ATUALIZADO
