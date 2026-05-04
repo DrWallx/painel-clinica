@@ -118,20 +118,45 @@ if (tipo === "bio") {
                 text: `
 Você é um especialista em bioimpedância.
 
-Leia este PDF e extraia os dados.
+Leia este exame COMPLETO e extraia TODOS os dados possíveis.
 
-Retorne APENAS JSON válido:
+Retorne JSON estruturado assim:
 
 {
   "peso": "",
   "gordura_corporal": "",
   "massa_muscular": "",
   "agua_corporal": "",
-  "idade_metabolica": ""
+  "proteina": "",
+  "mineral": "",
+
+  "tmb": "",
+  "gasto_energetico": "",
+  "idade_metabolica": "",
+  "massa_celular": "",
+
+  "imc": "",
+  "gordura_visceral": "",
+  "rcq": "",
+
+  "agua_intracelular": "",
+  "agua_extracelular": "",
+  "indice_aec": "",
+
+  "peso_alvo": "",
+  "controle_gordura": "",
+  "controle_muscular": "",
+
+  "braco_direito": "",
+  "braco_esquerdo": "",
+  "coxa_direita": "",
+  "coxa_esquerda": "",
+  "tronco": ""
 }
 
-Se não encontrar algum campo, deixe vazio.
-`
+Se algum campo não existir, deixe vazio.
+Retorne APENAS JSON válido.
+
               }
             ]
           }
