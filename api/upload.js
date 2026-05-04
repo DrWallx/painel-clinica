@@ -12,7 +12,7 @@ module.exports.config = {
 module.exports = async function handler(req, res) {
   try {
 
-    const form = formidable({ multiples: false })
+    const form = new formidable.IncomingForm({ multiples: false })
 
     const { fields, files } = await new Promise((resolve, reject) => {
       form.parse(req, (err, fields, files) => {
