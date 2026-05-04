@@ -80,6 +80,19 @@ h2 {
   Enviar Bio 2
 </button>
 
+<br><br>
+
+<button onclick="enviarTudo()" style="
+  padding:12px;
+  background:#111827;
+  color:white;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+">
+  Enviar Tudo
+</button>
+
   <p id="statusUpload" style="margin-top:10px;color:#555"></p>
 </div>
 
@@ -211,11 +224,11 @@ idade_corporal.innerText = d.idade_metabolica || "-"
   controle_musculo.innerText = d.controle_muscular || "-"
 
   // segmentação
- braco_dir.innerText = d.right_hand_muscle
-  braco_esq.innerText = d.left_hand_muscle
-  coxa_dir.innerText = d.right_foot_muscle
-  coxa_esq.innerText = d.left_foot_muscle
-  tronco.innerText = d.trunk_muscle
+ braco_dir.innerText = d.braco_direito || "-"
+  braco_esq.innerText = d.braco_esquerdo || "-"
+  coxa_dir.innerText = d.coxa_direita || "-"
+  coxa_esq.innerText = d.coxa_esquerda || "-"
+  tronco.innerText = d.tronco || "-"
 
   //  new Chart(document.getElementById("graficoPeso"), {
   //  type: "line",
@@ -276,9 +289,71 @@ async function enviarBio(tipo) {
         location.reload()
       }, 3000)
 
+      // 🔥 LIMPA OS INPUTS
+  input1.value = ""
+  input2.value = ""
+
     } else {
       status.innerText = "Erro no upload"
     }
+
+  } catch (err) {
+    status.innerText = "Erro: " + err.message
+  }
+}
+
+async function enviarTudo() {
+
+  const status = document.getElementById("statusUpload")
+
+  const input1 = document.getElementById("arquivoBio1")
+  const input2 = document.getElementById("arquivoBio2")
+
+  const urlParams = new URLSearchParams(window.location.search)
+  const paciente_id = urlParams.get("paciente_id")
+
+  if (!input1.files.length && !input2.files.length) {
+    alert("Selecione pelo menos 1 arquivo")
+    return
+  }
+
+  status.innerText = "Enviando arquivos..."
+
+  try {
+
+    // 🔵 BIO 1
+    if (input1.files.length) {
+
+      const form1 = new FormData()
+      form1.append("file", input1.files[0])
+      form1.append("paciente_id", paciente_id)
+      form1.append("tipo", "bio1")
+
+      await fetch("/api/upload", {
+        method: "POST",
+        body: form1
+      })
+    }
+
+    // 🟢 BIO 2
+    if (input2.files.length) {
+
+      const form2 = new FormData()
+      form2.append("file", input2.files[0])
+      form2.append("paciente_id", paciente_id)
+      form2.append("tipo", "bio2")
+
+      await fetch("/api/upload", {
+        method: "POST",
+        body: form2
+      })
+    }
+
+    status.innerText = "Processando IA..."
+
+    setTimeout(() => {
+      location.reload()
+    }, 3000)
 
   } catch (err) {
     status.innerText = "Erro: " + err.message
