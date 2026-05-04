@@ -163,11 +163,113 @@ Retorne APENAS:
 
 Se não encontrar, deixe vazio.
 
-Você é um especialista em bioimpedância.
+Você está analisando DOIS exames de bioimpedância.
 
-Leia este exame COMPLETO e extraia TODOS os dados possíveis.
+Seu objetivo é extrair dados clínicos e padronizar para os campos abaixo.
 
-Retorne JSON estruturado assim:
+━━━━━━━━━━━━━━━━━━━
+📌 MAPEAMENTO OBRIGATÓRIO
+━━━━━━━━━━━━━━━━━━━
+
+Use estas equivalências:
+
+- massa_muscular:
+  • MME
+  • Massa muscular esquelética
+  • Skeletal muscle mass
+
+- massa_livre_gordura:
+  • Massa livre de gordura
+  • Fat-free mass
+
+- massa_gorda_kg:
+  • Massa de gordura (kg)
+
+- gordura_corporal:
+  • Percentual de gordura corporal
+  • Body fat %
+
+- pmg:
+  • Percentual de massa gorda
+  • PMG
+
+- massa_celular:
+  • BCM
+  • Massa celular corporal
+
+- cintura:
+  • Circunferência abdominal
+  • Circunferência da cintura
+
+- rcq:
+  • Relação cintura-quadril
+  • WHR
+
+- gordura_visceral:
+  • NGV
+  • Nível de gordura visceral
+
+- proteina:
+  • Proteína corporal
+
+- mineral:
+  • Conteúdo mineral
+
+- tmb:
+  • Taxa metabólica basal
+  • TMB
+
+- gasto_energetico:
+  • Gasto energético total diário
+
+- pontuacao:
+  • Pontuação total
+
+- grau_obesidade:
+  • Grau de obesidade
+
+- controle_peso:
+  • Controle de peso
+
+- controle_gordura:
+  • Controle de gordura
+
+- controle_muscular:
+  • Controle muscular
+
+━━━━━━━━━━━━━━━━━━━
+⚠️ REGRAS CRÍTICAS
+━━━━━━━━━━━━━━━━━━━
+
+- NÃO inventar valores
+- NÃO usar gráficos
+- NÃO converter números
+- NÃO usar escalas visuais
+
+- Sempre procurar dados em:
+  • tabelas
+  • colunas laterais
+  • seções segmentares
+
+- NÃO deixar vazio se houver valor visível
+
+━━━━━━━━━━━━━━━━━━━
+🎯 PRIORIDADES
+━━━━━━━━━━━━━━━━━━━
+
+Para evitar erros:
+
+- massa_muscular → SEMPRE usar MME se existir
+- gordura_visceral → usar apenas NGV (valor inteiro, ex: 9)
+- NÃO usar:
+  • 0.79 (isso é RCQ)
+  • 79.7 (erro comum)
+
+━━━━━━━━━━━━━━━━━━━
+📦 RETORNO (OBRIGATÓRIO)
+━━━━━━━━━━━━━━━━━━━
+
+Retorne JSON válido:
 
 {
   "altura": "",
@@ -178,7 +280,14 @@ Retorne JSON estruturado assim:
 
   "gordura_corporal": "",
   "massa_muscular": "",
+  "massa_livre_gordura": "",
+  "massa_gorda_kg": "",
+
   "agua_corporal": "",
+  "agua_intracelular": "",
+  "agua_extracelular": "",
+  "indice_aec": "",
+
   "proteina": "",
   "mineral": "",
 
@@ -190,14 +299,16 @@ Retorne JSON estruturado assim:
   "imc": "",
   "gordura_visceral": "",
   "rcq": "",
-
-  "agua_intracelular": "",
-  "agua_extracelular": "",
-  "indice_aec": "",
+  "cintura": "",
+  "pmg": "",
+  "grau_obesidade": "",
 
   "peso_alvo": "",
+  "controle_peso": "",
   "controle_gordura": "",
   "controle_muscular": "",
+
+  "pontuacao": "",
 
   "braco_direito": "",
   "braco_esquerdo": "",
@@ -206,8 +317,7 @@ Retorne JSON estruturado assim:
   "tronco": ""
 }
 
-Se algum campo não existir, deixe vazio.
-Retorne APENAS JSON válido.
+Se algum campo realmente não existir no exame, deixe vazio.
 
 `
               }
