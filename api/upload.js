@@ -130,10 +130,9 @@ if (data.bio_arquivos?.bio1 && data.bio_arquivos?.bio2) {
 {
   type: "input_file",
   file_url: data.bio_arquivos.bio2
-  }
+  },
 
- await kv.set(key, data)
-              {
+             {
                 type: "input_text",
                 text: `
 
@@ -163,8 +162,6 @@ Retorne APENAS:
 }
 
 Se não encontrar, deixe vazio.
-
-` : `
 
 Você é um especialista em bioimpedância.
 
