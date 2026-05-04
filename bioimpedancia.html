@@ -161,10 +161,10 @@ const paciente = await res.json()
 const d = paciente.bio || {}
 
 nome.innerText = paciente.nome || "-"
-altura.innerText = "-"
-sexo.innerText = "-"
-data.innerText = "-"
-hora.innerText = "-"
+altura.innerText = d.altura || "-"
+sexo.innerText = d.sexo || "-"
+data.innerText = d.data_exame || "-"
+hora.innerText = d.hora_exame || "-"
 
   // composição
 peso.innerText = d.peso || "-"
@@ -174,29 +174,29 @@ agua.innerText = d.agua_corporal || "-"
 idade_corporal.innerText = d.idade_metabolica || "-"
 
   // metabolismo
-  tmb.innerText = "-"
-  caloria.innerText = "-"
-  bcm.innerText = "-"
+  tmb.innerText = d.tmb || "-"
+  caloria.innerText = d.gasto_energetico || "-"
+  bcm.innerText = d.massa_celular || "-"
 
   // obesidade
-  imc.innerText = d.bmi
-  vfa.innerText = d.vfa
-  rcq.innerText = d.whr_rate
-  cintura.innerText = d.waist_measurement
+  imc.innerText = d.imc || "-"
+  vfa.innerText = d.gordura_visceral || "-"
+  rcq.innerText = d.rcq || "-"
+  cintura.innerText = "-"
 
   // água
-  agua_intra.innerText = d.bcm_in_water
-  agua_extra.innerText = d.bcm_out_water
-  aec.innerText = d.edema
+  agua_intra.innerText = d.agua_intracelular || "-"
+  agua_extra.innerText = d.agua_extracelular || "-"
+  aec.innerText = d.indice_aec || "-"
 
   // controle
-  peso_ideal.innerText = d.weight_recommend
-  controle_peso.innerText = d.weight_control_value
-  controle_gordura.innerText = d.mbf_control_value
-  controle_musculo.innerText = d.lbm_control_value
+  peso_ideal.innerText = d.peso_alvo || "-"
+  controle_peso.innerText = "-"
+  controle_gordura.innerText = d.controle_gordura || "-"
+  controle_musculo.innerText = d.controle_muscular || "-"
 
   // segmentação
-  braco_dir.innerText = d.right_hand_muscle
+ braco_dir.innerText = d.right_hand_muscle
   braco_esq.innerText = d.left_hand_muscle
   coxa_dir.innerText = d.right_foot_muscle
   coxa_esq.innerText = d.left_foot_muscle
