@@ -139,8 +139,9 @@ if (data.bio_arquivos?.bio1 && data.bio_arquivos?.bio2) {
 
                 Você está analisando DOIS exames de bioimpedância:
 
-                - Um de composição corporal
-                - Um de gordura visceral
+                - Um de composição corporal, e outro de gordura visceral (se houver)
+                - Um de gordura visceral (onde tem os gráficos)
+                - no quadro de gráficos (Abdominal - Análise Abdominal), extraia somente p NGV (nível de gordura Visceral)
 
 IMPORTANTE:
 - Extraia APENAS o valor de gordura visceral.
@@ -152,8 +153,6 @@ IMPORTANTE:
 Procure especificamente por:
 
 - NGV (nível de gordura visceral)
-- visceral fat
-- gordura visceral
 
 No exame, o valor correto normalmente é um número inteiro (ex: 7).
 
