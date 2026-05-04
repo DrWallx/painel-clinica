@@ -195,6 +195,18 @@ Retorne APENAS JSON válido.
 
     let dadosBio = {}
 
+try {
+  // 🔥 LIMPA A RESPOSTA DA IA
+  texto = texto.replace(/```json/g, "")
+  texto = texto.replace(/```/g, "")
+  texto = texto.trim()
+
+  dadosBio = JSON.parse(texto)
+} catch (e) {
+  console.log("ERRO PARSE IA:", texto)
+  dadosBio = {}
+}
+
     try {
       dadosBio = JSON.parse(texto)
     } catch (e) {
@@ -213,7 +225,10 @@ dataAtual.exames = Array.isArray(dataAtual.exames) ? dataAtual.exames : []
 dataAtual.notas = Array.isArray(dataAtual.notas) ? dataAtual.notas : []
 
 // 🔥 SALVA BIO
-dataAtual.bio = dadosBio
+dataAtual.bio = {
+  ...(dataAtual.bio || {}),
+  ...dadosBio
+}
 
 console.log("SALVANDO BIO FINAL:", dataAtual)
 
