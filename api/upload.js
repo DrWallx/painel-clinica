@@ -68,6 +68,20 @@ export default async function handler(req, res) {
 
     let data = await kv.get(key) || {}
 
+    if (!data.bio_arquivos) {
+  data.bio_arquivos = {}
+}
+
+if (tipo === "bio1") {
+  data.bio_arquivos.bio1 = blob.url
+}
+
+if (tipo === "bio2") {
+  data.bio_arquivos.bio2 = blob.url
+}
+
+await kv.set(key, data)
+
     // estrutura segura
     data.receitas = Array.isArray(data.receitas) ? data.receitas : []
     data.notas = Array.isArray(data.notas) ? data.notas : []
@@ -91,7 +105,7 @@ export default async function handler(req, res) {
 /* 🧠 IA BIOIMPEDANCIA */
 /* ===================== */
 
-if (tipo === "bio" || tipo === "bio1" || tipo === "bio2") {
+if (data.bio_arquivos?.bio1 && data.bio_arquivos?.bio2) {
 
   try {
 
@@ -110,21 +124,30 @@ if (tipo === "bio" || tipo === "bio1" || tipo === "bio2") {
             role: "user",
             content: [
               {
-                type: "input_file",
-                file_url: blob.url
-              },
+              type: "input_file",
+              file_url: data.bio_arquivos.bio1
+        },
+{
+  type: "input_file",
+  file_url: data.bio_arquivos.bio2
+  }
+
+ await kv.set(key, data)
               {
                 type: "input_text",
                 text: `
-text: tipo === "bio2" ? `
 
-Você está analisando um exame de bioimpedância focado em gordura abdominal.
+                Você está analisando DOIS exames de bioimpedância:
+
+                - Um de composição corporal
+                - Um de gordura visceral
 
 IMPORTANTE:
 - Extraia APENAS o valor de gordura visceral.
 - NÃO use valores de gráficos ou barras.
 - NÃO estime valores.
 - NÃO invente números.
+- Usar apenas números claramente escritos
 
 Procure especificamente por:
 
