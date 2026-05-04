@@ -3,13 +3,13 @@ const fs = require("fs")
 const { put } = require("@vercel/blob")
 const { kv } = require("@vercel/kv")
 
-export const config = {
+module.exports.config = {
   api: {
     bodyParser: false
   }
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   try {
 
     const form = formidable({ multiples: false })
