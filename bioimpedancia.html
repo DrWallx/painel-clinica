@@ -50,20 +50,35 @@ h2 {
   <div class="card">
   <h2>Upload Bioimpedância</h2>
 
-  <input type="file" id="arquivoBio" accept="application/pdf">
+  <label>Bioimpedância (Composição)</label><br>
+<input type="file" id="arquivoBio1" accept="application/pdf">
 
-  <br><br>
+<button onclick="enviarBio('bio1')" style="
+  padding:10px;
+  background:#3b82f6;
+  color:white;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+">
+  Enviar Bio 1
+</button>
 
-  <button onclick="enviarBio()" style="
-    padding:10px;
-    background:#3b82f6;
-    color:white;
-    border:none;
-    border-radius:6px;
-    cursor:pointer;
-  ">
-    Enviar e Analisar
-  </button>
+<br><br>
+
+<label>Bioimpedância (Visceral)</label><br>
+<input type="file" id="arquivoBio2" accept="application/pdf">
+
+<button onclick="enviarBio('bio2')" style="
+  padding:10px;
+  background:#10b981;
+  color:white;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+">
+  Enviar Bio 2
+</button>
 
   <p id="statusUpload" style="margin-top:10px;color:#555"></p>
 </div>
@@ -216,10 +231,17 @@ idade_corporal.innerText = d.idade_metabolica || "-"
 
 carregar()
 
-async function enviarBio() {
+async function enviarBio(tipo) {
 
-  const input = document.getElementById("arquivoBio")
   const status = document.getElementById("statusUpload")
+
+  let input
+
+  if (tipo === "bio1") {
+    input = document.getElementById("arquivoBio1")
+  } else {
+    input = document.getElementById("arquivoBio2")
+  }
 
   if (!input.files.length) {
     alert("Selecione um PDF")
@@ -236,7 +258,7 @@ async function enviarBio() {
   const form = new FormData()
   form.append("file", file)
   form.append("paciente_id", paciente_id)
-  form.append("tipo", "bio") // 🔥 ESSENCIAL
+  form.append("tipo", tipo) // 🔥 AGORA FUNCIONA
 
   try {
 
@@ -250,9 +272,7 @@ async function enviarBio() {
     if (data.success) {
       status.innerText = "Processando IA..."
 
-      // ⏳ espera IA rodar
       setTimeout(() => {
-        status.innerText = "Atualizando dados..."
         location.reload()
       }, 3000)
 
