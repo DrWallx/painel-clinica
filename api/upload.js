@@ -132,7 +132,7 @@ Procure especificamente por:
 - visceral fat
 - gordura visceral
 
-No exame, o valor correto normalmente é um número inteiro (ex: 9).
+No exame, o valor correto normalmente é um número inteiro (ex: 7).
 
 Retorne APENAS:
 
