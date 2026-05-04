@@ -117,6 +117,9 @@ h2 {
       <p>Água corporal: <span id="agua"></span></p>
       <p>Proteína: <span id="proteina"></span></p>
       <p>Mineral: <span id="mineral"></span></p>
+      <p>Massa livre de gordura: <span id="massa_livre"></span></p>
+      <p>Massa gorda (kg): <span id="massa_gorda"></span></p>
+      <p>PMG (%): <span id="pmg"></span></p>
     </div>
 
     <!-- METABOLISMO -->
@@ -135,6 +138,8 @@ h2 {
       <p>Gordura visceral: <span id="vfa"></span></p>
       <p>RCQ: <span id="rcq"></span></p>
       <p>Cintura: <span id="cintura"></span></p>
+      <p>Grau obesidade: <span id="grau_obesidade"></span></p>
+      <p>Pontuação: <span id="pontuacao"></span></p>
     </div>
 
     <!-- ÁGUA -->
@@ -210,7 +215,7 @@ idade_corporal.innerText = d.idade_metabolica || "-"
   imc.innerText = d.imc || "-"
   vfa.innerText = d.gordura_visceral || "-"
   rcq.innerText = d.rcq || "-"
-  cintura.innerText = "-"
+  cintura.innerText = d.cintura || "-"
 
   // água
   agua_intra.innerText = d.agua_intracelular || "-"
@@ -219,7 +224,7 @@ idade_corporal.innerText = d.idade_metabolica || "-"
 
   // controle
   peso_ideal.innerText = d.peso_alvo || "-"
-  controle_peso.innerText = "-"
+  controle_peso.innerText = d.controle_peso || "-"
   controle_gordura.innerText = d.controle_gordura || "-"
   controle_musculo.innerText = d.controle_muscular || "-"
 
