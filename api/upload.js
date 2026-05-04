@@ -123,7 +123,14 @@ Leia este exame COMPLETO e extraia TODOS os dados possíveis.
 Retorne JSON estruturado assim:
 
 {
+
+
+  "altura": "",
+  "sexo": "",
+  "data_exame": "",
+  "hora_exame": ""
   "peso": "",
+  
   "gordura_corporal": "",
   "massa_muscular": "",
   "agua_corporal": "",
