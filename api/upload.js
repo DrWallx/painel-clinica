@@ -1,7 +1,7 @@
-import formidable from "formidable"
-import fs from "fs"
-import { put } from "@vercel/blob"
-import { kv } from "@vercel/kv"
+const formidable = require("formidable")
+const fs = require("fs")
+const { put } = require("@vercel/blob")
+const { kv } = require("@vercel/kv")
 
 export const config = {
   api: {
