@@ -116,6 +116,34 @@ if (tipo === "bio" || tipo === "bio1" || tipo === "bio2") {
               {
                 type: "input_text",
                 text: `
+text: tipo === "bio2" ? `
+
+Você está analisando um exame de bioimpedância focado em gordura abdominal.
+
+IMPORTANTE:
+- Extraia APENAS o valor de gordura visceral.
+- NÃO use valores de gráficos ou barras.
+- NÃO estime valores.
+- NÃO invente números.
+
+Procure especificamente por:
+
+- NGV (nível de gordura visceral)
+- visceral fat
+- gordura visceral
+
+No exame, o valor correto normalmente é um número inteiro (ex: 9).
+
+Retorne APENAS:
+
+{
+  "gordura_visceral": ""
+}
+
+Se não encontrar, deixe vazio.
+
+` : `
+
 Você é um especialista em bioimpedância.
 
 Leia este exame COMPLETO e extraia TODOS os dados possíveis.
@@ -123,8 +151,6 @@ Leia este exame COMPLETO e extraia TODOS os dados possíveis.
 Retorne JSON estruturado assim:
 
 {
-
-
   "altura": "",
   "sexo": "",
   "data_exame": "",
@@ -163,7 +189,6 @@ Retorne JSON estruturado assim:
 
 Se algum campo não existir, deixe vazio.
 Retorne APENAS JSON válido.
-
 
 `
               }
