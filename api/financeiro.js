@@ -91,20 +91,22 @@ async function buscarPacientesInativos(req, res) {
   respostas.flat().forEach(item => {
     const dataConsulta = converterData(item.data)
     const status = Number(item.status_id)
-    const consultaComProfissional =
-      Number(item.procedimento_id) === 23 &&
+    const procedimento = Number(item.procedimento_id)
+    const atendimentoComProfissional =
+      (procedimento === 22 || procedimento === 23) &&
       Number(item.profissional_id) === 1 &&
       (status === 1 || status === 3) &&
       dataConsulta &&
       dataConsulta <= hoje
 
-    if (!consultaComProfissional) return
+    if (!atendimentoComProfissional) return
 
     const pacienteId = Number(item.paciente_id)
 
     // Local e especialidade definem o grupo de pacientes acompanhado.
     // A consulta mais recente pode ser presencial ou telemedicina.
     if (
+      procedimento === 23 &&
       Number(item.local_id) === 2 &&
       Number(item.especialidade_id) === 104
     ) {
