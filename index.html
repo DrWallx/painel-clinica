@@ -301,7 +301,7 @@ listaCancelados.appendChild(bloco);
 return;
 }
 
-if(item.status_id != 1 && item.status_id != 7 && item.status_id != 2 && item.status_id != 3){
+if(item.status_id != 1 && item.status_id != 6 && item.status_id != 7 && item.status_id != 2 && item.status_id != 3){
 return;
 }
 
@@ -320,6 +320,7 @@ if(item.status_id == 1) statusIcon = "🟡 Agendada";
 if(item.status_id == 7) statusIcon = "🔵 Confirmada";
 if(item.status_id == 2) statusIcon = "🟢 Confirmada";
 if(item.status_id == 3) statusIcon = "✅ Realizada";
+if(item.status_id == 6) statusIcon = "❌ Não Compareceu";
 
 const bloco = document.createElement("div");
 bloco.className = "agenda-item";
