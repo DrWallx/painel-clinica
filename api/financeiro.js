@@ -15,6 +15,15 @@ function converterData(data) {
   return new Date(ano, mes - 1, dia)
 }
 
+function converterDataHora(data, horario = "00:00:00") {
+  const dataConvertida = converterData(data)
+  if (!dataConvertida) return null
+
+  const [hora = 0, minuto = 0, segundo = 0] = horario.split(":").map(Number)
+  dataConvertida.setHours(hora, minuto, segundo, 0)
+  return dataConvertida
+}
+
 function mesesEntre(inicio, fim) {
   const periodos = []
   const atual = new Date(inicio.getFullYear(), inicio.getMonth(), 1)
@@ -154,12 +163,117 @@ async function buscarPacientesInativos(req, res) {
   })
 }
 
+async function buscarNovosCancelados(res) {
+  const token = process.env.FEEGOW_TOKEN
+  if (!token) {
+    return res.status(500).json({ erro: "FEEGOW_TOKEN não configurado" })
+  }
+
+  const hoje = new Date()
+  hoje.setHours(23, 59, 59, 999)
+  const inicio = new Date(2025, 1, 1)
+  const fimFuturo = new Date(hoje)
+  fimFuturo.setFullYear(fimFuturo.getFullYear() + 1)
+
+  const periodosHistoricos = mesesEntre(inicio, hoje)
+  const respostasHistoricas = await executarEmLotes(periodosHistoricos, 4, periodo => {
+    const params = new URLSearchParams({
+      data_start: periodo.inicio,
+      data_end: periodo.fim
+    })
+    return buscarFeegow(`/appoints/search?${params}`, token)
+  })
+
+  // Uma busca separada inclui reagendamentos futuros, que retiram o paciente da lista.
+  const inicioFuturo = new Date(hoje)
+  inicioFuturo.setDate(inicioFuturo.getDate() + 1)
+  inicioFuturo.setHours(0, 0, 0, 0)
+  const paramsFuturo = new URLSearchParams({
+    data_start: formatarDataBR(inicioFuturo),
+    data_end: formatarDataBR(fimFuturo)
+  })
+  const respostaFutura = await buscarFeegow(`/appoints/search?${paramsFuturo}`, token)
+  const agendamentos = [...respostasHistoricas.flat(), ...respostaFutura]
+
+  const candidatos = new Map()
+
+  agendamentos.forEach(item => {
+    const canceladoEm = converterDataHora(item.data, item.horario)
+    const primeiroAgendamento = Number(item.primeiro_agendamento) === 1
+    const cancelamentoInicial =
+      primeiroAgendamento &&
+      Number(item.procedimento_id) === 23 &&
+      Number(item.profissional_id) === 1 &&
+      Number(item.status_id) === 11 &&
+      canceladoEm &&
+      canceladoEm <= hoje
+
+    if (!cancelamentoInicial) return
+
+    const pacienteId = Number(item.paciente_id)
+    const atual = candidatos.get(pacienteId)
+    if (!atual || canceladoEm > atual.canceladoEm) {
+      candidatos.set(pacienteId, {
+        paciente_id: pacienteId,
+        agendamento_id: Number(item.agendamento_id),
+        data_cancelamento: item.data,
+        canceladoEm
+      })
+    }
+  })
+
+  const semReagendamento = [...candidatos.values()]
+    .filter(candidato => {
+      return !agendamentos.some(item => {
+        if (Number(item.paciente_id) !== candidato.paciente_id) return false
+        if (Number(item.profissional_id) !== 1) return false
+        if (![22, 23].includes(Number(item.procedimento_id))) return false
+        if (Number(item.agendamento_id) === candidato.agendamento_id) return false
+
+        const dataAgendamento = converterDataHora(item.data, item.horario)
+        return dataAgendamento && dataAgendamento > candidato.canceladoEm
+      })
+    })
+    .sort((a, b) => b.canceladoEm - a.canceladoEm)
+
+  const pacientes = await executarEmLotes(semReagendamento, 10, async item => {
+    const params = new URLSearchParams({ paciente_id: String(item.paciente_id) })
+    const content = await buscarFeegow(`/patient/search?${params}`, token)
+    const paciente = Array.isArray(content) ? content[0] : content
+    const diasDesdeCancelamento = Math.max(
+      0,
+      Math.floor((hoje.getTime() - item.canceladoEm.getTime()) / 86400000)
+    )
+
+    return {
+      paciente_id: item.paciente_id,
+      nome: paciente?.nome || "Paciente sem nome",
+      data_cancelamento: item.data_cancelamento,
+      dias_desde_cancelamento: diasDesdeCancelamento,
+      telefone: paciente?.celulares?.[0] || paciente?.telefones?.[0] || "",
+      email: paciente?.email?.[0] || ""
+    }
+  })
+
+  res.setHeader("Cache-Control", "s-maxage=300, stale-while-revalidate=600")
+  return res.status(200).json({
+    pacientes,
+    total: pacientes.length,
+    periodo_inicio: formatarDataBR(inicio),
+    atualizado_em: new Date().toISOString()
+  })
+}
+
 export default async function handler(req, res) {
 
   try {
 
     if (req.query.tipo === "inativos") {
       return await buscarPacientesInativos(req, res)
+    }
+
+    if (req.query.tipo === "novos_cancelados") {
+      return await buscarNovosCancelados(res)
     }
 
     console.log("ENV URL:", process.env.SUPABASE_URL)
