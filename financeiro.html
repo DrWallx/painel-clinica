@@ -457,7 +457,7 @@ async function carregarPacientesInativos(){
   total.innerText = "-"
 
   try{
-    const res = await fetch("/api/pacientesInativos?dias=60")
+    const res = await fetch("/api/financeiro?tipo=inativos&dias=60")
     const resposta = await res.json()
 
     if(!res.ok){
