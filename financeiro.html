@@ -144,6 +144,52 @@ th,td{
   cursor:pointer;
   margin-left:5px;
 }
+
+.card-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:12px;
+}
+
+.card-header h2{
+  margin:0;
+}
+
+.texto-apoio{
+  color:#64748b;
+  margin:6px 0 18px;
+}
+
+.tabela-container{
+  overflow-x:auto;
+}
+
+.btn-atualizar{
+  background:#6366f1;
+  color:white;
+  border:none;
+  padding:9px 14px;
+  border-radius:8px;
+  cursor:pointer;
+  white-space:nowrap;
+}
+
+.contato-link{
+  color:#4f46e5;
+  text-decoration:none;
+}
+
+.mensagem-tabela{
+  text-align:center;
+  color:#64748b;
+  padding:24px;
+}
+
+.mensagem-erro{
+  color:#dc2626;
+}
 </style>
 
 </head>
@@ -223,6 +269,68 @@ th,td{
       <p>Valor total: <b id="valorTotal"></b></p>
       <p>Valor recebido: <b id="valorPago"></b></p>
       <p>Saldo: <b id="saldo"></b></p>
+    </div>
+
+    <!-- PACIENTES SEM CONSULTA HÁ MAIS DE 60 DIAS -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Pacientes sem consulta há mais de 60 dias</h2>
+        <button class="btn-atualizar" onclick="carregarPacientesInativos()">Atualizar lista</button>
+      </div>
+
+      <p class="texto-apoio">
+        Pacientes vinculados ao local 2 e especialidade 104. A última consulta considera também telemedicina,
+        considerando consulta (23) ou retorno (22), profissional 1 e status 1 ou 3.
+        Total: <b id="totalInativos">-</b>
+      </p>
+
+      <div class="tabela-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Paciente ID</th>
+              <th>Nome</th>
+              <th>Última consulta</th>
+              <th>Telefone</th>
+              <th>E-mail</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaInativos">
+            <tr><td colspan="5" class="mensagem-tabela">Carregando pacientes...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- NOVOS PACIENTES QUE CANCELARAM E NÃO REAGENDARAM -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Novos pacientes que cancelaram e não reagendaram</h2>
+        <button class="btn-atualizar" onclick="carregarNovosCancelados()">Buscar pacientes</button>
+      </div>
+
+      <p class="texto-apoio">
+        Primeira consulta cancelada com você nos últimos 6 meses e sem qualquer consulta ou retorno agendado posteriormente.
+        Total: <b id="totalNovosCancelados">-</b>
+      </p>
+
+      <div class="tabela-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Paciente ID</th>
+              <th>Nome</th>
+              <th>Cancelamento</th>
+              <th>Há quantos dias</th>
+              <th>Telefone</th>
+              <th>E-mail</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaNovosCancelados">
+            <tr><td colspan="6" class="mensagem-tabela">Clique em “Buscar pacientes” para consultar.</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
   </main>
@@ -359,7 +467,119 @@ function formatarData(d){
   return `${dia}/${mes}/${ano}`
 }
 
+function formatarTelefoneLink(telefone){
+  const numero = String(telefone || "").replace(/\D/g, "")
+  return numero.startsWith("55") ? numero : `55${numero}`
+}
+
+function escaparHtml(valor){
+  return String(valor ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;")
+}
+
+async function carregarPacientesInativos(){
+  const tbody = document.getElementById("tabelaInativos")
+  const total = document.getElementById("totalInativos")
+
+  tbody.innerHTML = '<tr><td colspan="5" class="mensagem-tabela">Consultando o Feegow...</td></tr>'
+  total.innerText = "-"
+
+  try{
+    const res = await fetch("/api/financeiro?tipo=inativos&dias=60")
+    const resposta = await res.json()
+
+    if(!res.ok){
+      throw new Error(resposta.detalhe || resposta.erro || "Erro ao carregar a lista")
+    }
+
+    const pacientes = resposta.pacientes || []
+    total.innerText = resposta.total || 0
+
+    if(!pacientes.length){
+      tbody.innerHTML = '<tr><td colspan="5" class="mensagem-tabela">Nenhum paciente encontrado.</td></tr>'
+      return
+    }
+
+    tbody.innerHTML = pacientes.map(paciente => {
+      const telefoneLink = formatarTelefoneLink(paciente.telefone)
+      const telefone = paciente.telefone
+        ? `<a class="contato-link" href="https://wa.me/${telefoneLink}" target="_blank" rel="noopener noreferrer">${escaparHtml(paciente.telefone)}</a>`
+        : "-"
+      const email = paciente.email
+        ? `<a class="contato-link" href="mailto:${encodeURIComponent(paciente.email)}">${escaparHtml(paciente.email)}</a>`
+        : "-"
+
+      return `
+        <tr>
+          <td>${escaparHtml(paciente.paciente_id)}</td>
+          <td>${escaparHtml(paciente.nome)}</td>
+          <td>${formatarData(paciente.ultima_data.split("-").reverse().join("-"))}</td>
+          <td>${telefone}</td>
+          <td>${email}</td>
+        </tr>
+      `
+    }).join("")
+  }catch(error){
+    console.error(error)
+    tbody.innerHTML = `<tr><td colspan="5" class="mensagem-tabela mensagem-erro">${error.message}</td></tr>`
+  }
+}
+
+async function carregarNovosCancelados(){
+  const tbody = document.getElementById("tabelaNovosCancelados")
+  const total = document.getElementById("totalNovosCancelados")
+
+  tbody.innerHTML = '<tr><td colspan="6" class="mensagem-tabela">Consultando cancelamentos no Feegow...</td></tr>'
+  total.innerText = "-"
+
+  try{
+    const res = await fetch(`/api/financeiro?tipo=novos_cancelados&_=${Date.now()}`)
+    const resposta = await res.json()
+
+    if(!res.ok){
+      throw new Error(resposta.detalhe || resposta.erro || "Erro ao carregar a lista")
+    }
+
+    const pacientes = resposta.pacientes || []
+    total.innerText = resposta.total || 0
+
+    if(!pacientes.length){
+      tbody.innerHTML = '<tr><td colspan="6" class="mensagem-tabela">Nenhum paciente encontrado.</td></tr>'
+      return
+    }
+
+    tbody.innerHTML = pacientes.map(paciente => {
+      const telefoneLink = formatarTelefoneLink(paciente.telefone)
+      const telefone = paciente.telefone
+        ? `<a class="contato-link" href="https://wa.me/${telefoneLink}" target="_blank" rel="noopener noreferrer">${escaparHtml(paciente.telefone)}</a>`
+        : "-"
+      const email = paciente.email
+        ? `<a class="contato-link" href="mailto:${encodeURIComponent(paciente.email)}">${escaparHtml(paciente.email)}</a>`
+        : "-"
+
+      return `
+        <tr>
+          <td>${escaparHtml(paciente.paciente_id)}</td>
+          <td>${escaparHtml(paciente.nome)}</td>
+          <td>${formatarData(paciente.data_cancelamento.split("-").reverse().join("-"))}</td>
+          <td>${escaparHtml(paciente.dias_desde_cancelamento)} dia(s)</td>
+          <td>${telefone}</td>
+          <td>${email}</td>
+        </tr>
+      `
+    }).join("")
+  }catch(error){
+    console.error(error)
+    tbody.innerHTML = `<tr><td colspan="6" class="mensagem-tabela mensagem-erro">${escaparHtml(error.message)}</td></tr>`
+  }
+}
+
 carregarDados()
+carregarPacientesInativos()
 
 </script>
 
