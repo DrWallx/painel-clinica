@@ -302,6 +302,37 @@ th,td{
       </div>
     </div>
 
+    <!-- NOVOS PACIENTES QUE CANCELARAM E NÃO REAGENDARAM -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Novos pacientes que cancelaram e não reagendaram</h2>
+        <button class="btn-atualizar" onclick="carregarNovosCancelados()">Buscar pacientes</button>
+      </div>
+
+      <p class="texto-apoio">
+        Primeira consulta cancelada com você e sem qualquer consulta ou retorno agendado posteriormente.
+        Total: <b id="totalNovosCancelados">-</b>
+      </p>
+
+      <div class="tabela-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Paciente ID</th>
+              <th>Nome</th>
+              <th>Cancelamento</th>
+              <th>Há quantos dias</th>
+              <th>Telefone</th>
+              <th>E-mail</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaNovosCancelados">
+            <tr><td colspan="6" class="mensagem-tabela">Clique em “Buscar pacientes” para consultar.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </main>
 
 </div>
@@ -495,6 +526,55 @@ async function carregarPacientesInativos(){
   }catch(error){
     console.error(error)
     tbody.innerHTML = `<tr><td colspan="5" class="mensagem-tabela mensagem-erro">${error.message}</td></tr>`
+  }
+}
+
+async function carregarNovosCancelados(){
+  const tbody = document.getElementById("tabelaNovosCancelados")
+  const total = document.getElementById("totalNovosCancelados")
+
+  tbody.innerHTML = '<tr><td colspan="6" class="mensagem-tabela">Consultando cancelamentos no Feegow...</td></tr>'
+  total.innerText = "-"
+
+  try{
+    const res = await fetch(`/api/financeiro?tipo=novos_cancelados&_=${Date.now()}`)
+    const resposta = await res.json()
+
+    if(!res.ok){
+      throw new Error(resposta.detalhe || resposta.erro || "Erro ao carregar a lista")
+    }
+
+    const pacientes = resposta.pacientes || []
+    total.innerText = resposta.total || 0
+
+    if(!pacientes.length){
+      tbody.innerHTML = '<tr><td colspan="6" class="mensagem-tabela">Nenhum paciente encontrado.</td></tr>'
+      return
+    }
+
+    tbody.innerHTML = pacientes.map(paciente => {
+      const telefoneLink = formatarTelefoneLink(paciente.telefone)
+      const telefone = paciente.telefone
+        ? `<a class="contato-link" href="https://wa.me/${telefoneLink}" target="_blank" rel="noopener noreferrer">${escaparHtml(paciente.telefone)}</a>`
+        : "-"
+      const email = paciente.email
+        ? `<a class="contato-link" href="mailto:${encodeURIComponent(paciente.email)}">${escaparHtml(paciente.email)}</a>`
+        : "-"
+
+      return `
+        <tr>
+          <td>${escaparHtml(paciente.paciente_id)}</td>
+          <td>${escaparHtml(paciente.nome)}</td>
+          <td>${formatarData(paciente.data_cancelamento.split("-").reverse().join("-"))}</td>
+          <td>${escaparHtml(paciente.dias_desde_cancelamento)} dia(s)</td>
+          <td>${telefone}</td>
+          <td>${email}</td>
+        </tr>
+      `
+    }).join("")
+  }catch(error){
+    console.error(error)
+    tbody.innerHTML = `<tr><td colspan="6" class="mensagem-tabela mensagem-erro">${escaparHtml(error.message)}</td></tr>`
   }
 }
 
