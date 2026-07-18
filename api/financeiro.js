@@ -85,22 +85,32 @@ async function buscarPacientesInativos(req, res) {
     return buscarFeegow(`/appoints/search?${params}`, token)
   })
 
+  const pacientesDoGrupo = new Set()
   const ultimaConsultaPorPaciente = new Map()
 
   respostas.flat().forEach(item => {
     const dataConsulta = converterData(item.data)
     const status = Number(item.status_id)
-    const atendeRegra =
+    const consultaComProfissional =
       Number(item.procedimento_id) === 23 &&
-      Number(item.local_id) === 2 &&
-      Number(item.especialidade_id) === 104 &&
+      Number(item.profissional_id) === 1 &&
       (status === 1 || status === 3) &&
       dataConsulta &&
       dataConsulta <= hoje
 
-    if (!atendeRegra) return
+    if (!consultaComProfissional) return
 
     const pacienteId = Number(item.paciente_id)
+
+    // Local e especialidade definem o grupo de pacientes acompanhado.
+    // A consulta mais recente pode ser presencial ou telemedicina.
+    if (
+      Number(item.local_id) === 2 &&
+      Number(item.especialidade_id) === 104
+    ) {
+      pacientesDoGrupo.add(pacienteId)
+    }
+
     const atual = ultimaConsultaPorPaciente.get(pacienteId)
 
     if (!atual || dataConsulta > atual.data) {
@@ -114,7 +124,7 @@ async function buscarPacientesInativos(req, res) {
   })
 
   const inativos = [...ultimaConsultaPorPaciente.values()]
-    .filter(item => item.data < limite)
+    .filter(item => pacientesDoGrupo.has(item.paciente_id) && item.data < limite)
     .sort((a, b) => a.data - b.data)
 
   const pacientes = await executarEmLotes(inativos, 10, async item => {
