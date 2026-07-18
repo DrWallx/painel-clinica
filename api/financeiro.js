@@ -171,7 +171,7 @@ async function buscarNovosCancelados(res) {
 
   const hoje = new Date()
   hoje.setHours(23, 59, 59, 999)
-  const inicio = new Date(2025, 1, 1)
+  const inicio = new Date(2025, 0, 1)
   const fimFuturo = new Date(hoje)
   fimFuturo.setFullYear(fimFuturo.getFullYear() + 1)
 
