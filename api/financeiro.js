@@ -184,16 +184,19 @@ async function buscarNovosCancelados(res) {
     return buscarFeegow(`/appoints/search?${params}`, token)
   })
 
-  // Uma busca separada inclui reagendamentos futuros, que retiram o paciente da lista.
+  // Buscas mensais incluem reagendamentos futuros sem exceder o período aceito pelo Feegow.
   const inicioFuturo = new Date(hoje)
   inicioFuturo.setDate(inicioFuturo.getDate() + 1)
   inicioFuturo.setHours(0, 0, 0, 0)
-  const paramsFuturo = new URLSearchParams({
-    data_start: formatarDataBR(inicioFuturo),
-    data_end: formatarDataBR(fimFuturo)
+  const periodosFuturos = mesesEntre(inicioFuturo, fimFuturo)
+  const respostasFuturas = await executarEmLotes(periodosFuturos, 4, periodo => {
+    const params = new URLSearchParams({
+      data_start: periodo.inicio,
+      data_end: periodo.fim
+    })
+    return buscarFeegow(`/appoints/search?${params}`, token)
   })
-  const respostaFutura = await buscarFeegow(`/appoints/search?${paramsFuturo}`, token)
-  const agendamentos = [...respostasHistoricas.flat(), ...respostaFutura]
+  const agendamentos = [...respostasHistoricas.flat(), ...respostasFuturas.flat()]
 
   const candidatos = new Map()
 
