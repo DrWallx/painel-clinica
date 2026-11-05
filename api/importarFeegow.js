@@ -35,8 +35,8 @@ export default async function handler(req, res) {
     // 🔥 FILTRO CORRETO
     const filtrado = json.content.filter(item => {
       return (
-        item.procedimento_id === 23 && // 🔥 só consulta
-        item.status_id !== 11          // ❌ remove cancelado
+        item.procedimento_id != 22 && // Consultas de qualquer código, exceto retornos
+        item.status_id != 11          // Exclui cancelamentos, inclusive IDs em texto
       )
     })
 

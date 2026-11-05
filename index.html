@@ -249,8 +249,12 @@ button:hover{
 <script>
 
 function converterValor(valor){
-if(!valor) return 0
-return parseFloat(valor.replace("R$","").replace(/\./g,"").replace(",",".").trim())
+if(valor == null || valor === "") return 0;
+if(typeof valor === "number") return Number.isFinite(valor) ? valor : 0;
+let texto = String(valor).replace(/R\$/g, "").trim();
+if(texto.includes(",")) texto = texto.replace(/\./g, "").replace(",", ".");
+const numero = Number(texto);
+return Number.isFinite(numero) ? numero : 0;
 }
 
 function formatarData(data){
@@ -376,7 +380,7 @@ cancelados++;
 return;
 }
 
-if(item.procedimento_id == 23){
+if(item.procedimento_id != 22){
 consultas++;
 faturamento += converterValor(item.valor_total_agendamento);
 return;

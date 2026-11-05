@@ -72,7 +72,7 @@ export default async function handler(req, res){
         }
 
         // 🧠 CONSULTA
-        if(item.procedimento_id == 23){
+        if(item.procedimento_id != 22){
           total.consultas++
           meses[nomeMes].consultas++
           return
